@@ -1,142 +1,142 @@
-## Purpose
+## 目的
 
-Profiles SHALL define which workflows to install, enabling a streamlined core experience for new users while allowing power users to customize their workflow selection.
+配置文件应定义安装哪些工作流，为新用户启用精简的核心体验，同时允许高级用户自定义其工作流选择。
 
-## ADDED Requirements
+## 新增需求
 
-### Requirement: Profile definitions
-The system SHALL support two workflow profiles: `core` and `custom`.
+### 需求：配置文件定义
+系统应支持两个工作流配置文件：`core` 和 `custom`。
 
-#### Scenario: Core profile contents
-- **WHEN** profile is set to `core`
-- **THEN** the profile SHALL include workflows: `propose`, `explore`, `apply`, `archive`
+#### 场景：Core 配置文件内容
+- **当** 配置文件设置为 `core`
+- **则** 配置文件应包含工作流：`propose`、`explore`、`apply`、`archive`
 
-#### Scenario: Custom profile contents
-- **WHEN** profile is set to `custom`
-- **THEN** the profile SHALL include only the workflows specified in global config `workflows` array
+#### 场景：Custom 配置文件内容
+- **当** 配置文件设置为 `custom`
+- **则** 配置文件应仅包含全局配置 `workflows` 数组中指定的工作流
 
-### Requirement: Delivery is independent of profile
-The delivery setting SHALL control HOW workflows are installed (skills, commands, or both), separate from WHICH workflows are installed.
+### 需求：交付独立于配置文件
+交付设置应控制工作流如何安装（技能、命令或两者），与安装哪些工作流分开。
 
-#### Scenario: Delivery options
-- **WHEN** configuring delivery
-- **THEN** the system SHALL support three options: `both` (skills and commands), `skills` (skill files only), `commands` (command files only)
+#### 场景：交付选项
+- **当** 配置交付时
+- **则** 系统应支持三个选项：`both`（技能和命令）、`skills`（仅技能文件）、`commands`（仅命令文件）
 
-#### Scenario: Both delivery
-- **WHEN** delivery is set to `both`
-- **THEN** the system SHALL install both skill files and command files for each workflow
+#### 场景：Both 交付
+- **当** 交付设置为 `both`
+- **则** 系统应为每个工作流安装技能文件和命令文件
 
-#### Scenario: Skills-only delivery
-- **WHEN** delivery is set to `skills`
-- **THEN** the system SHALL install only skill files for each workflow
-- **THEN** the system SHALL NOT install command files
+#### 场景：Skills-only 交付
+- **当** 交付设置为 `skills`
+- **则** 系统应仅为每个工作流安装技能文件
+- **则** 系统不应安装命令文件
 
-#### Scenario: Commands-only delivery
-- **WHEN** delivery is set to `commands`
-- **THEN** the system SHALL install only command files for each workflow
-- **THEN** the system SHALL NOT install skill files
+#### 场景：Commands-only 交付
+- **当** 交付设置为 `commands`
+- **则** 系统应仅为每个工作流安装命令文件
+- **则** 系统不应安装技能文件
 
-#### Scenario: Core profile with custom delivery
-- **WHEN** profile is set to `core`
-- **AND** delivery is set to `skills`
-- **THEN** the system SHALL install core workflows as skills only (no commands)
+#### 场景：带自定义交付的 Core 配置文件
+- **当** 配置文件设置为 `core`
+- **且** 交付设置为 `skills`
+- **则** 系统应仅将 core 工作流作为技能安装（无命令）
 
-#### Scenario: Delivery defaults
-- **WHEN** delivery is not set in global config
-- **THEN** the system SHALL default to `both`
+#### 场景：交付默认值
+- **当** 全局配置中未设置交付
+- **则** 系统应默认为 `both`
 
-### Requirement: Profile configuration via interactive picker
-The system SHALL provide an interactive picker for configuring profiles.
+### 需求：通过交互式选择器配置配置文件
+系统应提供配置配置文件的交互式选择器。
 
-#### Scenario: Interactive profile configuration
-- **WHEN** user runs `openspec config profile`
-- **THEN** the system SHALL display an interactive picker with:
-  - Delivery selection: `skills`, `commands`, `both`
-  - Workflow toggles for all available workflows
-- **THEN** the system SHALL pre-select current config values
-- **THEN** on confirmation, the system SHALL update global config
-- **THEN** the system SHALL set profile to `custom` if selected workflows differ from core defaults
-- **THEN** the system SHALL set profile to `core` if selected workflows match core defaults exactly (propose, explore, apply, archive), regardless of delivery setting
-- **THEN** the system SHALL NOT modify any project files
-- **THEN** the system SHALL display: "Config updated. Run `openspec update` in your projects to apply."
+#### 场景：交互式配置文件配置
+- **当** 用户运行 `openspec config profile`
+- **则** 系统应显示交互式选择器，包含：
+  - 交付选择：`skills`、`commands`、`both`
+  - 所有可用工作流的工作流切换
+- **则** 系统应预选当前配置值
+- **则** 确认时，系统应更新全局配置
+- **则** 如果选择的工作流与 core 默认值不同，系统应将配置文件设置为 `custom`
+- **则** 如果选择的工作流完全匹配 core 默认值（propose、explore、apply、archive），无论交付设置如何，系统应将配置文件设置为 `core`
+- **则** 系统不应修改任何项目文件
+- **则** 系统应显示："配置已更新。在你的项目中运行 `openspec update` 以应用。"
 
-#### Scenario: Core preset shortcut
-- **WHEN** user runs `openspec config profile core`
-- **THEN** the system SHALL set profile to `core`
-- **THEN** the system SHALL set workflows to `['propose', 'explore', 'apply', 'archive']`
-- **THEN** the system SHALL NOT change the delivery setting (preserves user preference)
-- **THEN** the system SHALL NOT modify any project files
-- **THEN** the system SHALL display: "Config updated. Run `openspec update` in your projects to apply."
-- **THEN** the new profile takes effect on the next `openspec init` or `openspec update` run
+#### 场景：Core 预设快捷方式
+- **当** 用户运行 `openspec config profile core`
+- **则** 系统应将配置文件设置为 `core`
+- **则** 系统应将工作流设置为 `['propose', 'explore', 'apply', 'archive']`
+- **则** 系统不应更改交付设置（保留用户偏好）
+- **则** 系统不应修改任何项目文件
+- **则** 系统应显示："配置已更新。在你的项目中运行 `openspec update` 以应用。"
+- **则** 新配置文件在下次 `openspec init` 或 `openspec update` 运行时生效
 
-#### Scenario: Config profile run inside a project
-- **WHEN** user runs `openspec config profile` inside an OpenSpec project directory
-- **THEN** after updating global config, the system SHALL prompt: "Apply to this project now? (y/n)"
-- **WHEN** user confirms
-- **THEN** the system SHALL run `openspec update` automatically
-- **THEN** the system SHALL still display: "Run `openspec update` in your other projects to apply."
+#### 场景：在项目内运行 Config profile
+- **当** 用户在 OpenSpec 项目目录内运行 `openspec config profile`
+- **则** 更新全局配置后，系统应提示："现在应用到此项目？(y/n)"
+- **当** 用户确认
+- **则** 系统应自动运行 `openspec update`
+- **则** 系统仍应显示："在你的其他项目中运行 `openspec update` 以应用。"
 
-#### Scenario: Config profile - user declines apply
-- **WHEN** user runs `openspec config profile` inside an OpenSpec project directory
-- **AND** user declines the "Apply to this project now?" prompt
-- **THEN** the system SHALL display: "Config updated. Run `openspec update` in your projects to apply."
-- **THEN** the system SHALL exit successfully without modifying project files
+#### 场景：Config profile - 用户拒绝应用
+- **当** 用户在 OpenSpec 项目目录内运行 `openspec config profile`
+- **且** 用户拒绝"现在应用到此项目？"提示
+- **则** 系统应显示："配置已更新。在你的项目中运行 `openspec update` 以应用。"
+- **则** 系统应成功退出而不修改项目文件
 
-#### Scenario: Config profile non-interactive
-- **WHEN** user runs `openspec config profile` non-interactively (e.g., in CI, no TTY)
-- **THEN** the system SHALL display an error: "Interactive mode required. Use `openspec config profile core` or set config via environment/flags."
-- **THEN** the system SHALL exit with code 1
+#### 场景：Config profile 非交互式
+- **当** 用户非交互式运行 `openspec config profile`（如在 CI 中，无 TTY）
+- **则** 系统应显示错误："需要交互模式。使用 `openspec config profile core` 或通过环境/标志设置配置。"
+- **则** 系统应以退出代码 1 退出
 
-### Requirement: Profile settings stored in global config
-Profile and delivery settings SHALL be stored in the existing global config file (`~/.config/openspec/config.json`) alongside telemetry and feature flags.
+### 需求：配置文件设置存储在全局配置中
+配置文件和交付设置应存储在现有全局配置文件（`~/.config/openspec/config.json`）中，与遥测和功能标志并列。
 
-#### Scenario: Config schema
-- **WHEN** reading profile configuration
-- **THEN** the config SHALL contain `profile` (core|custom), `delivery` (both|skills|commands), and optionally `workflows` (array of workflow names)
+#### 场景：配置模式
+- **当** 读取配置文件配置时
+- **则** 配置应包含 `profile`（core|custom）、`delivery`（both|skills|commands）和可选的 `workflows`（工作流名称数组）
 
-#### Scenario: Schema evolution
-- **WHEN** loading config without profile/delivery fields
-- **THEN** the system SHALL use defaults (profile=core, delivery=both)
-- **AND** existing config fields (telemetry, featureFlags) SHALL be preserved
+#### 场景：模式演进
+- **当** 加载没有 profile/delivery 字段的配置时
+- **则** 系统应使用默认值（profile=core，delivery=both）
+- **且** 现有配置字段（telemetry、featureFlags）应保留
 
-#### Scenario: Config list displays profile settings
-- **WHEN** user runs `openspec config list`
-- **THEN** the system SHALL display profile, delivery, and workflows settings
-- **AND** SHALL indicate which values are defaults vs explicitly set
+#### 场景：Config list 显示配置文件设置
+- **当** 用户运行 `openspec config list`
+- **则** 系统应显示 profile、delivery 和 workflows 设置
+- **且** 应指示哪些值是默认 vs 显式设置
 
-### Requirement: Config is global, projects are explicit
-Config changes SHALL NOT automatically propagate to projects.
+### 需求：配置是全局的，项目是显式的
+配置更改不应自动传播到项目。
 
-#### Scenario: Config update does not modify projects
-- **WHEN** user updates config via `openspec config profile`
-- **THEN** the system SHALL only update global config (`~/.config/openspec/config.json`)
-- **THEN** the system SHALL NOT modify any project skill/command files
-- **THEN** existing projects retain their current workflow files until user runs `openspec update`
+#### 场景：配置更新不修改项目
+- **当** 用户通过 `openspec config profile` 更新配置
+- **则** 系统应仅更新全局配置（`~/.config/openspec/config.json`）
+- **则** 系统不应修改任何项目技能/命令文件
+- **则** 现有项目保留其当前工作流文件直到用户运行 `openspec update`
 
-### Requirement: Config changes applied via update command
-The existing `openspec update` command SHALL apply the current global config to a project. See `specs/cli-update/spec.md` for detailed update behavior.
+### 需求：通过 update 命令应用配置更改
+现有 `openspec update` 命令应将当前全局配置应用到项目。详细更新行为见 `specs/cli-update/spec.md`。
 
-#### Scenario: Config changes require explicit project sync
-- **WHEN** user updates profile or delivery via `openspec config profile`
-- **THEN** the global config SHALL be updated immediately
-- **AND** project files SHALL remain unchanged until `openspec update` is run for that project
+#### 场景：配置更改需要显式项目同步
+- **当** 用户通过 `openspec config profile` 更新配置文件或交付
+- **则** 全局配置应立即更新
+- **且** 项目文件应保持不变直到为该项目运行 `openspec update`
 
-### Requirement: Profile defaults
-The system SHALL use `core` as the default profile for new users, while preserving existing users' workflows via migration.
+### 需求：配置文件默认值
+系统应使用 `core` 作为新用户的默认配置文件，同时通过迁移保留现有用户的工作流。
 
-#### Scenario: No global config exists (new user)
-- **WHEN** global config file does not exist
-- **AND** no existing workflows are installed in the project
-- **THEN** the system SHALL behave as if profile is `core`
+#### 场景：全局配置不存在（新用户）
+- **当** 全局配置文件不存在
+- **且** 项目中未安装现有工作流
+- **则** 系统应表现为配置文件是 `core`
 
-#### Scenario: Global config exists but profile field absent (new user)
-- **WHEN** global config file exists but does not contain a `profile` field
-- **AND** no existing workflows are installed in the project
-- **THEN** the system SHALL behave as if profile is `core`
+#### 场景：全局配置存在但配置文件字段缺失（新用户）
+- **当** 全局配置文件存在但不包含 `profile` 字段
+- **且** 项目中未安装现有工作流
+- **则** 系统应表现为配置文件是 `core`
 
-#### Scenario: Profile field absent with existing workflows (existing user migration)
-- **WHEN** global config does not contain a `profile` field
-- **AND** the `update` command detects existing workflow files in the project
-- **THEN** the system SHALL perform one-time migration (see `specs/cli-update/spec.md` for details)
-- **THEN** the system SHALL set profile to `custom` with the detected workflows
-- **THEN** the system SHALL NOT add or remove any workflow files during migration
+#### 场景：配置文件字段缺失但有现有工作流（现有用户迁移）
+- **当** 全局配置不包含 `profile` 字段
+- **且** `update` 命令检测到项目中有现有工作流文件
+- **则** 系统应执行一次性迁移（详见 `specs/cli-update/spec.md`）
+- **则** 系统应将配置文件设置为 `custom` 带检测到的工作流
+- **则** 系统在迁移期间不应添加或移除任何工作流文件

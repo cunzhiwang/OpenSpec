@@ -1,128 +1,128 @@
-# OPSX Archive Skill Spec
+# OPSX Archive Skill 规范
 
-## Purpose
+## 目的
 
-Define the expected behavior for the `/opsx:archive` skill, including readiness checks, spec sync prompting, archive execution, and user-facing output.
+定义 `/opsx:archive` 技能的预期行为，包括就绪检查、规范同步提示、归档执行和面向用户的输出。
 
-## Requirements
+## 需求
 
-### Requirement: OPSX Archive Skill
+### 需求：OPSX Archive 技能
 
-The system SHALL provide an `/opsx:archive` skill that archives completed changes in the experimental workflow.
+系统应当提供 `/opsx:archive` 技能，用于在实验性工作流中归档已完成的变更。
 
-#### Scenario: Archive a change with all artifacts complete
+#### 场景：归档所有产物已完成的变更
 
-- **WHEN** agent executes `/opsx:archive` with a change name
-- **AND** all artifacts in the schema are complete
-- **AND** all tasks are complete
-- **THEN** the agent moves the change to `openspec/changes/archive/YYYY-MM-DD-<name>/`
-- **AND** displays success message with archived location
+- **当** 代理使用变更名称执行 `/opsx:archive` 时
+- **且** 模式中的所有产物都已完成
+- **且** 所有任务都已完成
+- **则** 代理将变更移动到 `openspec/changes/archive/YYYY-MM-DD-<name>/`
+- **且** 显示成功消息及归档位置
 
-#### Scenario: Change selection prompt
+#### 场景：变更选择提示
 
-- **WHEN** agent executes `/opsx:archive` without specifying a change
-- **THEN** the agent prompts user to select from available changes
-- **AND** shows only active changes (excludes archive/)
+- **当** 代理执行 `/opsx:archive` 而未指定变更时
+- **则** 代理提示用户从可用变更中选择
+- **且** 仅显示活跃变更（排除 archive/）
 
-### Requirement: Artifact Completion Check
+### 需求：产物完成检查
 
-The skill SHALL check artifact completion status using the artifact graph before archiving.
+技能应当在归档前使用产物图检查产物完成状态。
 
-#### Scenario: Incomplete artifacts warning
+#### 场景：不完整产物警告
 
-- **WHEN** agent checks artifact status
-- **AND** one or more artifacts have status other than `done`
-- **THEN** display warning listing incomplete artifacts
-- **AND** prompt user for confirmation to continue
-- **AND** proceed if user confirms
+- **当** 代理检查产物状态时
+- **且** 一个或多个产物的状态不是 `done`
+- **则** 显示列出不完整产物的警告
+- **且** 提示用户确认是否继续
+- **且** 如果用户确认则继续
 
-#### Scenario: All artifacts complete
+#### 场景：所有产物已完成
 
-- **WHEN** agent checks artifact status
-- **AND** all artifacts have status `done`
-- **THEN** proceed without warning
+- **当** 代理检查产物状态时
+- **且** 所有产物状态为 `done`
+- **则** 无警告继续
 
-### Requirement: Task Completion Check
+### 需求：任务完成检查
 
-The skill SHALL check task completion status from tasks.md before archiving.
+技能应当在归档前从 tasks.md 检查任务完成状态。
 
-#### Scenario: Incomplete tasks found
+#### 场景：发现不完整任务
 
-- **WHEN** agent reads tasks.md
-- **AND** incomplete tasks are found (marked with `- [ ]`)
-- **THEN** display warning showing count of incomplete tasks
-- **AND** prompt user for confirmation to continue
-- **AND** proceed if user confirms
+- **当** 代理读取 tasks.md 时
+- **且** 发现不完整任务（标记为 `- [ ]`）
+- **则** 显示警告，显示不完整任务数量
+- **且** 提示用户确认是否继续
+- **且** 如果用户确认则继续
 
-#### Scenario: All tasks complete
+#### 场景：所有任务已完成
 
-- **WHEN** agent reads tasks.md
-- **AND** all tasks are complete (marked with `- [x]`)
-- **THEN** proceed without task-related warning
+- **当** 代理读取 tasks.md 时
+- **且** 所有任务已完成（标记为 `- [x]`）
+- **则** 无任务相关警告继续
 
-#### Scenario: No tasks file
+#### 场景：无任务文件
 
-- **WHEN** tasks.md does not exist
-- **THEN** proceed without task-related warning
+- **当** tasks.md 不存在时
+- **则** 无任务相关警告继续
 
-### Requirement: Spec Sync Prompt
+### 需求：规范同步提示
 
-The skill SHALL prompt to sync delta specs before archiving if specs exist.
+如果存在规范，技能应当在归档前提示同步增量规范。
 
-#### Scenario: Delta specs exist
+#### 场景：存在增量规范
 
-- **WHEN** agent checks for delta specs
-- **AND** `specs/` directory exists in the change with spec files
-- **THEN** prompt user: "This change has delta specs. Would you like to sync them to main specs before archiving?"
-- **AND** if user confirms, execute `/opsx:sync` logic
-- **AND** proceed with archive regardless of sync choice
+- **当** 代理检查增量规范时
+- **且** 变更中存在带有规范文件的 `specs/` 目录
+- **则** 提示用户："This change has delta specs. Would you like to sync them to main specs before archiving?"
+- **且** 如果用户确认，执行 `/opsx:sync` 逻辑
+- **且** 无论同步选择如何都继续归档
 
-#### Scenario: No delta specs
+#### 场景：无增量规范
 
-- **WHEN** agent checks for delta specs
-- **AND** no `specs/` directory or no spec files exist
-- **THEN** proceed without sync prompt
+- **当** 代理检查增量规范时
+- **且** 不存在 `specs/` 目录或无规范文件
+- **则** 无同步提示继续
 
-### Requirement: Archive Process
+### 需求：归档流程
 
-The skill SHALL move the change to the archive folder with date prefix.
+技能应当将变更移动到带日期前缀的归档文件夹。
 
-#### Scenario: Successful archive
+#### 场景：成功归档
 
-- **WHEN** archiving a change
-- **THEN** create `archive/` directory if it doesn't exist
-- **AND** generate target name as `YYYY-MM-DD-<change-name>` using current date
-- **AND** move entire change directory to archive location
-- **AND** preserve `.openspec.yaml` file in archived change
+- **当** 归档变更时
+- **则** 如果不存在则创建 `archive/` 目录
+- **且** 使用当前日期生成目标名称为 `YYYY-MM-DD-<change-name>`
+- **且** 将整个变更目录移动到归档位置
+- **且** 在归档的变更中保留 `.openspec.yaml` 文件
 
-#### Scenario: Archive already exists
+#### 场景：归档已存在
 
-- **WHEN** target archive directory already exists
-- **THEN** fail with error message
-- **AND** suggest renaming existing archive or using different date
+- **当** 目标归档目录已存在时
+- **则** 失败并显示错误消息
+- **且** 建议重命名现有归档或使用不同日期
 
-### Requirement: Skill Output
+### 需求：技能输出
 
-The skill SHALL provide clear feedback about the archive operation.
+技能应当提供关于归档操作的清晰反馈。
 
-#### Scenario: Archive complete with sync
+#### 场景：同步后归档完成
 
-- **WHEN** archive completes after syncing specs
-- **THEN** display summary:
-  - Specs synced (from `/opsx:sync` output)
-  - Change archived to location
-  - Schema that was used
+- **当** 归档在同步规范后完成时
+- **则** 显示摘要：
+  - 已同步的规范（来自 `/opsx:sync` 输出）
+  - 变更归档到的位置
+  - 使用的模式
 
-#### Scenario: Archive complete without sync
+#### 场景：未同步的归档完成
 
-- **WHEN** archive completes without syncing specs
-- **THEN** display summary:
-  - Note that specs were not synced (if applicable)
-  - Change archived to location
-  - Schema that was used
+- **当** 归档在未同步规范的情况下完成时
+- **则** 显示摘要：
+  - 注明规范未同步（如适用）
+  - 变更归档到的位置
+  - 使用的模式
 
-#### Scenario: Archive complete with warnings
+#### 场景：带警告的归档完成
 
-- **WHEN** archive completes with incomplete artifacts or tasks
-- **THEN** include note about what was incomplete
-- **AND** suggest reviewing if archive was intentional
+- **当** 归档在有不完整产物或任务的情况下完成时
+- **则** 包含关于不完整内容的注释
+- **且** 建议如果归档是有意的则进行审查

@@ -1,264 +1,265 @@
-# cli-config Specification
+# cli-config 规范
 
-## Purpose
-Provide a user-friendly CLI interface for viewing and modifying global OpenSpec configuration settings without manually editing JSON files.
-## Requirements
-### Requirement: Command Structure
+## 目的
+提供用户友好的 CLI 界面，用于查看和修改全局 OpenSpec 配置设置，无需手动编辑 JSON 文件。
 
-The config command SHALL provide subcommands for all configuration operations.
+## 需求
+### 需求：命令结构
 
-#### Scenario: Available subcommands
+config 命令应当为所有配置操作提供子命令。
 
-- **WHEN** user executes `openspec config --help`
-- **THEN** display available subcommands:
-  - `path` - Show config file location
-  - `list` - Show all current settings
-  - `get <key>` - Get a specific value
-  - `set <key> <value>` - Set a value
-  - `unset <key>` - Remove a key (revert to default)
-  - `reset` - Reset configuration to defaults
-  - `edit` - Open config in editor
+#### 场景：可用子命令
 
-### Requirement: Config Path
+- **当** 用户执行 `openspec config --help` 时
+- **则** 显示可用子命令：
+  - `path` - 显示配置文件位置
+  - `list` - 显示所有当前设置
+  - `get <key>` - 获取特定值
+  - `set <key> <value>` - 设置值
+  - `unset <key>` - 移除键（恢复为默认值）
+  - `reset` - 将配置重置为默认值
+  - `edit` - 在编辑器中打开配置
 
-The config command SHALL display the config file location.
+### 需求：配置路径
 
-#### Scenario: Show config path
+config 命令应当显示配置文件位置。
 
-- **WHEN** user executes `openspec config path`
-- **THEN** print the absolute path to the config file
-- **AND** exit with code 0
+#### 场景：显示配置路径
 
-### Requirement: Config List
+- **当** 用户执行 `openspec config path` 时
+- **则** 打印配置文件的绝对路径
+- **且** 以代码 0 退出
 
-The config command SHALL display all current configuration values.
+### 需求：配置列表
 
-#### Scenario: List config in human-readable format
+config 命令应当显示所有当前配置值。
 
-- **WHEN** user executes `openspec config list`
-- **THEN** display all config values in YAML-like format
-- **AND** show nested objects with indentation
+#### 场景：以人类可读格式列出配置
 
-#### Scenario: List config as JSON
+- **当** 用户执行 `openspec config list` 时
+- **则** 以类 YAML 格式显示所有配置值
+- **且** 使用缩进显示嵌套对象
 
-- **WHEN** user executes `openspec config list --json`
-- **THEN** output the complete config as valid JSON
-- **AND** output only JSON (no additional text)
+#### 场景：以 JSON 格式列出配置
 
-### Requirement: Config Get
+- **当** 用户执行 `openspec config list --json` 时
+- **则** 将完整配置输出为有效 JSON
+- **且** 仅输出 JSON（无额外文本）
 
-The config command SHALL retrieve specific configuration values.
+### 需求：配置获取
 
-#### Scenario: Get top-level key
+config 命令应当检索特定的配置值。
 
-- **WHEN** user executes `openspec config get <key>` with a valid top-level key
-- **THEN** print the raw value only (no labels or formatting)
-- **AND** exit with code 0
+#### 场景：获取顶级键
 
-#### Scenario: Get nested key with dot notation
+- **当** 用户执行 `openspec config get <key>` 并指定有效的顶级键时
+- **则** 仅打印原始值（无标签或格式化）
+- **且** 以代码 0 退出
 
-- **WHEN** user executes `openspec config get featureFlags.someFlag`
-- **THEN** traverse the nested structure using dot notation
-- **AND** print the value at that path
+#### 场景：使用点号表示法获取嵌套键
 
-#### Scenario: Get non-existent key
+- **当** 用户执行 `openspec config get featureFlags.someFlag` 时
+- **则** 使用点号表示法遍历嵌套结构
+- **且** 打印该路径处的值
 
-- **WHEN** user executes `openspec config get <key>` with a key that does not exist
-- **THEN** print nothing (empty output)
-- **AND** exit with code 1
+#### 场景：获取不存在的键
 
-#### Scenario: Get object value
+- **当** 用户执行 `openspec config get <key>` 并指定不存在的键时
+- **则** 不打印任何内容（空输出）
+- **且** 以代码 1 退出
 
-- **WHEN** user executes `openspec config get <key>` where the value is an object
-- **THEN** print the object as JSON
+#### 场景：获取对象值
 
-### Requirement: Config Set
+- **当** 用户执行 `openspec config get <key>` 且值为对象时
+- **则** 将对象打印为 JSON
 
-The config command SHALL set configuration values with automatic type coercion.
+### 需求：配置设置
 
-#### Scenario: Set string value
+config 命令应当设置配置值，并自动进行类型转换。
 
-- **WHEN** user executes `openspec config set <key> <value>`
-- **AND** value does not match boolean or number patterns
-- **THEN** store value as a string
-- **AND** display confirmation message
+#### 场景：设置字符串值
 
-#### Scenario: Set boolean value
+- **当** 用户执行 `openspec config set <key> <value>` 时
+- **且** 值不匹配布尔值或数字模式
+- **则** 将值存储为字符串
+- **且** 显示确认消息
 
-- **WHEN** user executes `openspec config set <key> true` or `openspec config set <key> false`
-- **THEN** store value as boolean (not string)
-- **AND** display confirmation message
+#### 场景：设置布尔值
 
-#### Scenario: Set numeric value
+- **当** 用户执行 `openspec config set <key> true` 或 `openspec config set <key> false` 时
+- **则** 将值存储为布尔值（而非字符串）
+- **且** 显示确认消息
 
-- **WHEN** user executes `openspec config set <key> <value>`
-- **AND** value is a valid number (integer or float)
-- **THEN** store value as number (not string)
+#### 场景：设置数字值
 
-#### Scenario: Force string with --string flag
+- **当** 用户执行 `openspec config set <key> <value>` 时
+- **且** 值是有效数字（整数或浮点数）
+- **则** 将值存储为数字（而非字符串）
 
-- **WHEN** user executes `openspec config set <key> <value> --string`
-- **THEN** store value as string regardless of content
-- **AND** this allows storing literal "true" or "123" as strings
+#### 场景：使用 --string 标志强制为字符串
 
-#### Scenario: Set nested key
+- **当** 用户执行 `openspec config set <key> <value> --string` 时
+- **则** 无论内容如何都将值存储为字符串
+- **且** 这允许将字面量 "true" 或 "123" 存储为字符串
 
-- **WHEN** user executes `openspec config set featureFlags.newFlag true`
-- **THEN** create intermediate objects if they don't exist
-- **AND** set the value at the nested path
+#### 场景：设置嵌套键
 
-### Requirement: Config Unset
+- **当** 用户执行 `openspec config set featureFlags.newFlag true` 时
+- **则** 如果中间对象不存在则创建它们
+- **且** 在嵌套路径处设置值
 
-The config command SHALL remove configuration overrides.
+### 需求：配置取消设置
 
-#### Scenario: Unset existing key
+config 命令应当移除配置覆盖。
 
-- **WHEN** user executes `openspec config unset <key>`
-- **AND** the key exists in the config
-- **THEN** remove the key from the config file
-- **AND** the value reverts to its default
-- **AND** display confirmation message
+#### 场景：取消设置现有键
 
-#### Scenario: Unset non-existent key
+- **当** 用户执行 `openspec config unset <key>` 时
+- **且** 键在配置中存在
+- **则** 从配置文件中移除该键
+- **且** 值恢复为默认值
+- **且** 显示确认消息
 
-- **WHEN** user executes `openspec config unset <key>`
-- **AND** the key does not exist in the config
-- **THEN** display message indicating key was not set
-- **AND** exit with code 0
+#### 场景：取消设置不存在的键
 
-### Requirement: Config Reset
+- **当** 用户执行 `openspec config unset <key>` 时
+- **且** 键在配置中不存在
+- **则** 显示消息指示键未设置
+- **且** 以代码 0 退出
 
-The config command SHALL reset configuration to defaults.
+### 需求：配置重置
 
-#### Scenario: Reset all with confirmation
+config 命令应当将配置重置为默认值。
 
-- **WHEN** user executes `openspec config reset --all`
-- **THEN** prompt for confirmation before proceeding
-- **AND** if confirmed, delete the config file or reset to defaults
-- **AND** display confirmation message
+#### 场景：带确认的全部重置
 
-#### Scenario: Reset all with -y flag
+- **当** 用户执行 `openspec config reset --all` 时
+- **则** 在继续之前提示确认
+- **且** 如果确认，删除配置文件或重置为默认值
+- **且** 显示确认消息
 
-- **WHEN** user executes `openspec config reset --all -y`
-- **THEN** reset without prompting for confirmation
+#### 场景：使用 -y 标志的全部重置
 
-#### Scenario: Reset without --all flag
+- **当** 用户执行 `openspec config reset --all -y` 时
+- **则** 无需提示确认即重置
 
-- **WHEN** user executes `openspec config reset` without `--all`
-- **THEN** display error indicating `--all` is required
-- **AND** exit with code 1
+#### 场景：不带 --all 标志的重置
 
-### Requirement: Config Edit
+- **当** 用户执行 `openspec config reset` 而不带 `--all` 时
+- **则** 显示错误指示需要 `--all`
+- **且** 以代码 1 退出
 
-The config command SHALL open the config file in the user's editor.
+### 需求：配置编辑
 
-#### Scenario: Open editor successfully
+config 命令应当在用户的编辑器中打开配置文件。
 
-- **WHEN** user executes `openspec config edit`
-- **AND** `$EDITOR` or `$VISUAL` environment variable is set
-- **THEN** open the config file in that editor
-- **AND** create the config file with defaults if it doesn't exist
-- **AND** wait for the editor to close before returning
+#### 场景：成功打开编辑器
 
-#### Scenario: No editor configured
+- **当** 用户执行 `openspec config edit` 时
+- **且** 设置了 `$EDITOR` 或 `$VISUAL` 环境变量
+- **则** 在该编辑器中打开配置文件
+- **且** 如果配置文件不存在则使用默认值创建
+- **且** 等待编辑器关闭后再返回
 
-- **WHEN** user executes `openspec config edit`
-- **AND** neither `$EDITOR` nor `$VISUAL` is set
-- **THEN** display error message suggesting to set `$EDITOR`
-- **AND** exit with code 1
+#### 场景：未配置编辑器
 
-### Requirement: Profile Configuration Flow
+- **当** 用户执行 `openspec config edit` 时
+- **且** 既未设置 `$EDITOR` 也未设置 `$VISUAL`
+- **则** 显示错误消息建议设置 `$EDITOR`
+- **且** 以代码 1 退出
 
-The `openspec config profile` command SHALL provide an action-first interactive flow that allows users to modify delivery and workflow settings independently.
+### 需求：配置文件配置流程
 
-#### Scenario: Current profile summary appears first
+`openspec config profile` 命令应当提供一个操作优先的交互式流程，允许用户独立修改交付和工作流设置。
 
-- **WHEN** user runs `openspec config profile` in an interactive terminal
-- **THEN** display a current-state header with:
-  - current delivery value
-  - workflow count with profile label (core or custom)
+#### 场景：首先显示当前配置文件摘要
 
-#### Scenario: Action-first menu offers skippable paths
+- **当** 用户在交互式终端中运行 `openspec config profile` 时
+- **则** 显示当前状态头部，包含：
+  - 当前交付值
+  - 带有配置文件标签（core 或 custom）的工作流数量
 
-- **WHEN** user runs `openspec config profile` interactively
-- **THEN** the first prompt SHALL offer:
+#### 场景：操作优先菜单提供可跳过的路径
+
+- **当** 用户交互式运行 `openspec config profile` 时
+- **则** 第一个提示应当提供：
   - `Change delivery + workflows`
   - `Change delivery only`
   - `Change workflows only`
   - `Keep current settings (exit)`
 
-#### Scenario: Delivery prompt marks current selection
+#### 场景：交付提示标记当前选择
 
-- **WHEN** delivery selection is shown in `openspec config profile`
-- **THEN** the currently configured delivery option SHALL include `[current]` in its label
-- **AND** that value SHALL be preselected by default
+- **当** 在 `openspec config profile` 中显示交付选择时
+- **则** 当前配置的交付选项应当在其标签中包含 `[current]`
+- **且** 该值应当默认预选
 
-#### Scenario: No-op exits without saving or apply prompt
+#### 场景：无操作退出时不保存或提示应用
 
-- **WHEN** user chooses `Keep current settings (exit)` OR makes selections that do not change effective config values
-- **THEN** the command SHALL print `No config changes.`
-- **AND** SHALL NOT write config changes
-- **AND** SHALL NOT ask to apply updates to the current project
+- **当** 用户选择 `Keep current settings (exit)` 或做出不改变有效配置值的选择时
+- **则** 命令应当打印 `No config changes.`
+- **且** 不应当写入配置更改
+- **且** 不应当询问是否将更新应用到当前项目
 
-#### Scenario: No-op warns when current project is out of sync
+#### 场景：无操作时警告当前项目不同步
 
-- **WHEN** `openspec config profile` exits with `No config changes.` inside an OpenSpec project
-- **AND** project files are out of sync with the current global profile/delivery
-- **THEN** display a non-blocking warning that global config is not yet applied to this project
-- **AND** include guidance to run `openspec update` to sync project files
+- **当** `openspec config profile` 在 OpenSpec 项目内以 `No config changes.` 退出时
+- **且** 项目文件与当前全局配置文件/交付不同步
+- **则** 显示非阻塞警告，指示全局配置尚未应用到此项目
+- **且** 包含运行 `openspec update` 以同步项目文件的指导
 
-#### Scenario: Apply prompt is gated on actual changes
+#### 场景：应用提示受实际更改控制
 
-- **WHEN** config values were changed and saved
-- **AND** current directory is an OpenSpec project
-- **THEN** prompt `Apply changes to this project now?`
-- **AND** if confirmed, run `openspec update` for the current project
+- **当** 配置值已更改并保存时
+- **且** 当前目录是 OpenSpec 项目
+- **则** 提示 `Apply changes to this project now?`
+- **且** 如果确认，为当前项目运行 `openspec update`
 
-### Requirement: Key Naming Convention
+### 需求：键命名约定
 
-The config command SHALL use camelCase keys matching the JSON structure.
+config 命令应当使用与 JSON 结构匹配的驼峰命名键。
 
-#### Scenario: Keys match JSON structure
+#### 场景：键匹配 JSON 结构
 
-- **WHEN** accessing configuration keys via CLI
-- **THEN** use camelCase matching the actual JSON property names
-- **AND** support dot notation for nested access (e.g., `featureFlags.someFlag`)
+- **当** 通过 CLI 访问配置键时
+- **则** 使用与实际 JSON 属性名匹配的驼峰命名
+- **且** 支持嵌套访问的点号表示法（例如 `featureFlags.someFlag`）
 
-### Requirement: Schema Validation
+### 需求：模式验证
 
-The config command SHALL validate configuration writes against the config schema using zod, while rejecting unknown keys for `config set` unless explicitly overridden.
+config 命令应当使用 zod 根据配置模式验证配置写入，同时拒绝 `config set` 的未知键，除非显式覆盖。
 
-#### Scenario: Unknown key rejected by default
+#### 场景：默认拒绝未知键
 
-- **WHEN** user executes `openspec config set someFutureKey 123`
-- **THEN** display a descriptive error message indicating the key is invalid
-- **AND** do not modify the config file
-- **AND** exit with code 1
+- **当** 用户执行 `openspec config set someFutureKey 123` 时
+- **则** 显示描述性错误消息指示键无效
+- **且** 不修改配置文件
+- **且** 以代码 1 退出
 
-#### Scenario: Unknown key accepted with override
+#### 场景：使用覆盖接受未知键
 
-- **WHEN** user executes `openspec config set someFutureKey 123 --allow-unknown`
-- **THEN** the value is saved successfully
-- **AND** exit with code 0
+- **当** 用户执行 `openspec config set someFutureKey 123 --allow-unknown` 时
+- **则** 值成功保存
+- **且** 以代码 0 退出
 
-#### Scenario: Invalid feature flag value rejected
+#### 场景：拒绝无效的功能标志值
 
-- **WHEN** user executes `openspec config set featureFlags.someFlag notABoolean`
-- **THEN** display a descriptive error message
-- **AND** do not modify the config file
-- **AND** exit with code 1
+- **当** 用户执行 `openspec config set featureFlags.someFlag notABoolean` 时
+- **则** 显示描述性错误消息
+- **且** 不修改配置文件
+- **且** 以代码 1 退出
 
-### Requirement: Reserved Scope Flag
+### 需求：保留的作用域标志
 
-The config command SHALL reserve the `--scope` flag for future extensibility.
+config 命令应当为未来扩展性保留 `--scope` 标志。
 
-#### Scenario: Scope flag defaults to global
+#### 场景：作用域标志默认为全局
 
-- **WHEN** user executes any config command without `--scope`
-- **THEN** operate on global configuration (default behavior)
+- **当** 用户执行任何 config 命令而不带 `--scope` 时
+- **则** 操作全局配置（默认行为）
 
-#### Scenario: Project scope not yet implemented
+#### 场景：项目作用域尚未实现
 
-- **WHEN** user executes `openspec config --scope project <subcommand>`
-- **THEN** display error message: "Project-local config is not yet implemented"
-- **AND** exit with code 1
+- **当** 用户执行 `openspec config --scope project <subcommand>` 时
+- **则** 显示错误消息："Project-local config is not yet implemented"
+- **且** 以代码 1 退出

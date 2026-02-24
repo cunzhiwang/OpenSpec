@@ -1,497 +1,498 @@
-# OpenSpec Conventions Specification
+# OpenSpec 约定规范
 
-## Purpose
+## 目的
 
-OpenSpec conventions SHALL define how system capabilities are documented, how changes are proposed and tracked, and how specifications evolve over time. This meta-specification serves as the source of truth for OpenSpec's own conventions.
-## Requirements
-### Requirement: Structured conventions for specs and changes
+OpenSpec 约定应当定义如何记录系统能力、如何提议和跟踪变更，以及规范如何随时间演进。此元规范作为 OpenSpec 自身约定的权威来源。
 
-OpenSpec conventions SHALL mandate a structured spec format with clear requirement and scenario sections so tooling can parse consistently.
+## 需求
+### 需求：规范和变更的结构化约定
 
-#### Scenario: Following the structured spec format
+OpenSpec 约定应当规定具有清晰需求和场景部分的结构化规范格式，以便工具可以一致地解析。
 
-- **WHEN** writing or updating OpenSpec specifications
-- **THEN** authors SHALL use `### Requirement: ...` followed by at least one `#### Scenario: ...` section
+#### 场景：遵循结构化规范格式
 
-### Requirement: Behavior-First Specification Boundary
-OpenSpec specifications SHALL capture verifiable behavior contracts and avoid internal implementation detail.
+- **当** 编写或更新 OpenSpec 规范时
+- **则** 作者应当使用 `### 需求：...` 后跟至少一个 `#### 场景：...` 部分
 
-#### Scenario: Writing behavior requirements
-- **WHEN** documenting a capability in `spec.md`
-- **THEN** requirements focus on externally observable behavior, interfaces, error handling, and constraints
-- **AND** scenarios remain testable or explicitly verifiable
+### 需求：行为优先规范边界
+OpenSpec 规范应当捕获可验证的行为契约，避免内部实现细节。
 
-#### Scenario: Avoiding implementation leakage
-- **WHEN** details involve concrete library choices, class/function structure, or execution mechanics
-- **THEN** those details SHALL be documented in `design.md` or `tasks.md` instead of behavioral requirements
+#### 场景：编写行为需求
+- **当** 在 `spec.md` 中记录能力时
+- **则** 需求聚焦于外部可观察的行为、接口、错误处理和约束
+- **并且** 场景保持可测试或可明确验证
 
-### Requirement: Progressive Rigor
-OpenSpec conventions SHALL keep specs lightweight by default and scale rigor only when risk or coordination complexity demands it.
+#### 场景：避免实现泄漏
+- **当** 细节涉及具体库选择、类/函数结构或执行机制时
+- **则** 这些细节应当记录在 `design.md` 或 `tasks.md` 中，而非行为需求
 
-#### Scenario: Routine change specification
-- **WHEN** a change is local and low-risk
-- **THEN** authors use concise, behavior-first requirements with minimal ceremony
+### 需求：渐进式严格性
+OpenSpec 约定应当默认保持规范轻量，仅在风险或协调复杂性需要时增加严格性。
 
-#### Scenario: High-risk or cross-boundary change specification
-- **WHEN** a change is cross-team, cross-repo, API-contract breaking, migration-heavy, or security/privacy sensitive
-- **THEN** authors increase detail and explicit validation expectations proportionally
+#### 场景：常规变更规范
+- **当** 变更是本地的且低风险时
+- **则** 作者使用简洁的行为优先需求，最少的形式
 
-### Requirement: Project Structure
-An OpenSpec project SHALL maintain a consistent directory structure for specifications and changes.
+#### 场景：高风险或跨边界变更规范
+- **当** 变更是跨团队、跨仓库、破坏 API 契约、迁移密集或安全/隐私敏感时
+- **则** 作者相应增加细节和显式验证期望
 
-#### Scenario: Initializing project structure
-- **WHEN** an OpenSpec project is initialized
-- **THEN** it SHALL have this structure:
+### 需求：项目结构
+OpenSpec 项目应当为规范和变更维护一致的目录结构。
+
+#### 场景：初始化项目结构
+- **当** 初始化 OpenSpec 项目时
+- **则** 应当具有以下结构：
 ```
 openspec/
-├── project.md              # Project-specific context
-├── AGENTS.md               # AI assistant instructions
-├── specs/                  # Current deployed capabilities
-│   └── [capability]/       # Single, focused capability
-│       ├── spec.md         # WHAT and WHY
-│       └── design.md       # HOW (optional, for established patterns)
-└── changes/                # Proposed changes
-    ├── [change-name]/      # Descriptive change identifier
-    │   ├── proposal.md     # Why, what, and impact
-    │   ├── tasks.md        # Implementation checklist
-    │   ├── design.md       # Technical decisions (optional)
-    │   └── specs/          # Complete future state
+├── project.md              # 项目特定上下文
+├── AGENTS.md               # AI 助手指令
+├── specs/                  # 当前已部署的能力
+│   └── [capability]/       # 单一、聚焦的能力
+│       ├── spec.md         # 做什么和为什么
+│       └── design.md       # 如何做（可选，用于既定模式）
+└── changes/                # 提议的变更
+    ├── [change-name]/      # 描述性变更标识符
+    │   ├── proposal.md     # 为什么、做什么和影响
+    │   ├── tasks.md        # 实现检查清单
+    │   ├── design.md       # 技术决策（可选）
+    │   └── specs/          # 完整的未来状态
     │       └── [capability]/
-    │           └── spec.md # Clean markdown (no diff syntax)
-    └── archive/            # Completed changes
+    │           └── spec.md # 干净的 markdown（无 diff 语法）
+    └── archive/            # 已完成的变更
         └── YYYY-MM-DD-[name]/
 ```
 
-### Requirement: Structured Format for Behavioral Specs
+### 需求：行为规范的结构化格式
 
-Behavioral specifications SHALL use a structured format with consistent section headers and keywords to ensure visual consistency and parseability.
+行为规范应当使用具有一致部分标题和关键字的结构化格式，以确保视觉一致性和可解析性。
 
-#### Scenario: Writing requirement sections
+#### 场景：编写需求部分
 
-- **WHEN** documenting a requirement in a behavioral specification
-- **THEN** use a level-3 heading with format `### Requirement: [Name]`
-- **AND** immediately follow with a SHALL statement describing core behavior
-- **AND** keep requirement names descriptive and under 50 characters
+- **当** 在行为规范中记录需求时
+- **则** 使用格式为 `### 需求：[名称]` 的三级标题
+- **并且** 紧接着是描述核心行为的 SHALL 陈述
+- **并且** 保持需求名称描述性且不超过 50 个字符
 
-#### Scenario: Documenting scenarios
+#### 场景：记录场景
 
-- **WHEN** documenting specific behaviors or use cases
-- **THEN** use level-4 headings with format `#### Scenario: [Description]`
-- **AND** use bullet points with bold keywords for steps:
-  - **GIVEN** for initial state (optional)
-  - **WHEN** for conditions or triggers
-  - **THEN** for expected outcomes
-  - **AND** for additional outcomes or conditions
+- **当** 记录特定行为或用例时
+- **则** 使用格式为 `#### 场景：[描述]` 的四级标题
+- **并且** 使用带有粗体关键字的项目符号表示步骤：
+  - **前提** 表示初始状态（可选）
+  - **当** 表示条件或触发器
+  - **则** 表示预期结果
+  - **并且** 表示额外结果或条件
 
-#### Scenario: Adding implementation details
+#### 场景：添加实现细节
 
-- **WHEN** a step requires additional detail
-- **THEN** use sub-bullets under the main step
-- **AND** maintain consistent indentation
-  - Sub-bullets provide examples or specifics
-  - Keep sub-bullets concise
+- **当** 步骤需要额外细节时
+- **则** 在主步骤下使用子项目符号
+- **并且** 保持一致的缩进
+  - 子项目符号提供示例或具体细节
+  - 保持子项目符号简洁
 
-### Requirement: Header-Based Requirement Identification
+### 需求：基于标题的需求标识
 
-Requirement headers SHALL serve as unique identifiers for programmatic matching between current specs and proposed changes.
+需求标题应当作为当前规范和提议变更之间程序化匹配的唯一标识符。
 
-#### Scenario: Matching requirements programmatically
+#### 场景：程序化匹配需求
 
-- **WHEN** processing delta changes
-- **THEN** use the `### Requirement: [Name]` header as the unique identifier
-- **AND** match using normalized headers: `normalize(header) = trim(header)`
-- **AND** compare headers with case-sensitive equality after normalization
+- **当** 处理增量变更时
+- **则** 使用 `### 需求：[名称]` 标题作为唯一标识符
+- **并且** 使用规范化标题匹配：`normalize(header) = trim(header)`
+- **并且** 规范化后使用大小写敏感的相等比较标题
 
-#### Scenario: Handling requirement renames
+#### 场景：处理需求重命名
 
-- **WHEN** renaming a requirement
-- **THEN** use a special `## RENAMED Requirements` section
-- **AND** specify both old and new names explicitly:
+- **当** 重命名需求时
+- **则** 使用特殊的 `## RENAMED Requirements` 部分
+- **并且** 显式指定新旧名称：
   ```markdown
   ## RENAMED Requirements
-  - FROM: `### Requirement: Old Name`
-  - TO: `### Requirement: New Name`
+  - FROM: `### Requirement: 旧名称`
+  - TO: `### Requirement: 新名称`
   ```
-- **AND** if content also changes, include under MODIFIED using the NEW header
+- **并且** 如果内容也有变更，使用新标题在 MODIFIED 下包含
 
-#### Scenario: Validating header uniqueness
+#### 场景：验证标题唯一性
 
-- **WHEN** creating or modifying requirements
-- **THEN** ensure no duplicate headers exist within a spec
-- **AND** validation tools SHALL flag duplicate headers as errors
+- **当** 创建或修改需求时
+- **则** 确保规范内不存在重复标题
+- **并且** 验证工具应当将重复标题标记为错误
 
-### Requirement: Change Storage Convention
+### 需求：变更存储约定
 
-Change proposals SHALL store only the additions, modifications, and removals to specifications, not complete future states.
+变更提案应当仅存储对规范的添加、修改和删除，而非完整的未来状态。
 
-#### Scenario: Creating change proposals with additions
+#### 场景：创建带添加的变更提案
 
-- **WHEN** creating a change proposal that adds new requirements
-- **THEN** include only the new requirements under `## ADDED Requirements`
-- **AND** each requirement SHALL include its complete content
-- **AND** use the standard structured format for requirements and scenarios
+- **当** 创建添加新需求的变更提案时
+- **则** 仅在 `## ADDED Requirements` 下包含新需求
+- **并且** 每个需求应当包含其完整内容
+- **并且** 使用标准结构化格式编写需求和场景
 
-#### Scenario: Creating change proposals with modifications  
+#### 场景：创建带修改的变更提案
 
-- **WHEN** creating a change proposal that modifies existing requirements
-- **THEN** include the modified requirements under `## MODIFIED Requirements`
-- **AND** use the same header text as in the current spec (normalized)
-- **AND** include the complete modified requirement (not a diff)
-- **AND** optionally annotate what changed with inline comments like `← (was X)`
+- **当** 创建修改现有需求的变更提案时
+- **则** 在 `## MODIFIED Requirements` 下包含修改后的需求
+- **并且** 使用与当前规范相同的标题文本（规范化）
+- **并且** 包含完整的修改后需求（非差异）
+- **并且** 可选地使用内联注释如 `← (曾是 X)` 标注变更内容
 
-#### Scenario: Creating change proposals with removals
+#### 场景：创建带删除的变更提案
 
-- **WHEN** creating a change proposal that removes requirements
-- **THEN** list them under `## REMOVED Requirements`
-- **AND** use the normalized header text for identification
-- **AND** include reason for removal
-- **AND** document any migration path if applicable
+- **当** 创建删除需求的变更提案时
+- **则** 在 `## REMOVED Requirements` 下列出它们
+- **并且** 使用规范化的标题文本进行标识
+- **并且** 包含删除原因
+- **并且** 记录适用的迁移路径
 
-The `changes/[name]/specs/` directory SHALL contain:
-- Delta files showing only what changes
-- Sections for ADDED, MODIFIED, REMOVED, and RENAMED requirements
-- Normalized header matching for requirement identification
-- Complete requirements using the structured format
-- Clear indication of change type for each requirement
+`changes/[name]/specs/` 目录应当包含：
+- 仅显示变更内容的增量文件
+- 添加、修改、删除和重命名需求的部分
+- 用于需求标识的规范化标题匹配
+- 使用结构化格式的完整需求
+- 每个需求的变更类型清晰指示
 
-#### Scenario: Using standard output symbols
+#### 场景：使用标准输出符号
 
-- **WHEN** displaying delta operations in CLI output
-- **THEN** use these standard symbols:
-  - `+` for ADDED (green)
-  - `~` for MODIFIED (yellow)
-  - `-` for REMOVED (red)
-  - `→` for RENAMED (cyan)
+- **当** 在 CLI 输出中显示增量操作时
+- **则** 使用这些标准符号：
+  - `+` 表示添加（绿色）
+  - `~` 表示修改（黄色）
+  - `-` 表示删除（红色）
+  - `→` 表示重命名（青色）
 
-### Requirement: Archive Process Enhancement
+### 需求：归档过程增强
 
-The archive process SHALL programmatically apply delta changes to current specifications using header-based matching.
+归档过程应当使用基于标题的匹配程序化地将增量变更应用到当前规范。
 
-#### Scenario: Archiving changes with deltas
+#### 场景：带增量的变更归档
 
-- **WHEN** archiving a completed change
-- **THEN** the archive command SHALL:
-  1. Parse RENAMED sections first and apply renames
-  2. Parse REMOVED sections and remove by normalized header match
-  3. Parse MODIFIED sections and replace by normalized header match (using new names if renamed)
-  4. Parse ADDED sections and append new requirements
-- **AND** validate that all MODIFIED/REMOVED headers exist in current spec
-- **AND** validate that ADDED headers don't already exist
-- **AND** generate the updated spec in the main specs/ directory
+- **当** 归档已完成的变更时
+- **则** 归档命令应当：
+  1. 首先解析 RENAMED 部分并应用重命名
+  2. 解析 REMOVED 部分并通过规范化标题匹配删除
+  3. 解析 MODIFIED 部分并通过规范化标题匹配替换（如果重命名则使用新名称）
+  4. 解析 ADDED 部分并附加新需求
+- **并且** 验证所有 MODIFIED/REMOVED 标题在当前规范中存在
+- **并且** 验证 ADDED 标题尚不存在
+- **并且** 在主 specs/ 目录生成更新后的规范
 
-#### Scenario: Handling conflicts during archive
+#### 场景：归档期间处理冲突
 
-- **WHEN** delta changes conflict with current spec state
-- **THEN** the archive command SHALL report specific conflicts
-- **AND** require manual resolution before proceeding
-- **AND** provide clear guidance on resolving conflicts
+- **当** 增量变更与当前规范状态冲突时
+- **则** 归档命令应当报告具体冲突
+- **并且** 在继续之前要求手动解决
+- **并且** 提供解决冲突的清晰指导
 
-### Requirement: Proposal Format
+### 需求：提案格式
 
-Proposals SHALL explicitly document all changes with clear from/to comparisons.
+提案应当明确记录所有变更，提供清晰的前/后比较。
 
-#### Scenario: Documenting changes
+#### 场景：记录变更
 
-- **WHEN** documenting what changes
-- **THEN** the proposal SHALL explicitly describe each change:
+- **当** 记录变更内容时
+- **则** 提案应当明确描述每个变更：
 
 ```markdown
-**[Section or Behavior Name]**
-- From: [current state/requirement]
-- To: [future state/requirement]
-- Reason: [why this change is needed]
-- Impact: [breaking/non-breaking, who's affected]
+**[部分或行为名称]**
+- 从：[当前状态/需求]
+- 到：[未来状态/需求]
+- 原因：[为什么需要此变更]
+- 影响：[破坏性/非破坏性，影响谁]
 ```
 
-This explicit format compensates for not having inline diffs and ensures reviewers understand exactly what will change.
+此显式格式弥补了没有内联差异的不足，确保审查者准确理解将发生什么变更。
 
-### Requirement: Change Review
+### 需求：变更审查
 
-The system SHALL support multiple methods for reviewing proposed changes.
+系统应当支持多种审查提议变更的方法。
 
-#### Scenario: Reviewing changes
+#### 场景：审查变更
 
-- **WHEN** reviewing proposed changes
-- **THEN** reviewers can compare using:
-- GitHub PR diff view when changes are committed
-- Command line: `diff -u specs/[capability]/spec.md changes/[name]/specs/[capability]/spec.md`
-- Any visual diff tool comparing current vs future state
+- **当** 审查提议的变更时
+- **则** 审查者可以使用以下方式比较：
+- 当变更提交后使用 GitHub PR 差异视图
+- 命令行：`diff -u specs/[capability]/spec.md changes/[name]/specs/[capability]/spec.md`
+- 任何比较当前与未来状态的可视化差异工具
 
-### Requirement: Structured Format Adoption
+### 需求：结构化格式采用
 
-Behavioral specifications SHALL adopt the structured format with `### Requirement:` and `#### Scenario:` headers as the default.
+行为规范应当采用带有 `### 需求：` 和 `#### 场景：` 标题的结构化格式作为默认。
 
-#### Scenario: Use structured headings for behavior
+#### 场景：使用结构化标题记录行为
 
-- **WHEN** documenting behavioral requirements
-- **THEN** use `### Requirement:` for requirements
-- **AND** use `#### Scenario:` for scenarios with bold WHEN/THEN/AND keywords
+- **当** 记录行为需求时
+- **则** 对需求使用 `### 需求：`
+- **并且** 对带有粗体 WHEN/THEN/AND 关键字的场景使用 `#### 场景：`
 
-### Requirement: Verb–Noun CLI Command Structure
-OpenSpec CLI design SHALL use verbs as top-level commands with nouns provided as arguments or flags for scoping.
+### 需求：动词-名词 CLI 命令结构
+OpenSpec CLI 设计应当使用动词作为顶层命令，名词通过参数或标志提供作用域。
 
-#### Scenario: Verb-first command discovery
-- **WHEN** a user runs a command like `openspec list`
-- **THEN** the verb communicates the action clearly
-- **AND** nouns refine scope via flags or arguments (e.g., `--changes`, `--specs`)
+#### 场景：动词优先命令发现
+- **当** 用户运行如 `openspec list` 的命令时
+- **则** 动词清晰传达操作
+- **并且** 名词通过标志或参数细化作用域（例如 `--changes`、`--specs`）
 
-#### Scenario: Backward compatibility for noun commands
-- **WHEN** users run noun-prefixed commands such as `openspec spec ...` or `openspec change ...`
-- **THEN** the CLI SHALL continue to support them for at least one release
-- **AND** display a deprecation warning that points to verb-first alternatives
+#### 场景：名词命令的向后兼容
+- **当** 用户运行名词前缀命令如 `openspec spec ...` 或 `openspec change ...` 时
+- **则** CLI 应当至少继续支持一个版本
+- **并且** 显示指向动词优先替代方案的弃用警告
 
-#### Scenario: Disambiguation guidance
-- **WHEN** item names are ambiguous between changes and specs
-- **THEN** `openspec show` and `openspec validate` SHALL accept `--type spec|change`
-- **AND** the help text SHALL document this clearly
+#### 场景：歧义消除指导
+- **当** 项目名称在变更和规范之间存在歧义时
+- **则** `openspec show` 和 `openspec validate` 应当接受 `--type spec|change`
+- **并且** 帮助文本应当清楚记录这一点
 
-## Core Principles
+## 核心原则
 
-The system SHALL follow these principles:
-- Specs reflect what IS currently built and deployed
-- Changes contain proposals for what SHOULD be changed
-- AI drives the documentation process
-- Specs are living documentation kept in sync with deployed code
+系统应当遵循这些原则：
+- 规范反映当前已构建和部署的内容
+- 变更包含应该变更内容的提案
+- AI 驱动文档过程
+- 规范是与已部署代码保持同步的活文档
 
-## Directory Structure
+## 目录结构
 
-### Requirement: Project Structure
+### 需求：项目结构
 
-An OpenSpec project SHALL maintain a consistent directory structure for specifications and changes.
+OpenSpec 项目应当为规范和变更维护一致的目录结构。
 
-#### Scenario: Initializing project structure
+#### 场景：初始化项目结构
 
-- **WHEN** an OpenSpec project is initialized
-- **THEN** it SHALL have this structure:
+- **当** 初始化 OpenSpec 项目时
+- **则** 应当具有以下结构：
 ```
 openspec/
-├── project.md              # Project-specific context
-├── AGENTS.md               # AI assistant instructions
-├── specs/                  # Current deployed capabilities
-│   └── [capability]/       # Single, focused capability
-│       ├── spec.md         # WHAT and WHY
-│       └── design.md       # HOW (optional, for established patterns)
-└── changes/                # Proposed changes
-    ├── [change-name]/      # Descriptive change identifier
-    │   ├── proposal.md     # Why, what, and impact
-    │   ├── tasks.md        # Implementation checklist
-    │   ├── design.md       # Technical decisions (optional)
-    │   └── specs/          # Complete future state
+├── project.md              # 项目特定上下文
+├── AGENTS.md               # AI 助手指令
+├── specs/                  # 当前已部署的能力
+│   └── [capability]/       # 单一、聚焦的能力
+│       ├── spec.md         # 做什么和为什么
+│       └── design.md       # 如何做（可选，用于既定模式）
+└── changes/                # 提议的变更
+    ├── [change-name]/      # 描述性变更标识符
+    │   ├── proposal.md     # 为什么、做什么和影响
+    │   ├── tasks.md        # 实现检查清单
+    │   ├── design.md       # 技术决策（可选）
+    │   └── specs/          # 完整的未来状态
     │       └── [capability]/
-    │           └── spec.md # Clean markdown (no diff syntax)
-    └── archive/            # Completed changes
+    │           └── spec.md # 干净的 markdown（无 diff 语法）
+    └── archive/            # 已完成的变更
         └── YYYY-MM-DD-[name]/
 ```
 
-## Specification Format
+## 规范格式
 
-### Requirement: Structured Format for Behavioral Specs
+### 需求：行为规范的结构化格式
 
-Behavioral specifications SHALL use a structured format with consistent section headers and keywords to ensure visual consistency and parseability.
+行为规范应当使用具有一致部分标题和关键字的结构化格式，以确保视觉一致性和可解析性。
 
-#### Scenario: Writing requirement sections
+#### 场景：编写需求部分
 
-- **WHEN** documenting a requirement in a behavioral specification
-- **THEN** use a level-3 heading with format `### Requirement: [Name]`
-- **AND** immediately follow with a SHALL statement describing core behavior
-- **AND** keep requirement names descriptive and under 50 characters
+- **当** 在行为规范中记录需求时
+- **则** 使用格式为 `### 需求：[名称]` 的三级标题
+- **并且** 紧接着是描述核心行为的 SHALL 陈述
+- **并且** 保持需求名称描述性且不超过 50 个字符
 
-#### Scenario: Documenting scenarios
+#### 场景：记录场景
 
-- **WHEN** documenting specific behaviors or use cases
-- **THEN** use level-4 headings with format `#### Scenario: [Description]`
-- **AND** use bullet points with bold keywords for steps:
-  - **GIVEN** for initial state (optional)
-  - **WHEN** for conditions or triggers
-  - **THEN** for expected outcomes
-  - **AND** for additional outcomes or conditions
+- **当** 记录特定行为或用例时
+- **则** 使用格式为 `#### 场景：[描述]` 的四级标题
+- **并且** 使用带有粗体关键字的项目符号表示步骤：
+  - **前提** 表示初始状态（可选）
+  - **当** 表示条件或触发器
+  - **则** 表示预期结果
+  - **并且** 表示额外结果或条件
 
-#### Scenario: Adding implementation details
+#### 场景：添加实现细节
 
-- **WHEN** a step requires additional detail
-- **THEN** use sub-bullets under the main step
-- **AND** maintain consistent indentation
-  - Sub-bullets provide examples or specifics
-  - Keep sub-bullets concise
+- **当** 步骤需要额外细节时
+- **则** 在主步骤下使用子项目符号
+- **并且** 保持一致的缩进
+  - 子项目符号提供示例或具体细节
+  - 保持子项目符号简洁
 
-## Change Storage Convention
+## 变更存储约定
 
-### Requirement: Header-Based Requirement Identification
+### 需求：基于标题的需求标识
 
-Requirement headers SHALL serve as unique identifiers for programmatic matching between current specs and proposed changes.
+需求标题应当作为当前规范和提议变更之间程序化匹配的唯一标识符。
 
-#### Scenario: Matching requirements programmatically
+#### 场景：程序化匹配需求
 
-- **WHEN** processing delta changes
-- **THEN** use the `### Requirement: [Name]` header as the unique identifier
-- **AND** match using normalized headers: `normalize(header) = trim(header)`
-- **AND** compare headers with case-sensitive equality after normalization
+- **当** 处理增量变更时
+- **则** 使用 `### 需求：[名称]` 标题作为唯一标识符
+- **并且** 使用规范化标题匹配：`normalize(header) = trim(header)`
+- **并且** 规范化后使用大小写敏感的相等比较标题
 
-#### Scenario: Handling requirement renames
+#### 场景：处理需求重命名
 
-- **WHEN** renaming a requirement
-- **THEN** use a special `## RENAMED Requirements` section
-- **AND** specify both old and new names explicitly:
+- **当** 重命名需求时
+- **则** 使用特殊的 `## RENAMED Requirements` 部分
+- **并且** 显式指定新旧名称：
   ```markdown
   ## RENAMED Requirements
-  - FROM: `### Requirement: Old Name`
-  - TO: `### Requirement: New Name`
+  - FROM: `### Requirement: 旧名称`
+  - TO: `### Requirement: 新名称`
   ```
-- **AND** if content also changes, include under MODIFIED using the NEW header
+- **并且** 如果内容也有变更，使用新标题在 MODIFIED 下包含
 
-#### Scenario: Validating header uniqueness
+#### 场景：验证标题唯一性
 
-- **WHEN** creating or modifying requirements
-- **THEN** ensure no duplicate headers exist within a spec
-- **AND** validation tools SHALL flag duplicate headers as errors
+- **当** 创建或修改需求时
+- **则** 确保规范内不存在重复标题
+- **并且** 验证工具应当将重复标题标记为错误
 
-### Requirement: Change Storage Convention
+### 需求：变更存储约定
 
-Change proposals SHALL store only the additions, modifications, and removals to specifications, not complete future states.
+变更提案应当仅存储对规范的添加、修改和删除，而非完整的未来状态。
 
-#### Scenario: Creating change proposals with additions
+#### 场景：创建带添加的变更提案
 
-- **WHEN** creating a change proposal that adds new requirements
-- **THEN** include only the new requirements under `## ADDED Requirements`
-- **AND** each requirement SHALL include its complete content
-- **AND** use the standard structured format for requirements and scenarios
+- **当** 创建添加新需求的变更提案时
+- **则** 仅在 `## ADDED Requirements` 下包含新需求
+- **并且** 每个需求应当包含其完整内容
+- **并且** 使用标准结构化格式编写需求和场景
 
-#### Scenario: Creating change proposals with modifications  
+#### 场景：创建带修改的变更提案
 
-- **WHEN** creating a change proposal that modifies existing requirements
-- **THEN** include the modified requirements under `## MODIFIED Requirements`
-- **AND** use the same header text as in the current spec (normalized)
-- **AND** include the complete modified requirement (not a diff)
-- **AND** optionally annotate what changed with inline comments like `← (was X)`
+- **当** 创建修改现有需求的变更提案时
+- **则** 在 `## MODIFIED Requirements` 下包含修改后的需求
+- **并且** 使用与当前规范相同的标题文本（规范化）
+- **并且** 包含完整的修改后需求（非差异）
+- **并且** 可选地使用内联注释如 `← (曾是 X)` 标注变更内容
 
-#### Scenario: Creating change proposals with removals
+#### 场景：创建带删除的变更提案
 
-- **WHEN** creating a change proposal that removes requirements
-- **THEN** list them under `## REMOVED Requirements`
-- **AND** use the normalized header text for identification
-- **AND** include reason for removal
-- **AND** document any migration path if applicable
+- **当** 创建删除需求的变更提案时
+- **则** 在 `## REMOVED Requirements` 下列出它们
+- **并且** 使用规范化的标题文本进行标识
+- **并且** 包含删除原因
+- **并且** 记录适用的迁移路径
 
-The `changes/[name]/specs/` directory SHALL contain:
-- Delta files showing only what changes
-- Sections for ADDED, MODIFIED, REMOVED, and RENAMED requirements
-- Normalized header matching for requirement identification
-- Complete requirements using the structured format
-- Clear indication of change type for each requirement
+`changes/[name]/specs/` 目录应当包含：
+- 仅显示变更内容的增量文件
+- 添加、修改、删除和重命名需求的部分
+- 用于需求标识的规范化标题匹配
+- 使用结构化格式的完整需求
+- 每个需求的变更类型清晰指示
 
-#### Scenario: Using standard output symbols
+#### 场景：使用标准输出符号
 
-- **WHEN** displaying delta operations in CLI output
-- **THEN** use these standard symbols:
-  - `+` for ADDED (green)
-  - `~` for MODIFIED (yellow)
-  - `-` for REMOVED (red)
-  - `→` for RENAMED (cyan)
+- **当** 在 CLI 输出中显示增量操作时
+- **则** 使用这些标准符号：
+  - `+` 表示添加（绿色）
+  - `~` 表示修改（黄色）
+  - `-` 表示删除（红色）
+  - `→` 表示重命名（青色）
 
-### Requirement: Archive Process Enhancement
+### 需求：归档过程增强
 
-The archive process SHALL programmatically apply delta changes to current specifications using header-based matching.
+归档过程应当使用基于标题的匹配程序化地将增量变更应用到当前规范。
 
-#### Scenario: Archiving changes with deltas
+#### 场景：带增量的变更归档
 
-- **WHEN** archiving a completed change
-- **THEN** the archive command SHALL:
-  1. Parse RENAMED sections first and apply renames
-  2. Parse REMOVED sections and remove by normalized header match
-  3. Parse MODIFIED sections and replace by normalized header match (using new names if renamed)
-  4. Parse ADDED sections and append new requirements
-- **AND** validate that all MODIFIED/REMOVED headers exist in current spec
-- **AND** validate that ADDED headers don't already exist
-- **AND** generate the updated spec in the main specs/ directory
+- **当** 归档已完成的变更时
+- **则** 归档命令应当：
+  1. 首先解析 RENAMED 部分并应用重命名
+  2. 解析 REMOVED 部分并通过规范化标题匹配删除
+  3. 解析 MODIFIED 部分并通过规范化标题匹配替换（如果重命名则使用新名称）
+  4. 解析 ADDED 部分并附加新需求
+- **并且** 验证所有 MODIFIED/REMOVED 标题在当前规范中存在
+- **并且** 验证 ADDED 标题尚不存在
+- **并且** 在主 specs/ 目录生成更新后的规范
 
-#### Scenario: Handling conflicts during archive
+#### 场景：归档期间处理冲突
 
-- **WHEN** delta changes conflict with current spec state
-- **THEN** the archive command SHALL report specific conflicts
-- **AND** require manual resolution before proceeding
-- **AND** provide clear guidance on resolving conflicts
+- **当** 增量变更与当前规范状态冲突时
+- **则** 归档命令应当报告具体冲突
+- **并且** 在继续之前要求手动解决
+- **并且** 提供解决冲突的清晰指导
 
-### Requirement: Proposal Format
+### 需求：提案格式
 
-Proposals SHALL explicitly document all changes with clear from/to comparisons.
+提案应当明确记录所有变更，提供清晰的前/后比较。
 
-#### Scenario: Documenting changes
+#### 场景：记录变更
 
-- **WHEN** documenting what changes
-- **THEN** the proposal SHALL explicitly describe each change:
+- **当** 记录变更内容时
+- **则** 提案应当明确描述每个变更：
 
 ```markdown
-**[Section or Behavior Name]**
-- From: [current state/requirement]
-- To: [future state/requirement]
-- Reason: [why this change is needed]
-- Impact: [breaking/non-breaking, who's affected]
+**[部分或行为名称]**
+- 从：[当前状态/需求]
+- 到：[未来状态/需求]
+- 原因：[为什么需要此变更]
+- 影响：[破坏性/非破坏性，影响谁]
 ```
 
-This explicit format compensates for not having inline diffs and ensures reviewers understand exactly what will change.
+此显式格式弥补了没有内联差异的不足，确保审查者准确理解将发生什么变更。
 
-## Change Lifecycle
+## 变更生命周期
 
-The change process SHALL follow these states:
+变更过程应当遵循以下状态：
 
-1. **Propose**: AI creates change with future state specs and explicit proposal
-2. **Review**: Humans review proposal and future state
-3. **Approve**: Change is approved for implementation
-4. **Implement**: Follow tasks.md checklist (can span multiple PRs)
-5. **Deploy**: Changes are deployed to production
-6. **Update**: Specs in `specs/` are updated to match deployed reality
-7. **Archive**: Change is moved to `archive/YYYY-MM-DD-[name]/`
+1. **提议**：AI 创建带有未来状态规范和显式提案的变更
+2. **审查**：人类审查提案和未来状态
+3. **批准**：变更被批准实现
+4. **实现**：按照 tasks.md 检查清单执行（可跨多个 PR）
+5. **部署**：变更部署到生产环境
+6. **更新**：`specs/` 中的规范更新以匹配已部署的现实
+7. **归档**：变更移动到 `archive/YYYY-MM-DD-[name]/`
 
-## Viewing Changes
+## 查看变更
 
-### Requirement: Change Review
+### 需求：变更审查
 
-The system SHALL support multiple methods for reviewing proposed changes.
+系统应当支持多种审查提议变更的方法。
 
-#### Scenario: Reviewing changes
+#### 场景：审查变更
 
-- **WHEN** reviewing proposed changes
-- **THEN** reviewers can compare using:
-- GitHub PR diff view when changes are committed
-- Command line: `diff -u specs/[capability]/spec.md changes/[name]/specs/[capability]/spec.md`
-- Any visual diff tool comparing current vs future state
+- **当** 审查提议的变更时
+- **则** 审查者可以使用以下方式比较：
+- 当变更提交后使用 GitHub PR 差异视图
+- 命令行：`diff -u specs/[capability]/spec.md changes/[name]/specs/[capability]/spec.md`
+- 任何比较当前与未来状态的可视化差异工具
 
-The system relies on tools to generate diffs rather than storing them.
+系统依赖工具生成差异而非存储它们。
 
-## Capability Naming
+## 能力命名
 
-Capabilities SHALL use:
-- Verb-noun patterns (e.g., `user-auth`, `payment-capture`)
-- Hyphenated lowercase names
-- Singular focus (one responsibility per capability)
-- No nesting (flat structure under `specs/`)
+能力应当使用：
+- 动词-名词模式（例如 `user-auth`、`payment-capture`）
+- 连字符小写名称
+- 单一聚焦（每个能力一个职责）
+- 无嵌套（`specs/` 下扁平结构）
 
-## When Changes Require Proposals
+## 何时需要提案
 
-A proposal SHALL be created for:
-- New features or capabilities
-- Breaking changes to existing behavior
-- Architecture or pattern changes
-- Performance optimizations that change behavior
-- Security updates affecting access patterns
+以下情况需要创建提案：
+- 新功能或能力
+- 对现有行为的破坏性变更
+- 架构或模式变更
+- 改变行为的性能优化
+- 影响访问模式的安全更新
 
-A proposal is NOT required for:
-- Bug fixes restoring intended behavior
-- Typos or formatting fixes
-- Non-breaking dependency updates
-- Adding tests for existing behavior
-- Documentation clarifications
+以下情况不需要提案：
+- 恢复预期行为的 bug 修复
+- 拼写或格式修复
+- 非破坏性依赖更新
+- 为现有行为添加测试
+- 文档澄清
 
-## Why This Approach
+## 为什么采用这种方法
 
-Clean future state storage provides:
-- **Readability**: No diff syntax pollution
-- **AI-compatibility**: Standard markdown that AI tools understand
-- **Simplicity**: No special parsing or processing needed
-- **Tool-agnostic**: Any diff tool can show changes
-- **Clear intent**: Explicit proposals document reasoning
+干净的未来状态存储提供：
+- **可读性**：无差异语法污染
+- **AI 兼容性**：AI 工具理解的标准 markdown
+- **简单性**：无需特殊解析或处理
+- **工具无关**：任何差异工具都可以显示变更
+- **清晰意图**：显式提案记录推理
 
-The structured format adds:
-- **Visual Consistency**: Requirement and Scenario prefixes make sections instantly recognizable
-- **Parseability**: Consistent structure enables tooling and automation
-- **Gradual Adoption**: Existing specs can migrate incrementally
+结构化格式增加：
+- **视觉一致性**：需求和场景前缀使部分立即可识别
+- **可解析性**：一致的结构支持工具和自动化
+- **渐进采用**：现有规范可以逐步迁移

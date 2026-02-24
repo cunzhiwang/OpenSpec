@@ -1,129 +1,129 @@
-# cli-view Specification
+# CLI View 规范
 
-## Purpose
+## 目的
 
-The `openspec view` command provides a comprehensive dashboard view of the OpenSpec project state, displaying specifications, changes, and progress metrics in a unified, visually appealing format to help developers quickly understand project status.
-## Requirements
-### Requirement: Dashboard Display
+`openspec view` 命令提供 OpenSpec 项目状态的综合仪表板视图，以统一、美观的格式显示规范、变更和进度指标，帮助开发者快速了解项目状态。
 
-The system SHALL provide a `view` command that displays a dashboard overview of specs and changes.
+## 需求
+### 需求：仪表板显示
 
-#### Scenario: Basic dashboard display
+系统应当提供显示规范和变更仪表板概览的 `view` 命令。
 
-- **WHEN** user runs `openspec view`
-- **THEN** system displays a formatted dashboard with sections for summary, active changes, completed changes, and specifications
+#### 场景：基本仪表板显示
 
-#### Scenario: No OpenSpec directory
+- **当** 用户运行 `openspec view` 时
+- **则** 系统显示格式化的仪表板，包含摘要、活动变更、已完成变更和规范部分
 
-- **WHEN** user runs `openspec view` in a directory without OpenSpec
-- **THEN** system displays error message "✗ No openspec directory found"
+#### 场景：无 OpenSpec 目录
 
-### Requirement: Summary Section
+- **当** 用户在没有 OpenSpec 的目录中运行 `openspec view` 时
+- **则** 系统显示错误消息 "✗ 未找到 openspec 目录"
 
-The dashboard SHALL display a summary section with key project metrics, including draft change count.
+### 需求：摘要部分
 
-#### Scenario: Complete summary display
+仪表板应当显示包含关键项目指标的摘要部分，包括草稿变更计数。
 
-- **WHEN** dashboard is rendered with specs and changes
-- **THEN** system shows total number of specifications and requirements
-- **AND** shows number of draft changes
-- **AND** shows number of active changes in progress
-- **AND** shows number of completed changes
-- **AND** shows overall task progress percentage
+#### 场景：完整摘要显示
 
-#### Scenario: Empty project summary
+- **当** 仪表板渲染规范和变更时
+- **则** 系统显示规范和需求总数
+- **并且** 显示草稿变更数量
+- **并且** 显示进行中的活动变更数量
+- **并且** 显示已完成变更数量
+- **并且** 显示整体任务进度百分比
 
-- **WHEN** no specs or changes exist
-- **THEN** summary shows zero counts for all metrics
+#### 场景：空项目摘要
 
-### Requirement: Active Changes Display
-The dashboard SHALL show active changes with visual progress indicators.
+- **当** 不存在规范或变更时
+- **则** 摘要显示所有指标为零
 
-#### Scenario: Active changes ordered by completion percentage
-- **WHEN** multiple active changes are displayed with progress information
-- **THEN** list them sorted by completion percentage ascending so 0% items appear first
-- **AND** treat missing progress values as 0% for ordering
-- **AND** break ties by change identifier in ascending alphabetical order to keep output deterministic
+### 需求：活动变更显示
+仪表板应当显示带有可视进度指示器的活动变更。
 
-### Requirement: Completed Changes Display
+#### 场景：按完成百分比排序活动变更
+- **当** 显示带有进度信息的多个活动变更时
+- **则** 按完成百分比升序排列，0% 项目最先显示
+- **并且** 将缺失的进度值视为 0% 进行排序
+- **并且** 按变更标识符字母升序打破平局，保持输出确定性
 
-The dashboard SHALL list completed changes in a separate section, only showing changes with ALL tasks completed.
+### 需求：已完成变更显示
 
-> **Fixes bug**: Previously, changes with `total === 0` were incorrectly shown as completed.
+仪表板应当在单独部分列出已完成变更，仅显示所有任务都已完成的变更。
 
-#### Scenario: Completed changes listing
+> **修复 bug**：之前 `total === 0` 的变更被错误地显示为已完成。
 
-- **WHEN** there are changes with `tasks.total > 0` AND `tasks.completed === tasks.total`
-- **THEN** system shows them with checkmark indicators in a dedicated section
+#### 场景：已完成变更列表
 
-#### Scenario: Mixed completion states
+- **当** 存在 `tasks.total > 0` 且 `tasks.completed === tasks.total` 的变更时
+- **则** 系统在专门部分用勾选指示器显示它们
 
-- **WHEN** some changes are complete and others active
-- **THEN** system separates them into appropriate sections
+#### 场景：混合完成状态
 
-#### Scenario: Empty changes not completed
+- **当** 某些变更完成而其他处于活动状态时
+- **则** 系统将它们分到适当的部分
 
-- **WHEN** a change has no tasks.md or zero tasks defined
-- **THEN** system does NOT show it in "Completed Changes" section
-- **AND** shows it in "Draft Changes" section instead
+#### 场景：空变更未完成
 
-### Requirement: Specifications Display
+- **当** 变更没有 tasks.md 或定义了零个任务时
+- **则** 系统不在"已完成变更"部分显示它
+- **并且** 改为在"草稿变更"部分显示
 
-The dashboard SHALL display specifications sorted by requirement count.
+### 需求：规范显示
 
-#### Scenario: Specs listing with counts
+仪表板应当按需求数量排序显示规范。
 
-- **WHEN** specifications exist in the project
-- **THEN** system shows specs sorted by requirement count (descending) with count labels
+#### 场景：带计数的规范列表
 
-#### Scenario: Specs with parsing errors
+- **当** 项目中存在规范时
+- **则** 系统按需求数量（降序）排序显示规范，带计数标签
 
-- **WHEN** a spec file cannot be parsed
-- **THEN** system includes it with 0 requirement count
+#### 场景：有解析错误的规范
 
-### Requirement: Visual Formatting
+- **当** 规范文件无法解析时
+- **则** 系统将其包含在列表中，需求数量为 0
 
-The dashboard SHALL use consistent visual formatting with colors and symbols.
+### 需求：视觉格式化
 
-#### Scenario: Color coding
+仪表板应当使用一致的颜色和符号进行视觉格式化。
 
-- **WHEN** dashboard elements are displayed
-- **THEN** system uses cyan for specification items
-- **AND** yellow for active changes
-- **AND** green for completed items
-- **AND** dim gray for supplementary text
+#### 场景：颜色编码
 
-#### Scenario: Progress bar rendering
+- **当** 显示仪表板元素时
+- **则** 系统对规范项目使用青色
+- **并且** 对活动变更使用黄色
+- **并且** 对已完成项目使用绿色
+- **并且** 对辅助文本使用暗灰色
 
-- **WHEN** displaying progress bars
-- **THEN** system uses filled blocks (█) for completed portions and light blocks (░) for remaining
+#### 场景：进度条渲染
 
-### Requirement: Error Handling
+- **当** 显示进度条时
+- **则** 系统对已完成部分使用实心块（█），对剩余部分使用浅色块（░）
 
-The view command SHALL handle errors gracefully.
+### 需求：错误处理
 
-#### Scenario: File system errors
+view 命令应当优雅地处理错误。
 
-- **WHEN** file system operations fail
-- **THEN** system continues with available data and omits inaccessible items
+#### 场景：文件系统错误
 
-#### Scenario: Invalid data structures
+- **当** 文件系统操作失败时
+- **则** 系统继续使用可用数据并省略不可访问的项目
 
-- **WHEN** specs or changes have invalid format
-- **THEN** system skips invalid items and continues rendering
+#### 场景：无效数据结构
 
-### Requirement: Draft Changes Display
+- **当** 规范或变更格式无效时
+- **则** 系统跳过无效项目并继续渲染
 
-The dashboard SHALL display changes without tasks in a separate "Draft" section.
+### 需求：草稿变更显示
 
-#### Scenario: Draft changes listing
+仪表板应当在单独的"草稿"部分显示没有任务的变更。
 
-- **WHEN** there are changes with no tasks.md or zero tasks defined
-- **THEN** system shows them in a "Draft Changes" section
-- **AND** uses a distinct indicator (e.g., `○`) to show draft status
+#### 场景：草稿变更列表
 
-#### Scenario: Draft section ordering
+- **当** 存在没有 tasks.md 或定义了零个任务的变更时
+- **则** 系统在"草稿变更"部分显示它们
+- **并且** 使用独特指示器（例如 `○`）显示草稿状态
 
-- **WHEN** multiple draft changes exist
-- **THEN** system sorts them alphabetically by name
+#### 场景：草稿部分排序
 
+- **当** 存在多个草稿变更时
+- **则** 系统按名称字母顺序排序

@@ -1,20 +1,20 @@
-# Workspace Exploration
+# 工作区探索
 
-## Context
+## 背景
 
-While simplifying skill installation, we identified deeper questions about how profiles, config, and workspaces should work together. This doc captures what we've decided, what's open, and what needs research.
+在简化技能安装的过程中，我们发现了关于配置文件、配置和工作区应该如何协同工作的更深层问题。本文档记录了我们已决定的内容、开放的问题和需要研究的内容。
 
-**Update:** Initial exploration revealed that "workspaces" isn't primarily about config layering—it's about a more fundamental question: **where do specs and changes live when work spans multiple modules or repositories?**
+**更新：** 初步探索揭示，"工作区"主要不是关于配置分层的问题——而是关于一个更根本的问题：**当工作跨越多个模块或仓库时，规范和变更应该存放在哪里？**
 
 ---
 
-## Part 1: Profile & Config (Original Scope)
+## 第1部分：配置文件和配置（原始范围）
 
-### What We've Decided
+### 我们已决定的内容
 
-#### Profile UX (Simplified)
+#### 配置文件 UX（简化）
 
-**Before (original proposal):**
+**之前（原始提案）：**
 ```
 openspec profile set core|extended
 openspec profile install <workflow>
@@ -25,17 +25,17 @@ openspec config set delivery skills|commands|both
 openspec config get delivery
 openspec config list
 ```
-8 subcommands, two concepts (profile + config)
+8 个子命令，两个概念（profile + config）
 
-**After (simplified):**
+**之后（简化）：**
 ```
-openspec config profile          # interactive picker (delivery + workflows)
-openspec config profile core     # preset shortcut
-openspec config profile extended # preset shortcut
+openspec config profile          # 交互式选择器（delivery + workflows）
+openspec config profile core     # 预设快捷方式
+openspec config profile extended # 预设快捷方式
 ```
-1 command with presets, one concept
+1 个命令带预设，一个概念
 
-#### Interactive Picker
+#### 交互式选择器
 
 ```
 $ openspec config profile
@@ -43,7 +43,7 @@ $ openspec config profile
 Delivery: [skills] [commands] [both]
                               ^^^^^^
 
-Workflows: (space to toggle, enter to save)
+Workflows: (空格切换, 回车保存)
 [x] propose
 [x] explore
 [x] apply
@@ -57,73 +57,73 @@ Workflows: (space to toggle, enter to save)
 [ ] onboard
 ```
 
-One place to configure both delivery method and workflow selection.
+一个地方配置交付方式和工作流选择。
 
-#### Why "Profile" (Not "Workflows")
+#### 为什么是"Profile"（不是"Workflows"）
 
-Profiles as an abstraction allow for future extensibility:
-- Methodology bundles (spec-driven, test-driven)
-- User-created profiles
-- Shareable profiles
-- Different skill/command sets for different approaches
+配置文件作为抽象允许未来的扩展性：
+- 方法论包（spec-driven, test-driven）
+- 用户创建的配置文件
+- 可共享的配置文件
+- 不同方法的不同技能/命令集
 
-### Config Layering Research
+### 配置分层研究
 
-We researched how similar tools handle config layering:
+我们研究了类似工具如何处理配置分层：
 
-| Tool | Model | Key Pattern |
-|------|-------|-------------|
-| **VSCode** | User → Workspace → Folder | Objects merge, primitives override. Workspace = committed `.vscode/` in repo |
-| **ESLint (flat)** | Single root config | *Deliberately killed cascading* - "complexity exploded exponentially" |
-| **Turborepo** | Root + package extends | Per-package `turbo.json` with `extends: ["//"]` for overrides |
-| **Nx** | Integrated vs Package-based | Two modes - shared root OR per-package. Hard to migrate from integrated. |
-| **pnpm** | Workspace root defines scope | `pnpm-workspace.yaml` at root. Dependencies can be shared or per-package |
-| **Claude Code** | Global + Project | `~/.claude/` for global, `.claude/` per-project. No workspace tracking. |
-| **Kiro** | Distributed per-root | Each folder has `.kiro/`. Aggregated display, no inheritance. |
+| 工具 | 模型 | 关键模式 |
+|------|------|----------|
+| **VSCode** | 用户 → 工作区 → 文件夹 | 对象合并，原始值覆盖。工作区 = 仓库中提交的 `.vscode/` |
+| **ESLint（flat）** | 单一根配置 | *故意取消了级联* - "复杂性呈指数级增长" |
+| **Turborepo** | 根 + 包扩展 | 每个包的 `turbo.json` 带 `extends: ["//"]` 用于覆盖 |
+| **Nx** | 集成 vs 基于包 | 两种模式 - 共享根或每包。难以从集成迁移。 |
+| **pnpm** | 工作区根定义范围 | 根目录的 `pnpm-workspace.yaml`。依赖可以共享或每包 |
+| **Claude Code** | 全局 + 项目 | `~/.claude/` 用于全局，`.claude/` 每项目。无工作区跟踪。 |
+| **Kiro** | 每根分布式 | 每个文件夹有 `.kiro/`。聚合显示，无继承。 |
 
-**Key insight from ESLint:** The ESLint team explicitly removed cascading in flat config because cascading was a complexity nightmare. Their new model: one config at root, use glob patterns to target subdirectories.
+**ESLint 的关键洞察：** ESLint 团队在 flat config 中明确移除了级联，因为级联是一个复杂性噩梦。他们的新模型：根目录一个配置，使用 glob 模式来定位子目录。
 
-**Recommendation for profiles/config:** Two layers is enough.
-- **Global** = user's defaults (`~/.config/openspec/`)
-- **Project** = repo-level config (`.openspec/` or committed to repo)
+**配置文件/配置的建议：** 两层就够了。
+- **全局** = 用户的默认值（`~/.config/openspec/`）
+- **项目** = 仓库级配置（`.openspec/` 或提交到仓库）
 
-No "workspace" layer needed for config. This matches Claude Code's model.
+不需要配置的"工作区"层。这与 Claude Code 的模型匹配。
 
-### Config Decision (For This Change)
+### 配置决定（对于此变更）
 
-Keep it simple:
-1. Global profile as default for `openspec init`
-2. `openspec init` applies current profile to project
-3. No workspace tracking (yet)
-4. No auto-sync of existing projects
+保持简单：
+1. 全局配置文件作为 `openspec init` 的默认值
+2. `openspec init` 将当前配置文件应用到项目
+3. 暂无工作区跟踪
+4. 不自动同步现有项目
 
-This is explicit and doesn't prevent future features.
+这是显式的，不阻止未来功能。
 
 ---
 
-## Part 2: The Deeper Problem (Spec & Change Organization)
+## 第2部分：更深层的问题（规范和变更组织）
 
-### The Real Question
+### 真正的问题
 
-The workspace question isn't about config—it's about **where specs and changes live** when:
+工作区问题不是关于配置的——而是关于**当以下情况时，规范和变更应该存放在哪里**：
 
-1. **Monorepos**: A spec or change might span multiple packages/apps
-2. **Multi-repo**: A change might span multiple repositories entirely
-3. **Cross-functional work**: A feature affects multiple teams (backend, web, iOS, Android)
+1. **Monorepos**：规范或变更可能跨越多个包/应用
+2. **多仓库**：变更可能完全跨越多个仓库
+3. **跨职能工作**：功能影响多个团队（后端、Web、iOS、Android）
 
-### Current OpenSpec Architecture
+### 当前 OpenSpec 架构
 
-OpenSpec currently assumes:
-- One `openspec/` per repo, always at root
-- CLI doesn't walk up directories—expects you're at root
-- Changes can touch ANY spec (no scoping)
-- Single config applies to everything
-- No notion of "scope" or "boundary" within a project
+OpenSpec 当前假设：
+- 每个仓库一个 `openspec/`，始终在根目录
+- CLI 不会向上遍历目录——期望你在根目录
+- 变更可以触及任何规范（无范围限制）
+- 单一配置适用于所有内容
+- 项目内无"范围"或"边界"概念
 
 ```
 openspec/
 ├── specs/
-│   ├── auth/spec.md           # Domain-organized specs
+│   ├── auth/spec.md           # 按领域组织的规范
 │   ├── payments/spec.md
 │   └── checkout/spec.md
 ├── changes/
@@ -131,161 +131,161 @@ openspec/
 │       ├── proposal.md
 │       ├── design.md
 │       ├── tasks.md
-│       └── specs/             # Delta specs (can touch multiple)
+│       └── specs/             # 增量规范（可以触及多个）
 │           ├── auth/spec.md
 │           └── checkout/spec.md
 └── config.yaml
 ```
 
-**This works well for single-project repos.** But what about:
-- Large monorepos with 50+ packages?
-- Multi-repo microservices?
-- Cross-functional features spanning multiple teams?
+**这对单项目仓库工作得很好。** 但对于以下情况呢：
+- 有 50+ 个包的大型 monorepo？
+- 多仓库微服务？
+- 跨多个团队的跨职能功能？
 
-### The Checkout/Payment Example
+### 结账/支付示例
 
-Imagine a payment system with:
-- **Backend billing team**: Owns payment processing
-- **Web team**: Owns web checkout UX
-- **iOS team**: Owns iOS checkout UX
-- **Android team**: Owns Android checkout UX
-- **Cross-cutting**: The payment *contract* all clients must follow
+想象一个支付系统：
+- **后端账单团队**：拥有支付处理
+- **Web 团队**：拥有 Web 结账 UX
+- **iOS 团队**：拥有 iOS 结账 UX
+- **Android 团队**：拥有 Android 结账 UX
+- **跨领域**：所有客户端必须遵循的支付*契约*
 
-**Questions:**
-- Where does the shared payment contract spec live?
-- Where do platform-specific checkout specs live?
-- If iOS spec "extends" the shared contract, how is that expressed?
-- When the contract changes, how do downstream specs get updated?
-- Who owns what?
+**问题：**
+- 共享的支付契约规范存放在哪里？
+- 平台特定的结账规范存放在哪里？
+- 如果 iOS 规范"扩展"共享契约，如何表达？
+- 当契约变更时，下游规范如何更新？
+- 谁拥有什么？
 
-### The Core Tension
+### 核心张力
 
 ```
-                    SCOPE
+                    范围
                       │
-         Narrow       │       Broad
-    (team/module)     │    (cross-cutting)
+         狭窄         │       广泛
+    （团队/模块）      │    （跨领域）
                       │
     ┌─────────────────┼─────────────────┐
     │                 │                 │
-    │  "Our team's    │   "Shared       │
-    │   checkout      │    checkout     │
-    │   behavior"     │    contract"    │
+    │  "我们团队的     │   "共享         │
+    │   结账           │    结账         │
+    │   行为"          │    契约"        │
     │                 │                 │
-────┼─────────────────┼─────────────────┼──── OWNERSHIP
+────┼─────────────────┼─────────────────┼──── 所有权
     │                 │                 │
-    │  Easy:          │   Hard:         │
-    │  One team,      │   Multiple      │
-    │  one spec       │   stakeholders  │
+    │  简单:           │   困难:         │
+    │  一个团队,       │   多个          │
+    │  一个规范        │   利益相关者     │
     │                 │                 │
     └─────────────────┴─────────────────┘
 ```
 
 ---
 
-## Part 3: How Other Domains Solve This
+## 第3部分：其他领域如何解决这个问题
 
-### Patterns from Research
+### 研究中的模式
 
-| Domain | Shared Stuff | Specific Stuff | How They Connect |
-|--------|-------------|----------------|------------------|
-| **Protobuf** | `common/` at root | `domain/service/` per service | Imports from common |
-| **Design Systems** | Design tokens, component names, APIs | Platform implementations | "Same properties, different rendering" |
-| **DDD** | Shared Kernel | Bounded Contexts | Context mapping defines relationships |
-| **RFCs** | Cross-cutting RFCs | Team-scoped RFCs | Different review processes |
-| **OpenAPI** | Base schemas | Per-service specs | `$ref` to shared definitions |
+| 领域 | 共享内容 | 特定内容 | 如何连接 |
+|------|---------|---------|----------|
+| **Protobuf** | 根目录的 `common/` | 每个服务的 `domain/service/` | 从 common 导入 |
+| **设计系统** | 设计令牌、组件名称、API | 平台实现 | "相同属性，不同渲染" |
+| **DDD** | 共享内核 | 限界上下文 | 上下文映射定义关系 |
+| **RFC** | 跨领域 RFC | 团队范围 RFC | 不同的审查流程 |
+| **OpenAPI** | 基础模式 | 每个服务的规范 | `$ref` 到共享定义 |
 
-### Protobuf Monorepo Pattern
+### Protobuf Monorepo 模式
 
 ```
 proto/
-├── common/              # Shared, low-churn types
+├── common/              # 共享的、低变动的类型
 │   └── money.proto
 │   └── address.proto
-├── billing/             # Domain-specific
+├── billing/             # 领域特定
 │   └── service.proto
 └── checkout/
-    └── service.proto    # Imports from common/
+    └── service.proto    # 从 common/ 导入
 ```
 
-**Key insight:** "Most engineering organizations should keep their proto files in one repo. The mental overhead stays constant instead of scaling with organization size."
+**关键洞察：** "大多数工程组织应该将他们的 proto 文件保存在一个仓库中。心智开销保持恒定，而不是随组织规模扩展。"
 
-### Design Systems Pattern (Booking.com, Uber)
+### 设计系统模式（Booking.com, Uber）
 
-> "Components can look quite different between iOS and Android, as they use native app design standards, but still share the **same exact properties in code**. This is what makes properties so powerful—it's the **one source of truth** for every component."
+> "组件在 iOS 和 Android 之间可能看起来非常不同，因为它们使用原生应用设计标准，但仍然**在代码中共享完全相同的属性**。这就是属性如此强大的原因——它是每个组件的**唯一真相来源**。"
 
-**Key insight:** Shared spec defines the *contract* (properties, behavior). Platform specs define *implementation details* (how it looks/works on that platform).
+**关键洞察：** 共享规范定义*契约*（属性、行为）。平台规范定义*实现细节*（在该平台上的外观/工作方式）。
 
-### DDD Bounded Contexts
+### DDD 限界上下文
 
-> "One context, one team. Clear ownership avoids miscommunication."
+> "一个上下文，一个团队。清晰的所有权避免误沟通。"
 
-**Key insight:** Specs should have clear ownership. Cross-cutting concerns use a "Shared Kernel" pattern—explicitly shared code/specs that require coordination to change.
+**关键洞察：** 规范应该有清晰的所有权。跨领域关注点使用"共享内核"模式——显式共享的代码/规范，需要协调才能更改。
 
 ---
 
-## Part 4: Three Models for OpenSpec
+## 第4部分：OpenSpec 的三种模型
 
-### Model A: Flat Root (Current)
+### 模型 A：扁平根（当前）
 
 ```
 openspec/
 ├── specs/
-│   ├── checkout-contract/    # Shared contract
-│   ├── checkout-web/         # Web-specific
-│   ├── checkout-ios/         # iOS-specific
-│   ├── checkout-android/     # Android-specific
-│   ├── billing/              # Backend
-│   └── ... (50+ specs at root level)
+│   ├── checkout-contract/    # 共享契约
+│   ├── checkout-web/         # Web 特定
+│   ├── checkout-ios/         # iOS 特定
+│   ├── checkout-android/     # Android 特定
+│   ├── billing/              # 后端
+│   └── ... (根级别 50+ 规范)
 └── changes/
 ```
 
-**Pros:**
-- Simple mental model
-- All specs in one place
-- No nesting complexity
+**优点：**
+- 简单的心智模型
+- 所有规范在一个地方
+- 无嵌套复杂性
 
-**Cons:**
-- Gets unwieldy at scale (50+ directories)
-- No clear ownership signals
-- Hard to see which specs are related
-- Naming conventions become critical (`checkout-*`)
+**缺点：**
+- 大规模时变得难以管理（50+ 目录）
+- 无明确的所有权信号
+- 难以看出哪些规范相关
+- 命名约定变得关键（`checkout-*`）
 
-### Model B: Nested Specs (Domain → Platform)
+### 模型 B：嵌套规范（领域 → 平台）
 
 ```
 openspec/
 ├── specs/
 │   ├── checkout/
-│   │   ├── spec.md              # Shared contract (the "interface")
-│   │   ├── web/spec.md          # Web implementation spec
-│   │   ├── ios/spec.md          # iOS implementation spec
-│   │   └── android/spec.md      # Android implementation spec
+│   │   ├── spec.md              # 共享契约（"接口"）
+│   │   ├── web/spec.md          # Web 实现规范
+│   │   ├── ios/spec.md          # iOS 实现规范
+│   │   └── android/spec.md      # Android 实现规范
 │   └── billing/
 │       └── spec.md
 └── changes/
 ```
 
-**Pros:**
-- Clear hierarchy (shared at top, specific nested)
-- Related specs are co-located
-- Scales better visually
-- Ownership can follow structure
+**优点：**
+- 清晰的层次结构（共享在顶部，特定嵌套）
+- 相关规范共同定位
+- 视觉上更好扩展
+- 所有权可以遵循结构
 
-**Cons:**
-- More complex spec references (`checkout/web` vs `checkout`)
-- Need to define inheritance/extension semantics
-- Does iOS spec "extend" base spec, or just reference it?
+**缺点：**
+- 更复杂的规范引用（`checkout/web` vs `checkout`）
+- 需要定义继承/扩展语义
+- iOS 规范是"扩展"基础规范，还是只是引用它？
 
-**Open question:** What does "extends" mean?
+**开放问题：** "extends" 是什么意思？
 ```yaml
 # checkout/ios/spec.md
-extends: ../spec.md   # Inherits all requirements?
+extends: ../spec.md   # 继承所有需求？
 requirements:
-  - System SHALL support Apple Pay  # Adds to base?
+  - System SHALL support Apple Pay  # 添加到基础？
 ```
 
-### Model C: Distributed Specs (Near the Code)
+### 模型 C：分布式规范（靠近代码）
 
 ```
 monorepo/
@@ -299,29 +299,29 @@ monorepo/
 │   │   └── openspec/specs/checkout/spec.md
 │   └── android/
 │       └── openspec/specs/checkout/spec.md
-└── openspec/           # Root-level for cross-cutting
+└── openspec/           # 根级别用于跨领域
     ├── specs/
-    │   └── checkout-contract/spec.md   # Shared contract
-    └── changes/        # Where do cross-cutting changes live?
+    │   └── checkout-contract/spec.md   # 共享契约
+    └── changes/        # 跨领域变更存放在哪里？
 ```
 
-**Pros:**
-- Specs live near the code they describe
-- Teams own their specs naturally
-- Works for multi-repo too (each repo has its own `openspec/`)
+**优点：**
+- 规范靠近它们描述的代码
+- 团队自然拥有他们的规范
+- 也适用于多仓库（每个仓库有自己的 `openspec/`）
 
-**Cons:**
-- Cross-cutting specs are awkward (where do they go?)
-- Changes that span multiple `openspec/` directories = ???
-- Need a "workspace" concept to aggregate
-- Multiple `openspec/` roots to manage
+**缺点：**
+- 跨领域规范很尴尬（放在哪里？）
+- 跨越多个 `openspec/` 目录的变更 = ???
+- 需要"工作区"概念来聚合
+- 多个 `openspec/` 根需要管理
 
-### Model D: Hybrid (Model B Inside Each Project + Model C Across Projects)
+### 模型 D：混合（每个项目内的模型 B + 跨项目的模型 C）
 
-Use one `openspec/` root per project, but allow nested specs within that root for clear ownership and shared contracts.
-For multi-repo work, use a workspace manifest to coordinate multiple projects without duplicating canonical specs.
+每个项目使用一个 `openspec/` 根，但允许在该根内使用嵌套规范以实现清晰的所有权和共享契约。
+对于多仓库工作，使用工作区清单来协调多个项目而不复制规范的规范源。
 
-**Monorepo shape (single project, nested specs):**
+**Monorepo 形状（单项目，嵌套规范）：**
 ```
 repo/
 └── openspec/
@@ -347,7 +347,7 @@ repo/
                 └── checkout/android/spec.md
 ```
 
-**Multi-repo shape (multiple projects + workspace orchestration):**
+**多仓库形状（多项目 + 工作区协调）：**
 ```
 ~/work/
 ├── contracts/
@@ -372,28 +372,28 @@ repo/
         └── initiatives/add-3ds/links.yaml
 ```
 
-`workspace.yaml` lists projects/roots. `links.yaml` maps one cross-cutting initiative to per-project changes.
-Canonical specs stay in owning repos; workspace data is coordination metadata only.
+`workspace.yaml` 列出项目/根。`links.yaml` 将一个跨领域倡议映射到每个项目的变更。
+规范的规范源保留在拥有仓库中；工作区数据仅是协调元数据。
 
-**Pros:**
-- Clear ownership boundaries (one project owns its specs and changes)
-- Shared contracts can have a dedicated owner repo (no duplication as source of truth)
-- Works for monorepo and multi-repo with one mental model
-- Avoids inheritance complexity (relationships can start as explicit references)
-- Incremental migration path from current model
+**优点：**
+- 清晰的所有权边界（一个项目拥有其规范和变更）
+- 共享契约可以有专用的拥有仓库（无重复作为真相来源）
+- 用一个心智模型同时适用于 monorepo 和多仓库
+- 避免继承复杂性（关系可以从显式引用开始）
+- 从当前模型的增量迁移路径
 
-**Cons:**
-- Requires new workspace UX for cross-repo coordination
-- Cross-repo feature work creates multiple change IDs to manage
-- Needs conventions for contracts ownership and initiative linking
-- Some users may expect one global "mega change" instead of linked per-project changes
-- Tooling must support nested spec paths in both main specs and change deltas
+**缺点：**
+- 需要新的工作区 UX 用于跨仓库协调
+- 跨仓库功能工作创建多个变更 ID 需要管理
+- 需要契约所有权和倡议链接的约定
+- 一些用户可能期望一个全局"巨型变更"而不是链接的每项目变更
+- 工具必须支持主规范和变更增量中的嵌套规范路径
 
 ---
 
-## Part 5: Multi-Repo Considerations
+## 第5部分：多仓库考虑
 
-For multi-repo setups, Model C (or the coordination half of Model D) is almost forced:
+对于多仓库设置，模型 C（或模型 D 的协调部分）几乎是强制的：
 
 ```
 ~/work/
@@ -403,36 +403,36 @@ For multi-repo setups, Model C (or the coordination half of Model D) is almost f
 │   └── openspec/specs/checkout/
 ├── ios-client/
 │   └── openspec/specs/checkout/
-└── contracts/                    # Dedicated repo for shared specs?
+└── contracts/                    # 用于共享规范的专用仓库？
     └── openspec/specs/
         └── checkout-contract/
 ```
 
-### Questions for Multi-Repo
+### 多仓库的问题
 
-1. **Where do shared specs live?**
-   - Dedicated "contracts" repo?
-   - Duplicated in each repo (drift risk)?
-   - One repo is "source of truth" and others reference it?
+1. **共享规范存放在哪里？**
+   - 专用的"contracts"仓库？
+   - 在每个仓库中复制（漂移风险）？
+   - 一个仓库是"真相来源"，其他引用它？
 
-2. **Where do cross-repo changes live?**
-   - In one of the repos? (feels wrong—biased ownership)
-   - In a separate "workspace" repo?
-   - In `~/.config/openspec/workspaces/my-platform/changes/`?
+2. **跨仓库变更存放在哪里？**
+   - 在其中一个仓库中？（感觉不对——有偏向的所有权）
+   - 在单独的"工作区"仓库中？
+   - 在 `~/.config/openspec/workspaces/my-platform/changes/` 中？
 
-3. **How do changes propagate?**
-   - Change to `checkout-contract` affects all client repos
-   - Do we need explicit dependency tracking?
-   - Or is this "out of band" (teams coordinate manually)?
+3. **变更如何传播？**
+   - 对 `checkout-contract` 的变更影响所有客户端仓库
+   - 我们需要显式的依赖跟踪吗？
+   - 还是这是"带外"的（团队手动协调）？
 
-### What "Workspace" Might Mean for Multi-Repo
+### 多仓库的"工作区"可能意味着什么
 
-If we add workspace support, it could be:
+如果我们添加工作区支持，它可能是：
 
-> **A workspace is a collection of OpenSpec roots that can be operated on together.**
+> **工作区是可以一起操作的 OpenSpec 根的集合。**
 
 ```yaml
-# ~/.config/openspec/workspaces.yaml (or similar)
+# ~/.config/openspec/workspaces.yaml（或类似）
 workspaces:
   my-platform:
     roots:
@@ -441,241 +441,241 @@ workspaces:
       - ~/work/ios-client
       - ~/work/contracts
     shared_context: |
-      All services use TypeScript.
-      API contracts follow OpenAPI 3.1.
+      所有服务使用 TypeScript。
+      API 契约遵循 OpenAPI 3.1。
 ```
 
-This would enable:
-1. **Cross-repo changes**: Create a change that tracks deltas across multiple roots
-2. **Aggregated spec view**: See all specs across workspace
-3. **Shared context**: Context/rules that apply to all roots
+这将启用：
+1. **跨仓库变更**：创建跟踪跨多个根的增量的变更
+2. **聚合规范视图**：查看工作区中的所有规范
+3. **共享上下文**：适用于所有根的上下文/规则
 
 ---
 
-## Part 6: Key Design Questions
+## 第6部分：关键设计问题
 
-### 1. Should specs be hierarchical (with inheritance)?
+### 1. 规范应该是层次化的（带继承）吗？
 
-**Option A: No inheritance, just organization**
-- Nested directories are purely organizational
-- Each spec is independent
-- Relationships are implicit (naming) or documented manually
+**选项 A：无继承，只是组织**
+- 嵌套目录纯粹是组织性的
+- 每个规范是独立的
+- 关系是隐式的（命名）或手动记录的
 
-**Option B: Explicit inheritance**
+**选项 B：显式继承**
 ```yaml
 # checkout/ios/spec.md
 extends: ../spec.md
 requirements:
-  - System SHALL support Apple Pay  # Adds to base
+  - System SHALL support Apple Pay  # 添加到基础
 ```
-- Child specs inherit parent requirements
-- Can add, override, or extend
-- More powerful but more complex
+- 子规范继承父需求
+- 可以添加、覆盖或扩展
+- 更强大但更复杂
 
-**Option C: References without inheritance**
+**选项 C：无继承的引用**
 ```yaml
 # checkout/ios/spec.md
 references:
-  - ../spec.md  # "See also" but no inheritance
+  - ../spec.md  # "另见"但无继承
 requirements:
   - System SHALL implement checkout per checkout-contract
   - System SHALL support Apple Pay
 ```
-- Explicit references for documentation
-- No automatic inheritance
-- Simpler semantics
+- 用于文档的显式引用
+- 无自动继承
+- 更简单的语义
 
-### 2. Where does the "shared kernel" live?
+### 2. "共享内核"存放在哪里？
 
-**Option A: Root level (Model B)**
-- `openspec/specs/checkout/spec.md` is the shared kernel
-- Platform specs nest under it
+**选项 A：根级别（模型 B）**
+- `openspec/specs/checkout/spec.md` 是共享内核
+- 平台规范嵌套在其下
 
-**Option B: Dedicated area**
+**选项 B：专用区域**
 - `openspec/specs/_shared/checkout-contract/spec.md`
-- Or `openspec/specs/_contracts/checkout/spec.md`
-- Explicit "shared" namespace
+- 或 `openspec/specs/_contracts/checkout/spec.md`
+- 显式的"共享"命名空间
 
-**Option C: Separate repo (Model C for multi-repo)**
-- A dedicated `contracts` or `specs` repo
-- Other repos reference it
+**选项 C：单独的仓库（多仓库的模型 C）**
+- 专用的 `contracts` 或 `specs` 仓库
+- 其他仓库引用它
 
-### 3. What's a "workspace" vs a "project"?
+### 3. "工作区"与"项目"是什么？
 
-If we introduce workspaces:
+如果我们引入工作区：
 
-| Concept | Definition |
-|---------|------------|
-| **Project** | Single OpenSpec root (one `openspec/` directory) |
-| **Workspace** | Collection of projects that can be operated on together |
+| 概念 | 定义 |
+|------|------|
+| **项目** | 单个 OpenSpec 根（一个 `openspec/` 目录） |
+| **工作区** | 可以一起操作的项目集合 |
 
-A workspace would enable:
-- Aggregated spec viewing across projects
-- Cross-project changes
-- Shared context across projects
+工作区将启用：
+- 跨项目的聚合规范查看
+- 跨项目变更
+- 跨项目的共享上下文
 
-**Question:** Do we need explicit workspace tracking, or just ad-hoc multi-root (like Claude Code's `/add-dir`)?
+**问题：** 我们需要显式的工作区跟踪，还是只是临时的多根（如 Claude Code 的 `/add-dir`）？
 
-### 4. Does OpenSpec need to understand dependencies?
+### 4. OpenSpec 需要理解依赖吗？
 
-If `checkout-web` depends on `checkout-contract`:
-- Should OpenSpec know this relationship?
-- Should a change to `checkout-contract` warn about downstream specs?
-- Or is dependency tracking "out of scope"?
+如果 `checkout-web` 依赖 `checkout-contract`：
+- OpenSpec 应该知道这种关系吗？
+- 对 `checkout-contract` 的变更应该警告下游规范吗？
+- 还是依赖跟踪"超出范围"？
 
-**Trade-off:**
-- With dependency tracking: More powerful, automatic propagation warnings
-- Without: Simpler, teams manage dependencies themselves
+**权衡：**
+- 有依赖跟踪：更强大，自动传播警告
+- 无依赖跟踪：更简单，团队自己管理依赖
 
-### 5. How should changes work for cross-cutting work?
+### 5. 变更应该如何用于跨领域工作？
 
-**For monorepos (Model B):**
-- One change, multiple delta specs in `specs/`
-- Already works today
+**对于 monorepos（模型 B）：**
+- 一个变更，`specs/` 中有多个增量规范
+- 今天已经可以工作
 
-**For multi-repo (Model C):**
-- Option A: One "workspace change" that references multiple repo changes
-- Option B: Separate changes in each repo that reference each other
-- Option C: Changes always live in one repo, reference specs in others
-
----
-
-## Part 7: What Would "Amazing" Look Like?
-
-Based on research, teams love:
-
-1. **One place to look** (Protobuf: "mental overhead stays constant")
-2. **Clear ownership** (DDD: "one context, one team")
-3. **Shared contracts with local extensions** (Design Systems: "same properties, different rendering")
-4. **Automatic consistency** (Design Systems: "design tokens as foundation")
-5. **Low cognitive load** (shouldn't have to think about organization too much)
-
-### Possible North Stars
-
-**Ambitious:**
-> OpenSpec automatically understands your repo structure, detects cross-cutting specs, and helps you create changes that flow to the right places.
-
-**Simpler:**
-> You organize specs however you want. OpenSpec just works.
-
-**Practical:**
-> Nested specs for organization. Explicit dependencies for cross-cutting. No magic.
+**对于多仓库（模型 C）：**
+- 选项 A：一个"工作区变更"引用多个仓库变更
+- 选项 B：每个仓库中的单独变更相互引用
+- 选项 C：变更始终存放在一个仓库中，引用其他仓库中的规范
 
 ---
 
-## Part 8: Possible Paths Forward
+## 第7部分："惊艳"会是什么样子？
 
-### For This Change (simplify-skill-installation)
+基于研究，团队喜欢：
 
-Don't solve spec organization now. Keep scope to:
-1. Profile UX simplification
-2. `openspec init` improvements
-3. No workspace tracking yet
+1. **一个地方查看**（Protobuf："心智开销保持恒定"）
+2. **清晰的所有权**（DDD："一个上下文，一个团队"）
+3. **带本地扩展的共享契约**（设计系统："相同属性，不同渲染"）
+4. **自动一致性**（设计系统："设计令牌作为基础"）
+5. **低认知负荷**（不应该过多考虑组织）
 
-### Future: Spec Organization Change
+### 可能的北极星
 
-A separate change to explore and implement:
+**雄心勃勃的：**
+> OpenSpec 自动理解你的仓库结构，检测跨领域规范，并帮助你创建流向正确地方的变更。
 
-1. **Decide on Model A, B, C, or D (hybrid)**
-2. **Decide on inheritance semantics** (or none)
-3. **Update spec resolution** to handle nesting
-4. **Update change deltas** to handle nested specs
+**更简单的：**
+> 你按自己的方式组织规范。OpenSpec 就能工作。
 
-### Future: Multi-Repo / Workspace Change
-
-If needed, a separate change for:
-
-1. **Define workspace concept**
-2. **Implement workspace tracking** (or ad-hoc multi-root)
-3. **Cross-repo changes**
-4. **Shared context across repos**
+**实用的：**
+> 嵌套规范用于组织。显式依赖用于跨领域。无魔法。
 
 ---
 
-## Part 9: Spec Philosophy (Behavior First, Lightweight, Agent-Aligned)
+## 第8部分：可能的前进路径
 
-### What is a spec in OpenSpec?
+### 对于此变更（simplify-skill-installation）
 
-For OpenSpec, a spec should be treated as a **verifiable behavior contract at a boundary**:
-- What users, integrators, or operators can observe and rely on
-- What can be validated with tests, checks, or explicit review
-- What should remain stable even if internal implementation changes
+现在不解决规范组织问题。保持范围在：
+1. 配置文件 UX 简化
+2. `openspec init` 改进
+3. 暂无工作区跟踪
 
-### What should and should not be in specs
+### 未来：规范组织变更
 
-**Include:**
-- Observable behavior and outcomes
-- Interface/data contracts (inputs, outputs, error conditions)
-- Non-functional constraints that matter externally (privacy, security, reliability)
-- Compatibility guarantees that downstream consumers depend on
+单独的变更来探索和实现：
 
-**Avoid:**
-- Internal implementation details (class names, library choices, control flow)
-- Tooling mechanics that can change without affecting behavior
-- Step-by-step execution plans (belongs in tasks/design)
+1. **决定模型 A、B、C 或 D（混合）**
+2. **决定继承语义**（或无）
+3. **更新规范解析**以处理嵌套
+4. **更新变更增量**以处理嵌套规范
 
-### Keep rigor proportional (to avoid bureaucracy)
+### 未来：多仓库/工作区变更
 
-Use progressive rigor:
+如果需要，单独的变更用于：
 
-1. **Lite spec (default for most changes)**
-   - Short behavior bullets, clear scope, and acceptance checks
-2. **Full spec (only for high-risk or cross-boundary work)**
-   - Deeper contract detail for API breaks, migrations, security/privacy, or cross-team/repo changes
-
-This keeps day-to-day usage lightweight while preserving clarity where failures are expensive.
-
-### Human exploration -> agent-authored specs
-
-OpenSpec is often agent-authored from human exploration. To make that reliable:
-
-- Humans provide intent, constraints, and examples from exploration
-- Agents convert that into concise, behavior-first requirements and scenarios
-- Agents keep implementation detail in design/tasks, not specs
-- Validation checks enforce structure and testability
-
-In short: humans shape intent; agents produce consistent, verifiable contracts.
-
-### Where this philosophy should live
-
-To avoid losing this in exploration notes, codify it in:
-1. `docs/concepts.md` for human-facing framing
-2. `openspec/specs/openspec-conventions/spec.md` for normative spec conventions
-3. `openspec/specs/docs-agent-instructions/spec.md` for agent-instruction authoring rules
+1. **定义工作区概念**
+2. **实现工作区跟踪**（或临时多根）
+3. **跨仓库变更**
+4. **跨仓库的共享上下文**
 
 ---
 
-## Summary
+## 第9部分：规范哲学（行为优先、轻量级、代理对齐）
 
-| Question | Status | Notes |
-|----------|--------|-------|
-| Profile UX | Decided | `openspec config profile` with presets |
-| Config layering | Decided | Two layers: global + project (no workspace layer) |
-| Spec organization | Open | Four models under consideration (including hybrid Model D) |
-| Spec philosophy | Direction set | Behavior-first contracts, progressive rigor, and agent-aligned authoring |
-| Spec inheritance | Open | Inheritance vs references vs none |
-| Multi-repo support | Open | Workspace concept TBD |
-| Dependency tracking | Open | Probably out of scope initially |
+### 在 OpenSpec 中规范是什么？
 
-### Key Insight
+对于 OpenSpec，规范应该被视为**边界处的可验证行为契约**：
+- 用户、集成者或运营者可以观察和依赖的内容
+- 可以通过测试、检查或显式审查验证的内容
+- 即使内部实现变更也应保持稳定的内容
 
-The "workspace" question is really two separate questions:
-1. **Config/profile scope** → Solved with global + project (no workspace needed)
-2. **Spec/change organization** → Unsolved, needs deeper design work
+### 规范中应该和不应该包含什么
 
-These should be separate changes with separate explorations.
+**包含：**
+- 可观察的行为和结果
+- 接口/数据契约（输入、输出、错误条件）
+- 外部重要的非功能约束（隐私、安全、可靠性）
+- 下游消费者依赖的兼容性保证
+
+**避免：**
+- 内部实现细节（类名、库选择、控制流）
+- 可以在不影响行为的情况下更改的工具机制
+- 逐步执行计划（属于任务/设计）
+
+### 保持严谨性与工作量成比例（避免官僚主义）
+
+使用渐进式严谨性：
+
+1. **轻量级规范（大多数变更的默认）**
+   - 简短的行为要点、清晰的范围和验收检查
+2. **完整规范（仅用于高风险或跨边界工作）**
+   - 用于 API 破坏、迁移、安全/隐私或跨团队/仓库变更的更深入契约细节
+
+这保持日常使用轻量级，同时在失败代价昂贵的地方保持清晰。
+
+### 人类探索 -> 代理编写规范
+
+OpenSpec 通常从人类探索中由代理编写。为使其可靠：
+
+- 人类提供意图、约束和来自探索的示例
+- 代理将其转换为简洁的、行为优先的需求和场景
+- 代理将实现细节保留在设计/任务中，而不是规范中
+- 验证检查强制执行结构和可测试性
+
+简而言之：人类塑造意图；代理产生一致的、可验证的契约。
+
+### 这个哲学应该存放在哪里
+
+为避免在探索笔记中丢失这些，将其编入：
+1. `docs/concepts.md` 用于面向人类的框架
+2. `openspec/specs/openspec-conventions/spec.md` 用于规范性规范约定
+3. `openspec/specs/docs-agent-instructions/spec.md` 用于代理指令编写规则
 
 ---
 
-## References
+## 总结
 
-- [VSCode Settings Precedence](https://code.visualstudio.com/docs/configure/settings)
-- [ESLint Flat Config in Monorepos Discussion](https://github.com/eslint/eslint/discussions/16960)
-- [Turborepo Package Configurations](https://turborepo.dev/docs/reference/package-configurations)
-- [pnpm Workspaces](https://pnpm.io/workspaces)
-- [Claude Code Settings](https://code.claude.com/docs/en/settings)
-- [Kiro Multi-Root Workspaces](https://kiro.dev/docs/editor/multi-root-workspaces/)
-- [DDD Bounded Context](https://martinfowler.com/bliki/BoundedContext.html)
-- [Protobuf Monorepo Patterns](https://www.lesswrong.com/posts/xts8dC3NeTHwqYgCG/keep-your-protos-in-one-repo)
-- [Booking.com Multi-Platform Design System](https://booking.design/how-we-built-our-multi-platform-design-system-at-booking-com-d7b895399d40)
-- [InnerSource RFC Patterns](https://patterns.innersourcecommons.org/p/transparent-cross-team-decision-making-using-rfcs)
+| 问题 | 状态 | 备注 |
+|------|------|------|
+| 配置文件 UX | 已决定 | `openspec config profile` 带预设 |
+| 配置分层 | 已决定 | 两层：全局 + 项目（无工作区层） |
+| 规范组织 | 开放 | 正在考虑四种模型（包括混合模型 D） |
+| 规范哲学 | 方向确定 | 行为优先契约、渐进式严谨性和代理对齐编写 |
+| 规范继承 | 开放 | 继承 vs 引用 vs 无 |
+| 多仓库支持 | 开放 | 工作区概念待定 |
+| 依赖跟踪 | 开放 | 初步可能超出范围 |
+
+### 关键洞察
+
+"工作区"问题实际上是两个独立的问题：
+1. **配置/配置文件范围** → 用全局 + 项目解决（不需要工作区）
+2. **规范/变更组织** → 未解决，需要更深入的设计工作
+
+这些应该是单独的变更和单独的探索。
+
+---
+
+## 参考资料
+
+- [VSCode 设置优先级](https://code.visualstudio.com/docs/configure/settings)
+- [ESLint Flat Config 在 Monorepos 中的讨论](https://github.com/eslint/eslint/discussions/16960)
+- [Turborepo 包配置](https://turborepo.dev/docs/reference/package-configurations)
+- [pnpm 工作区](https://pnpm.io/workspaces)
+- [Claude Code 设置](https://code.claude.com/docs/en/settings)
+- [Kiro 多根工作区](https://kiro.dev/docs/editor/multi-root-workspaces/)
+- [DDD 限界上下文](https://martinfowler.com/bliki/BoundedContext.html)
+- [Protobuf Monorepo 模式](https://www.lesswrong.com/posts/xts8dC3NeTHwqYgCG/keep-your-protos-in-one-repo)
+- [Booking.com 多平台设计系统](https://booking.design/how-we-built-our-multi-platform-design-system-at-booking-com-d7b895399d40)
+- [InnerSource RFC 模式](https://patterns.innersourcecommons.org/p/transparent-cross-team-decision-making-using-rfcs)

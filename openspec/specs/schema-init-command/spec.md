@@ -1,76 +1,75 @@
-# schema-init-command Specification
+# schema-init-command 规范
 
-## Purpose
-Define `openspec schema init` behavior for creating project-local schema skeletons in interactive and non-interactive modes.
+## 目的
+定义 `openspec schema init` 行为，用于在交互和非交互模式下创建项目本地模式骨架。
 
-## Requirements
-### Requirement: Schema init command creates project-local schema
-The CLI SHALL provide an `openspec schema init <name>` command that creates a new schema directory under `openspec/schemas/<name>/` with a valid `schema.yaml` file and default template files.
+## 需求
+### 需求：Schema init 命令创建项目本地模式
+CLI 应当提供 `openspec schema init <name>` 命令，在 `openspec/schemas/<name>/` 下创建新的模式目录，包含有效的 `schema.yaml` 文件和默认模板文件。
 
-#### Scenario: Create schema with valid name
-- **WHEN** user runs `openspec schema init my-workflow`
-- **THEN** system creates directory `openspec/schemas/my-workflow/`
-- **AND** creates `schema.yaml` with name, version, description, and artifacts array
-- **AND** creates template files referenced by artifacts
-- **AND** displays success message with created path
+#### 场景：使用有效名称创建模式
+- **当** 用户运行 `openspec schema init my-workflow` 时
+- **则** 系统创建目录 `openspec/schemas/my-workflow/`
+- **且** 创建带有 name、version、description 和 artifacts 数组的 `schema.yaml`
+- **且** 创建由 artifacts 引用的模板文件
+- **且** 显示成功消息及创建的路径
 
-#### Scenario: Reject invalid schema name
-- **WHEN** user runs `openspec schema init "My Workflow"` (contains space)
-- **THEN** system displays error about invalid schema name
-- **AND** suggests using kebab-case format
-- **AND** exits with non-zero code
+#### 场景：拒绝无效模式名称
+- **当** 用户运行 `openspec schema init "My Workflow"`（包含空格）时
+- **则** 系统显示关于无效模式名称的错误
+- **且** 建议使用 kebab-case 格式
+- **且** 以非零代码退出
 
-#### Scenario: Schema name already exists
-- **WHEN** user runs `openspec schema init existing-schema` and `openspec/schemas/existing-schema/` already exists
-- **THEN** system displays error that schema already exists
-- **AND** suggests using `--force` to overwrite or `schema fork` to copy
-- **AND** exits with non-zero code
+#### 场景：模式名称已存在
+- **当** 用户运行 `openspec schema init existing-schema` 且 `openspec/schemas/existing-schema/` 已存在时
+- **则** 系统显示模式已存在的错误
+- **且** 建议使用 `--force` 覆盖或 `schema fork` 复制
+- **且** 以非零代码退出
 
-### Requirement: Schema init supports interactive mode
-The CLI SHALL prompt for schema configuration when run in an interactive terminal without explicit flags.
+### 需求：Schema init 支持交互模式
+CLI 应当在交互终端中运行且没有显式标志时提示模式配置。
 
-#### Scenario: Interactive prompts for description
-- **WHEN** user runs `openspec schema init my-workflow` in an interactive terminal
-- **THEN** system prompts for schema description
-- **AND** uses provided description in generated `schema.yaml`
+#### 场景：交互式提示描述
+- **当** 用户在交互终端中运行 `openspec schema init my-workflow` 时
+- **则** 系统提示模式描述
+- **且** 在生成的 `schema.yaml` 中使用提供的描述
 
-#### Scenario: Interactive prompts for artifact selection
-- **WHEN** user runs `openspec schema init my-workflow` in an interactive terminal
-- **THEN** system displays multi-select prompt with common artifacts (proposal, specs, design, tasks)
-- **AND** each option includes a brief description
-- **AND** uses selected artifacts in generated `schema.yaml`
+#### 场景：交互式提示产物选择
+- **当** 用户在交互终端中运行 `openspec schema init my-workflow` 时
+- **则** 系统显示带有常见产物（proposal、specs、design、tasks）的多选提示
+- **且** 每个选项包含简要描述
+- **且** 在生成的 `schema.yaml` 中使用选中的产物
 
-#### Scenario: Non-interactive mode with flags
-- **WHEN** user runs `openspec schema init my-workflow --description "My workflow" --artifacts proposal,tasks`
-- **THEN** system creates schema without prompting
-- **AND** uses flag values for configuration
+#### 场景：带标志的非交互模式
+- **当** 用户运行 `openspec schema init my-workflow --description "My workflow" --artifacts proposal,tasks` 时
+- **则** 系统无提示创建模式
+- **且** 使用标志值进行配置
 
-### Requirement: Schema init supports setting project default
-The CLI SHALL offer to set the newly created schema as the project default.
+### 需求：Schema init 支持设置项目默认值
+CLI 应当提供将新创建的模式设置为项目默认值的选项。
 
-#### Scenario: Set as default interactively
-- **WHEN** user runs `openspec schema init my-workflow` in interactive mode
-- **AND** user confirms setting as default
-- **THEN** system updates `openspec/config.yaml` with `defaultSchema: my-workflow`
+#### 场景：交互式设置为默认
+- **当** 用户在交互模式下运行 `openspec schema init my-workflow` 时
+- **且** 用户确认设置为默认
+- **则** 系统更新 `openspec/config.yaml`，添加 `defaultSchema: my-workflow`
 
-#### Scenario: Set as default via flag
-- **WHEN** user runs `openspec schema init my-workflow --default`
-- **THEN** system creates schema and updates `openspec/config.yaml` with `defaultSchema: my-workflow`
+#### 场景：通过标志设置为默认
+- **当** 用户运行 `openspec schema init my-workflow --default` 时
+- **则** 系统创建模式并更新 `openspec/config.yaml`，添加 `defaultSchema: my-workflow`
 
-#### Scenario: Skip setting default
-- **WHEN** user runs `openspec schema init my-workflow --no-default`
-- **THEN** system creates schema without modifying `openspec/config.yaml`
+#### 场景：跳过设置默认
+- **当** 用户运行 `openspec schema init my-workflow --no-default` 时
+- **则** 系统创建模式而不修改 `openspec/config.yaml`
 
-### Requirement: Schema init outputs JSON format
-The CLI SHALL support `--json` flag for machine-readable output.
+### 需求：Schema init 输出 JSON 格式
+CLI 应当支持 `--json` 标志以提供机器可读输出。
 
-#### Scenario: JSON output on success
-- **WHEN** user runs `openspec schema init my-workflow --json --description "Test" --artifacts proposal`
-- **THEN** system outputs JSON with `created: true`, `path`, and `schema` fields
-- **AND** does not display interactive prompts or spinners
+#### 场景：成功时的 JSON 输出
+- **当** 用户运行 `openspec schema init my-workflow --json --description "Test" --artifacts proposal` 时
+- **则** 系统输出带有 `created: true`、`path` 和 `schema` 字段的 JSON
+- **且** 不显示交互式提示或加载指示
 
-#### Scenario: JSON output on error
-- **WHEN** user runs `openspec schema init "invalid name" --json`
-- **THEN** system outputs JSON with `error` field describing the issue
-- **AND** exits with non-zero code
-
+#### 场景：错误时的 JSON 输出
+- **当** 用户运行 `openspec schema init "invalid name" --json` 时
+- **则** 系统输出带有描述问题的 `error` 字段的 JSON
+- **且** 以非零代码退出

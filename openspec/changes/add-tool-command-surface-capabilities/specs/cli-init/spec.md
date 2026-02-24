@@ -1,121 +1,121 @@
-## ADDED Requirements
+## 新增需求
 
-### Requirement: Command surface capability resolution
-The init command SHALL resolve each selected tool's command surface using explicit metadata first, then deterministic inference.
+### 需求：命令表面能力解析
+init 命令应首先使用显式元数据解析每个选定工具的命令表面，然后使用确定性推断。
 
-#### Scenario: Explicit command surface override
-- **WHEN** a tool declares an explicit command-surface capability
-- **THEN** init SHALL use that explicit capability
-- **AND** SHALL NOT override it based on adapter presence
+#### 场景：显式命令表面覆盖
+- **当** 工具声明显式命令表面能力时
+- **则** init 应使用该显式能力
+- **且** 不应基于适配器存在覆盖它
 
-#### Scenario: Inferred command surface from adapter presence
-- **WHEN** a tool does not declare an explicit command-surface capability
-- **AND** a command adapter is registered for the tool
-- **THEN** init SHALL infer `adapter` as the command surface
+#### 场景：从适配器存在推断命令表面
+- **当** 工具未声明显式命令表面能力
+- **且** 该工具注册了命令适配器
+- **则** init 应推断 `adapter` 作为命令表面
 
-#### Scenario: Inferred command surface for skills-only tool
-- **WHEN** a tool does not declare an explicit command-surface capability
-- **AND** no command adapter is registered for the tool
-- **AND** the tool has a configured `skillsDir`
-- **THEN** init SHALL infer `skills-invocable` as the command surface
+#### 场景：仅技能工具推断命令表面
+- **当** 工具未声明显式命令表面能力
+- **且** 该工具未注册命令适配器
+- **且** 该工具有配置的 `skillsDir`
+- **则** init 应推断 `skills-invocable` 作为命令表面
 
-#### Scenario: Inferred command surface without adapter or skills
-- **WHEN** a tool does not declare an explicit command-surface capability
-- **AND** no command adapter is registered for the tool
-- **AND** the tool has no `skillsDir`
-- **THEN** init SHALL infer `none` as the command surface
+#### 场景：无适配器或技能时推断命令表面
+- **当** 工具未声明显式命令表面能力
+- **且** 该工具未注册命令适配器
+- **且** 该工具没有 `skillsDir`
+- **则** init 应推断 `none` 作为命令表面
 
-### Requirement: Delivery compatibility by tool command surface
-The init command SHALL apply delivery settings using each tool's command surface capability, not adapter presence alone.
+### 需求：按工具命令表面的交付兼容性
+init 命令应使用每个工具的命令表面能力应用交付设置，而不仅是适配器存在。
 
-#### Scenario: Both delivery for adapter-backed tool
-- **WHEN** user runs `openspec init` with a selected tool that has a command adapter
-- **AND** delivery is set to `both`
-- **THEN** the system SHALL generate command files for active workflows using that adapter
-- **AND** SHALL generate or refresh managed skills when the tool has `skillsDir`
+#### 场景：适配器支持工具的 both 交付
+- **当** 用户运行 `openspec init` 并选择了有命令适配器的工具
+- **且** 交付设置为 `both`
+- **则** 系统应使用该适配器为活跃工作流生成命令文件
+- **且** 当工具有 `skillsDir` 时应生成或刷新托管技能
 
-#### Scenario: Both delivery for skills-invocable tool
-- **WHEN** user runs `openspec init` with a selected tool whose command surface is `skills-invocable`
-- **AND** delivery is set to `both`
-- **THEN** the system SHALL generate or refresh managed skill directories when the tool has `skillsDir`
-- **AND** SHALL NOT require adapter-generated command files for that tool
+#### 场景：skills-invocable 工具的 both 交付
+- **当** 用户运行 `openspec init` 并选择了命令表面为 `skills-invocable` 的工具
+- **且** 交付设置为 `both`
+- **则** 系统应在工具有 `skillsDir` 时生成或刷新托管技能目录
+- **且** 不应要求该工具的适配器生成命令文件
 
-#### Scenario: Both delivery for none command surface
-- **WHEN** user runs `openspec init` with a selected tool whose command surface is `none`
-- **AND** delivery is set to `both`
-- **THEN** the system SHALL perform no command-surface artifact action for that tool
-- **AND** MAY emit a compatibility note indicating no command surface is available
+#### 场景：none 命令表面的 both 交付
+- **当** 用户运行 `openspec init` 并选择了命令表面为 `none` 的工具
+- **且** 交付设置为 `both`
+- **则** 系统不应为该工具执行命令表面产物操作
+- **且** 可能发出兼容性说明，指示没有命令表面可用
 
-#### Scenario: Skills delivery for adapter-backed tool
-- **WHEN** user runs `openspec init` with a selected tool that has a command adapter
-- **AND** delivery is set to `skills`
-- **THEN** the system SHALL generate or refresh managed skill directories when the tool has `skillsDir`
-- **AND** SHALL remove managed adapter-generated command files for that tool
+#### 场景：适配器支持工具的 skills 交付
+- **当** 用户运行 `openspec init` 并选择了有命令适配器的工具
+- **且** 交付设置为 `skills`
+- **则** 系统应在工具有 `skillsDir` 时生成或刷新托管技能目录
+- **且** 应移除该工具的托管适配器生成命令文件
 
-#### Scenario: Skills delivery for skills-invocable tool
-- **WHEN** user runs `openspec init` with a selected tool whose command surface is `skills-invocable`
-- **AND** delivery is set to `skills`
-- **THEN** the system SHALL generate or refresh managed skill directories when the tool has `skillsDir`
-- **AND** SHALL NOT require adapter-generated command files for that tool
+#### 场景：skills-invocable 工具的 skills 交付
+- **当** 用户运行 `openspec init` 并选择了命令表面为 `skills-invocable` 的工具
+- **且** 交付设置为 `skills`
+- **则** 系统应在工具有 `skillsDir` 时生成或刷新托管技能目录
+- **且** 不应要求该工具的适配器生成命令文件
 
-#### Scenario: Skills delivery for none command surface
-- **WHEN** user runs `openspec init` with a selected tool whose command surface is `none`
-- **AND** delivery is set to `skills`
-- **THEN** the system SHALL perform no command-surface artifact action for that tool
-- **AND** MAY emit a compatibility note indicating no command surface is available
+#### 场景：none 命令表面的 skills 交付
+- **当** 用户运行 `openspec init` 并选择了命令表面为 `none` 的工具
+- **且** 交付设置为 `skills`
+- **则** 系统不应为该工具执行命令表面产物操作
+- **且** 可能发出兼容性说明，指示没有命令表面可用
 
-#### Scenario: Commands delivery for adapter-backed tool
-- **WHEN** user runs `openspec init` with a selected tool that has a command adapter
-- **AND** delivery is set to `commands`
-- **THEN** the system SHALL generate command files for active workflows using that adapter
-- **AND** the system SHALL remove managed skill directories for that tool
+#### 场景：适配器支持工具的 commands 交付
+- **当** 用户运行 `openspec init` 并选择了有命令适配器的工具
+- **且** 交付设置为 `commands`
+- **则** 系统应使用该适配器为活跃工作流生成命令文件
+- **且** 系统应移除该工具的托管技能目录
 
-#### Scenario: Commands delivery for skills-invocable tool
-- **WHEN** user runs `openspec init` with a selected tool whose command surface is `skills-invocable`
-- **AND** delivery is set to `commands`
-- **THEN** the system SHALL generate or refresh managed skill directories for active workflows
-- **AND** the system SHALL NOT remove those managed skill directories as part of commands-only cleanup
-- **AND** the system SHALL NOT require a command adapter for that tool
+#### 场景：skills-invocable 工具的 commands 交付
+- **当** 用户运行 `openspec init` 并选择了命令表面为 `skills-invocable` 的工具
+- **且** 交付设置为 `commands`
+- **则** 系统应为活跃工作流生成或刷新托管技能目录
+- **且** 系统不应作为 commands-only 清理的一部分移除那些托管技能目录
+- **且** 系统不应要求该工具的命令适配器
 
-#### Scenario: Commands delivery for mixed tool selection
-- **WHEN** user runs `openspec init` with multiple tools
-- **AND** selected tools include both adapter-backed and skills-invocable command surfaces
-- **AND** delivery is set to `commands`
-- **THEN** the system SHALL apply commands-only behavior per tool capability
-- **AND** the resulting install SHALL include command files for adapter-backed tools and skills for skills-invocable tools
+#### 场景：混合工具选择的 commands 交付
+- **当** 用户运行 `openspec init` 并选择了多个工具
+- **且** 选定工具包含适配器支持和 skills-invocable 命令表面
+- **且** 交付设置为 `commands`
+- **则** 系统应按每个工具能力应用 commands-only 行为
+- **且** 结果安装应包含适配器支持工具的命令文件和 skills-invocable 工具的技能
 
-#### Scenario: Commands delivery for unsupported command surface
-- **WHEN** user runs `openspec init` with a selected tool that has no command surface capability
-- **AND** delivery is set to `commands`
-- **THEN** the system SHALL fail before generating or deleting artifacts
-- **AND** the error SHALL list incompatible tool IDs and explain supported alternatives (`both` or `skills`)
+#### 场景：不支持命令表面的 commands 交付
+- **当** 用户运行 `openspec init` 并选择了没有命令表面能力的工具
+- **且** 交付设置为 `commands`
+- **则** 系统应在生成或删除产物前失败
+- **且** 错误应列出不兼容的工具 ID 并解释支持的替代方案（`both` 或 `skills`）
 
-#### Scenario: Interactive handling for unsupported command surface
-- **WHEN** user runs `openspec init` interactively
-- **AND** delivery is set to `commands`
-- **AND** selected tools include one or more tools with command surface `none`
-- **THEN** the CLI SHALL show a compatibility error and return to the interactive selection flow for correction
-- **AND** SHALL not perform artifact writes until a valid selection is confirmed
+#### 场景：交互式处理不支持的命令表面
+- **当** 用户交互式运行 `openspec init`
+- **且** 交付设置为 `commands`
+- **且** 选定工具包含一个或多个命令表面为 `none` 的工具
+- **则** CLI 应显示兼容性错误并返回交互式选择流程以进行更正
+- **且** 在确认有效选择前不执行产物写入
 
-### Requirement: Init compatibility signaling
-The init command SHALL clearly signal command-surface compatibility outcomes in both interactive and non-interactive flows.
+### 需求：Init 兼容性信号
+init 命令应在交互式和非交互式流程中清楚地信号命令表面兼容性结果。
 
-#### Scenario: Interactive compatibility note
-- **WHEN** init runs interactively
-- **AND** delivery is `commands`
-- **AND** selected tools include skills-invocable command surfaces
-- **THEN** the system SHALL display a compatibility note before the confirmation prompt indicating those tools will use skills as their command surface
+#### 场景：交互式兼容性说明
+- **当** init 交互式运行
+- **且** 交付是 `commands`
+- **且** 选定工具包含 skills-invocable 命令表面
+- **则** 系统应在确认提示前显示兼容性说明，指示那些工具将使用技能作为其命令表面
 
-#### Scenario: Non-interactive compatibility summary for skills-invocable tools
-- **WHEN** init runs non-interactively (including `--tools` usage)
-- **AND** delivery is `commands`
-- **AND** selected tools include one or more `skills-invocable` command surfaces
-- **THEN** the command SHALL proceed with exit code 0
-- **AND** the command SHALL write deterministic compatibility summary lines to stdout indicating those tools will use managed skills as their command surface
+#### 场景：skills-invocable 工具的非交互式兼容性摘要
+- **当** init 非交互式运行（包括 `--tools` 使用）
+- **且** 交付是 `commands`
+- **且** 选定工具包含一个或多个 `skills-invocable` 命令表面
+- **则** 命令应以退出代码 0 继续
+- **且** 命令应向 stdout 写入确定性兼容性摘要行，指示那些工具将使用托管技能作为其命令表面
 
-#### Scenario: Non-interactive compatibility failure
-- **WHEN** init runs non-interactively (including `--tools` usage)
-- **AND** delivery is `commands`
-- **AND** selected tools include any tool with no command surface capability
-- **THEN** the command SHALL exit with code 1
-- **AND** the command SHALL write deterministic, actionable guidance for resolving the selection to stderr
+#### 场景：非交互式兼容性失败
+- **当** init 非交互式运行（包括 `--tools` 使用）
+- **且** 交付是 `commands`
+- **且** 选定工具包含任何没有命令表面能力的工具
+- **则** 命令应以代码 1 退出
+- **且** 命令应向 stderr 写入确定性、可操作的指导以解决选择问题

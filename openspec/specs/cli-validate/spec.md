@@ -1,219 +1,218 @@
-# cli-validate Specification
+# CLI 验证规范
 
-## Purpose
-Define `openspec validate` behavior for validating changes and specs with actionable remediation guidance and structured output.
+## 目的
+定义 `openspec validate` 命令行为，用于验证变更和规范，提供可操作的修复指导和结构化输出。
 
-## Requirements
-### Requirement: Validation SHALL provide actionable remediation steps
-Validation output SHALL include specific guidance to fix each error, including expected structure, example headers, and suggested commands to verify fixes.
+## 需求
+### 需求：验证应当提供可操作的修复步骤
+验证输出应当包含修复每个错误的具体指导，包括预期结构、示例标题和建议的验证命令。
 
-#### Scenario: No deltas found in change
-- **WHEN** validating a change with zero parsed deltas
-- **THEN** show error "No deltas found" with guidance:
-  - Explain that change specs must include `## ADDED Requirements`, `## MODIFIED Requirements`, `## REMOVED Requirements`, or `## RENAMED Requirements`
-  - Remind authors that files must live under `openspec/changes/{id}/specs/<capability>/spec.md`
-  - Include an explicit note: "Spec delta files cannot start with titles before the operation headers"
-  - Suggest running `openspec change show {id} --json --deltas-only` for debugging
+#### 场景：变更中未找到增量
+- **当** 验证解析到零个增量的变更时
+- **则** 显示错误"未找到增量"并提供指导：
+  - 说明变更规范必须包含 `## ADDED Requirements`、`## MODIFIED Requirements`、`## REMOVED Requirements` 或 `## RENAMED Requirements`
+  - 提醒作者文件必须位于 `openspec/changes/{id}/specs/<capability>/spec.md` 下
+  - 包含明确注释："规范增量文件不能在操作标题之前以标题开始"
+  - 建议运行 `openspec change show {id} --json --deltas-only` 进行调试
 
-#### Scenario: Missing required sections
-- **WHEN** a required section is missing
-- **THEN** include expected header names and a minimal skeleton:
-  - For Spec: `## Purpose`, `## Requirements`
-  - For Change: `## Why`, `## What Changes`
-  - Provide an example snippet of the missing section with placeholder prose ready to copy
-  - Mention the quick-reference section in `openspec/AGENTS.md` as the authoritative template
+#### 场景：缺失必需部分
+- **当** 缺少必需部分时
+- **则** 包含预期标题名称和最小框架：
+  - 对于规范：`## Purpose`、`## Requirements`
+  - 对于变更：`## Why`、`## What Changes`
+  - 提供缺失部分的示例代码片段，包含占位符文本，可直接复制
+  - 提及 `openspec/AGENTS.md` 中的快速参考部分作为权威模板
 
-#### Scenario: Missing requirement descriptive text
-- **WHEN** a requirement header lacks descriptive text before scenarios
-- **THEN** emit an error explaining that `### Requirement:` lines must be followed by narrative text before any `#### Scenario:` headers
-  - Show compliant example: "### Requirement: Foo" followed by "The system SHALL ..."
-  - Suggest adding 1-2 sentences describing the normative behavior prior to listing scenarios
-  - Reference the pre-validation checklist in `openspec/AGENTS.md`
+#### 场景：缺失需求描述文本
+- **当** 需求标题在场景之前缺少描述文本时
+- **则** 发出错误，说明 `### Requirement:` 行后必须有叙述文本，然后才能有 `#### Scenario:` 标题
+  - 显示合规示例："### Requirement: Foo" 后跟 "系统应当..."
+  - 建议在列出场景之前添加 1-2 句描述规范行为的句子
+  - 参考 `openspec/AGENTS.md` 中的验证前检查清单
 
-### Requirement: Validator SHALL detect likely misformatted scenarios and warn with a fix
-The validator SHALL recognize bulleted lines that look like scenarios (e.g., lines beginning with WHEN/THEN/AND) and emit a targeted warning with a conversion example to `#### Scenario:`.
+### 需求：验证器应当检测可能格式错误的场景并警告提供修复
+验证器应当识别看起来像场景的项目符号行（例如以 WHEN/THEN/AND 开头的行）并发出针对性警告，提供转换为 `#### Scenario:` 的示例。
 
-#### Scenario: Bulleted WHEN/THEN under a Requirement
-- **WHEN** bullets that start with WHEN/THEN/AND are found under a requirement without any `#### Scenario:` headers
-- **THEN** emit warning: "Scenarios must use '#### Scenario:' headers", and show a conversion template:
+#### 场景：需求下的项目符号 WHEN/THEN
+- **当** 在没有 `#### Scenario:` 标题的需求下找到以 WHEN/THEN/AND 开头的项目符号时
+- **则** 发出警告："场景必须使用 '#### Scenario:' 标题"，并显示转换模板：
 ```
-#### Scenario: Short name
-- **WHEN** ...
-- **THEN** ...
-- **AND** ...
+#### 场景：简短名称
+- **当** ...
+- **则** ...
+- **并且** ...
 ```
 
-### Requirement: All issues SHALL include file paths and structured locations
-Error, warning, and info messages SHALL include:
-- Source file path (`openspec/changes/{id}/proposal.md`, `.../specs/{cap}/spec.md`)
-- Structured path (e.g., `deltas[0].requirements[0].scenarios`)
+### 需求：所有问题应当包含文件路径和结构化位置
+错误、警告和信息消息应当包含：
+- 源文件路径（`openspec/changes/{id}/proposal.md`、`.../specs/{cap}/spec.md`）
+- 结构化路径（例如 `deltas[0].requirements[0].scenarios`）
 
-#### Scenario: Zod validation error
-- **WHEN** a schema validation fails
-- **THEN** the message SHALL include `file`, `path`, and a remediation hint if applicable
+#### 场景：Zod 验证错误
+- **当** 模式验证失败时
+- **则** 消息应当包含 `file`、`path`，以及适用的修复提示
 
-### Requirement: Invalid results SHALL include a Next steps footer in human-readable output
-The CLI SHALL append a Next steps footer when the item is invalid and not using `--json`, including:
-- Summary line with counts
-- Top-3 guidance bullets (contextual to the most frequent or blocking errors)
-- A suggestion to re-run with `--json` and/or the debug command
+### 需求：无效结果在人类可读输出中应当包含下一步页脚
+当项目无效且不使用 `--json` 时，CLI 应当附加下一步页脚，包括：
+- 带计数的摘要行
+- 前 3 条指导要点（根据最频繁或阻塞性错误上下文化）
+- 建议使用 `--json` 和/或调试命令重新运行
 
-#### Scenario: Change invalid summary
-- **WHEN** a change validation fails
-- **THEN** print "Next steps" with 2-3 targeted bullets and suggest `openspec change show <id> --json --deltas-only`
+#### 场景：变更无效摘要
+- **当** 变更验证失败时
+- **则** 打印"下一步"，包含 2-3 条针对性要点，并建议 `openspec change show <id> --json --deltas-only`
 
-### Requirement: Top-level validate command
+### 需求：顶层 validate 命令
 
-The CLI SHALL provide a top-level `validate` command for validating changes and specs with flexible selection options.
+CLI 应当提供顶层 `validate` 命令，用于灵活选择选项验证变更和规范。
 
-#### Scenario: Interactive validation selection
+#### 场景：交互式验证选择
 
-- **WHEN** executing `openspec validate` without arguments
-- **THEN** prompt user to select what to validate (all, changes, specs, or specific item)
-- **AND** perform validation based on selection
-- **AND** display results with appropriate formatting
+- **当** 执行 `openspec validate` 而不带参数时
+- **则** 提示用户选择要验证的内容（全部、变更、规范或特定项目）
+- **并且** 根据选择执行验证
+- **并且** 以适当的格式显示结果
 
-#### Scenario: Non-interactive environments do not prompt
+#### 场景：非交互环境不提示
 
-- **GIVEN** stdin is not a TTY or `--no-interactive` is provided or environment variable `OPEN_SPEC_INTERACTIVE=0`
-- **WHEN** executing `openspec validate` without arguments
-- **THEN** do not prompt interactively
-- **AND** print a helpful hint listing available commands/flags and exit with code 1
+- **前提** stdin 不是 TTY 或提供了 `--no-interactive` 或环境变量 `OPEN_SPEC_INTERACTIVE=0`
+- **当** 执行 `openspec validate` 而不带参数时
+- **则** 不进行交互式提示
+- **并且** 打印有用的提示，列出可用命令/标志，以退出码 1 退出
 
-#### Scenario: Direct item validation
+#### 场景：直接项目验证
 
-- **WHEN** executing `openspec validate <item-name>`
-- **THEN** automatically detect if item is a change or spec
-- **AND** validate the specified item
-- **AND** display validation results
+- **当** 执行 `openspec validate <item-name>` 时
+- **则** 自动检测项目是变更还是规范
+- **并且** 验证指定项目
+- **并且** 显示验证结果
 
-### Requirement: Bulk and filtered validation
+### 需求：批量和过滤验证
 
-The validate command SHALL support flags for bulk validation (--all) and filtered validation by type (--changes, --specs).
+validate 命令应当支持批量验证（--all）和按类型过滤验证（--changes、--specs）的标志。
 
-#### Scenario: Validate everything
+#### 场景：验证所有
 
-- **WHEN** executing `openspec validate --all`
-- **THEN** validate all changes in openspec/changes/ (excluding archive)
-- **AND** validate all specs in openspec/specs/
-- **AND** display a summary showing passed/failed items
-- **AND** exit with code 1 if any validation fails
+- **当** 执行 `openspec validate --all` 时
+- **则** 验证 openspec/changes/ 中的所有变更（排除 archive）
+- **并且** 验证 openspec/specs/ 中的所有规范
+- **并且** 显示通过/失败项目的摘要
+- **并且** 如果任何验证失败则以退出码 1 退出
 
-#### Scenario: Scope of bulk validation
+#### 场景：批量验证范围
 
-- **WHEN** validating with `--all` or `--changes`
-- **THEN** include all change proposals under `openspec/changes/`
-- **AND** exclude the `openspec/changes/archive/` directory
+- **当** 使用 `--all` 或 `--changes` 验证时
+- **则** 包含 `openspec/changes/` 下的所有变更提案
+- **并且** 排除 `openspec/changes/archive/` 目录
 
-- **WHEN** validating with `--specs`
-- **THEN** include all specs that have a `spec.md` under `openspec/specs/<id>/spec.md`
+- **当** 使用 `--specs` 验证时
+- **则** 包含所有在 `openspec/specs/<id>/spec.md` 下有 `spec.md` 的规范
 
-#### Scenario: Validate all changes
+#### 场景：验证所有变更
 
-- **WHEN** executing `openspec validate --changes`
-- **THEN** validate all changes in openspec/changes/ (excluding archive)
-- **AND** display results for each change
-- **AND** show summary statistics
+- **当** 执行 `openspec validate --changes` 时
+- **则** 验证 openspec/changes/ 中的所有变更（排除 archive）
+- **并且** 显示每个变更的结果
+- **并且** 显示摘要统计
 
-#### Scenario: Validate all specs
+#### 场景：验证所有规范
 
-- **WHEN** executing `openspec validate --specs`
-- **THEN** validate all specs in openspec/specs/
-- **AND** display results for each spec
-- **AND** show summary statistics
+- **当** 执行 `openspec validate --specs` 时
+- **则** 验证 openspec/specs/ 中的所有规范
+- **并且** 显示每个规范的结果
+- **并且** 显示摘要统计
 
-### Requirement: Validation options and progress indication
+### 需求：验证选项和进度指示
 
-The validate command SHALL support standard validation options (--strict, --json) and display progress during bulk operations.
+validate 命令应当支持标准验证选项（--strict、--json）并在批量操作期间显示进度。
 
-#### Scenario: Strict validation
+#### 场景：严格验证
 
-- **WHEN** executing `openspec validate --all --strict`
-- **THEN** apply strict validation to all items
-- **AND** treat warnings as errors
-- **AND** fail if any item has warnings or errors
+- **当** 执行 `openspec validate --all --strict` 时
+- **则** 对所有项目应用严格验证
+- **并且** 将警告视为错误
+- **并且** 如果任何项目有警告或错误则失败
 
-#### Scenario: JSON output
+#### 场景：JSON 输出
 
-- **WHEN** executing `openspec validate --all --json`
-- **THEN** output validation results as JSON
-- **AND** include detailed issues for each item
-- **AND** include summary statistics
+- **当** 执行 `openspec validate --all --json` 时
+- **则** 以 JSON 格式输出验证结果
+- **并且** 包含每个项目的详细问题
+- **并且** 包含摘要统计
 
-#### Scenario: JSON output schema for bulk validation
+#### 场景：批量验证的 JSON 输出模式
 
-- **WHEN** executing `openspec validate --all --json` (or `--changes` / `--specs`)
-- **THEN** output a JSON object with the following shape:
-  - `items`: Array of objects with fields `{ id: string, type: "change"|"spec", valid: boolean, issues: Issue[], durationMs: number }`
-  - `summary`: Object `{ totals: { items: number, passed: number, failed: number }, byType: { change?: { items: number, passed: number, failed: number }, spec?: { items: number, passed: number, failed: number } } }`
-  - `version`: String identifier for the schema (e.g., `"1.0"`)
-- **AND** exit with code 1 if any `items[].valid === false`
+- **当** 执行 `openspec validate --all --json`（或 `--changes` / `--specs`）时
+- **则** 输出具有以下结构的 JSON 对象：
+  - `items`：对象数组，字段为 `{ id: string, type: "change"|"spec", valid: boolean, issues: Issue[], durationMs: number }`
+  - `summary`：对象 `{ totals: { items: number, passed: number, failed: number }, byType: { change?: { items: number, passed: number, failed: number }, spec?: { items: number, passed: number, failed: number } } }`
+  - `version`：模式的字符串标识符（例如 `"1.0"`）
+- **并且** 如果任何 `items[].valid === false` 则以退出码 1 退出
 
-Where `Issue` follows the existing per-item validation report shape `{ level: "ERROR"|"WARNING"|"INFO", path: string, message: string }`.
+其中 `Issue` 遵循现有的每项验证报告结构 `{ level: "ERROR"|"WARNING"|"INFO", path: string, message: string }`。
 
-#### Scenario: Show validation progress
+#### 场景：显示验证进度
 
-- **WHEN** validating multiple items (--all, --changes, or --specs)
-- **THEN** show progress indicator or status updates
-- **AND** indicate which item is currently being validated
-- **AND** display running count of passed/failed items
+- **当** 验证多个项目（--all、--changes 或 --specs）时
+- **则** 显示进度指示器或状态更新
+- **并且** 指示当前正在验证的项目
+- **并且** 显示通过/失败项目的运行计数
 
-#### Scenario: Concurrency limits for performance
+#### 场景：性能并发限制
 
-- **WHEN** validating multiple items
-- **THEN** run validations with a bounded concurrency (e.g., 4–8 in parallel)
-- **AND** ensure progress indicators remain responsive
+- **当** 验证多个项目时
+- **则** 以有限并发运行验证（例如 4-8 个并行）
+- **并且** 确保进度指示器保持响应
 
-### Requirement: Item type detection and ambiguity handling
+### 需求：项目类型检测和歧义处理
 
-The validate command SHALL handle ambiguous names and explicit type overrides to ensure clear, deterministic behavior.
+validate 命令应当处理歧义名称和显式类型覆盖，以确保清晰、确定性的行为。
 
-#### Scenario: Direct item validation with automatic type detection
+#### 场景：带自动类型检测的直接项目验证
 
-- **WHEN** executing `openspec validate <item-name>`
-- **THEN** if `<item-name>` uniquely matches a change or a spec, validate that item
+- **当** 执行 `openspec validate <item-name>` 时
+- **则** 如果 `<item-name>` 唯一匹配变更或规范，验证该项目
 
-#### Scenario: Ambiguity between change and spec names
+#### 场景：变更和规范名称歧义
 
-- **GIVEN** `<item-name>` exists both as a change and as a spec
-- **WHEN** executing `openspec validate <item-name>`
-- **THEN** print an ambiguity error explaining both matches
-- **AND** suggest passing `--type change` or `--type spec`, or using `openspec change validate` / `openspec spec validate`
-- **AND** exit with code 1 without performing validation
+- **前提** `<item-name>` 同时作为变更和规范存在
+- **当** 执行 `openspec validate <item-name>` 时
+- **则** 打印歧义错误，说明两个匹配
+- **并且** 建议传递 `--type change` 或 `--type spec`，或使用 `openspec change validate` / `openspec spec validate`
+- **并且** 以退出码 1 退出，不执行验证
 
-#### Scenario: Unknown item name
+#### 场景：未知项目名称
 
-- **WHEN** the `<item-name>` matches neither a change nor a spec
-- **THEN** print a not-found error
-- **AND** show nearest-match suggestions when available
-- **AND** exit with code 1
+- **当** `<item-name>` 既不匹配变更也不匹配规范时
+- **则** 打印未找到错误
+- **并且** 可用时显示最近匹配建议
+- **并且** 以退出码 1 退出
 
-#### Scenario: Explicit type override
+#### 场景：显式类型覆盖
 
-- **WHEN** executing `openspec validate --type change <item>`
-- **THEN** treat `<item>` as a change ID and validate it (skipping auto-detection)
+- **当** 执行 `openspec validate --type change <item>` 时
+- **则** 将 `<item>` 视为变更 ID 并验证（跳过自动检测）
 
-- **WHEN** executing `openspec validate --type spec <item>`
-- **THEN** treat `<item>` as a spec ID and validate it (skipping auto-detection)
+- **当** 执行 `openspec validate --type spec <item>` 时
+- **则** 将 `<item>` 视为规范 ID 并验证（跳过自动检测）
 
-### Requirement: Interactivity controls
+### 需求：交互性控制
 
-- The CLI SHALL respect `--no-interactive` to disable prompts.
-- The CLI SHALL respect `OPEN_SPEC_INTERACTIVE=0` to disable prompts globally.
-- Interactive prompts SHALL only be shown when stdin is a TTY and interactivity is not disabled.
+- CLI 应当尊重 `--no-interactive` 以禁用提示。
+- CLI 应当尊重 `OPEN_SPEC_INTERACTIVE=0` 以全局禁用提示。
+- 交互式提示应当仅在 stdin 是 TTY 且未禁用交互性时显示。
 
-#### Scenario: Disabling prompts via flags or environment
+#### 场景：通过标志或环境禁用提示
 
-- **WHEN** `openspec validate` is executed with `--no-interactive` or with environment `OPEN_SPEC_INTERACTIVE=0`
-- **THEN** the CLI SHALL not display interactive prompts
-- **AND** SHALL print non-interactive hints or chosen outputs as appropriate
+- **当** 使用 `--no-interactive` 或环境 `OPEN_SPEC_INTERACTIVE=0` 执行 `openspec validate` 时
+- **则** CLI 不应当显示交互式提示
+- **并且** 应当按需打印非交互式提示或选定输出
 
-### Requirement: Parser SHALL handle cross-platform line endings
-The markdown parser SHALL correctly identify sections regardless of line ending format (LF, CRLF, CR).
+### 需求：解析器应当处理跨平台行结束符
+Markdown 解析器应当正确识别部分，无论行结束符格式如何（LF、CRLF、CR）。
 
-#### Scenario: Required sections parsed with CRLF line endings
-- **GIVEN** a change proposal markdown saved with CRLF line endings
-- **AND** the document contains `## Why` and `## What Changes`
-- **WHEN** running `openspec validate <change-id>`
-- **THEN** validation SHALL recognize the sections and NOT raise parsing errors
-
+#### 场景：使用 CRLF 行结束符解析必需部分
+- **前提** 使用 CRLF 行结束符保存的变更提案 Markdown
+- **并且** 文档包含 `## Why` 和 `## What Changes`
+- **当** 运行 `openspec validate <change-id>` 时
+- **则** 验证应当识别部分，不应当引发解析错误

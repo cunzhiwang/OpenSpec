@@ -1,132 +1,132 @@
-## 1. Global Config Extension
+## 1. 全局配置扩展
 
-- [x] 1.1 Extend `src/core/global-config.ts` schema with `profile`, `delivery`, and `workflows` fields
-- [x] 1.2 Add TypeScript types for profile (`core` | `custom`), delivery (`both` | `skills` | `commands`), and workflows (string array)
-- [x] 1.3 Update `GlobalConfig` interface and defaults (profile=`core`, delivery=`both`)
-- [x] 1.4 Update existing `readGlobalConfig()` to handle missing new fields with defaults
-- [x] 1.5 Add tests for schema evolution (existing config without new fields)
+- [x] 1.1 用 `profile`、`delivery` 和 `workflows` 字段扩展 `src/core/global-config.ts` 模式
+- [x] 1.2 为 profile（`core` | `custom`）、delivery（`both` | `skills` | `commands`）和 workflows（字符串数组）添加 TypeScript 类型
+- [x] 1.3 更新 `GlobalConfig` 接口和默认值（profile=`core`，delivery=`both`）
+- [x] 1.4 更新现有 `readGlobalConfig()` 以处理带默认值的缺失新字段
+- [x] 1.5 添加模式演进测试（没有新字段的现有配置）
 
-## 2. Profile System
+## 2. 配置文件系统
 
-- [x] 2.1 Create `src/core/profiles.ts` with profile definitions (core, custom)
-- [x] 2.2 Define `CORE_WORKFLOWS` constant: `['propose', 'explore', 'apply', 'archive']`
-- [x] 2.3 Define `ALL_WORKFLOWS` constant with all 11 workflows
-- [x] 2.4 Add `COMMAND_IDS` constant to `src/core/shared/tool-detection.ts` (parallel to existing SKILL_NAMES)
-- [x] 2.5 Implement `getProfileWorkflows(profile, customWorkflows?)` resolver function
-- [x] 2.6 Add tests for profile resolution
+- [x] 2.1 创建 `src/core/profiles.ts` 带配置文件定义（core、custom）
+- [x] 2.2 定义 `CORE_WORKFLOWS` 常量：`['propose', 'explore', 'apply', 'archive']`
+- [x] 2.3 定义 `ALL_WORKFLOWS` 常量包含所有 11 个工作流
+- [x] 2.4 在 `src/core/shared/tool-detection.ts` 中添加 `COMMAND_IDS` 常量（与现有 SKILL_NAMES 并行）
+- [x] 2.5 实现 `getProfileWorkflows(profile, customWorkflows?)` 解析器函数
+- [x] 2.6 添加配置文件解析测试
 
-## 3. Config Profile Command (Interactive Picker)
+## 3. Config Profile 命令（交互式选择器）
 
-- [x] 3.1 Add `config profile` subcommand to `src/commands/config.ts`
-- [x] 3.2 Implement interactive picker UI with delivery selection (skills/commands/both)
-- [x] 3.3 Implement interactive picker UI with workflow toggles
-- [x] 3.4 Pre-select current config values in picker
-- [x] 3.5 Update global config on confirmation (config-only, no file regeneration)
-- [x] 3.6 Display post-update message: "Config updated. Run `openspec update` in your projects to apply."
-- [x] 3.7 Detect if running inside an OpenSpec project and offer to run update automatically
-- [x] 3.8 Implement `config profile core` preset shortcut (preserves delivery setting)
-- [x] 3.9 Handle non-interactive mode: error with helpful message
-- [x] 3.10 Update `openspec config list` to display profile, delivery, and workflows settings (indicate defaults vs explicit)
-- [x] 3.11 Add tests for config profile command and config list output
+- [x] 3.1 在 `src/commands/config.ts` 中添加 `config profile` 子命令
+- [x] 3.2 实现带交付选择的交互式选择器 UI（skills/commands/both）
+- [x] 3.3 实现带工作流切换的交互式选择器 UI
+- [x] 3.4 在选择器中预选当前配置值
+- [x] 3.5 确认时更新全局配置（仅配置，无文件重新生成）
+- [x] 3.6 显示更新后消息："配置已更新。在你的项目中运行 `openspec update` 以应用。"
+- [x] 3.7 检测是否在 OpenSpec 项目内运行并提供自动运行更新
+- [x] 3.8 实现 `config profile core` 预设快捷方式（保留交付设置）
+- [x] 3.9 处理非交互模式：带有帮助消息的错误
+- [x] 3.10 更新 `openspec config list` 以显示 profile、delivery 和 workflows 设置（指示默认值 vs 显式）
+- [x] 3.11 添加 config profile 命令和 config list 输出的测试
 
-## 4. Available Tools Detection
+## 4. 可用工具检测
 
-- [x] 4.1 Create `src/core/available-tools.ts` (separate from existing `tool-detection.ts`)
-- [x] 4.2 Implement `getAvailableTools(projectPath)` that scans for AI tool directories (`.claude/`, `.cursor/`, etc.)
-- [x] 4.3 Use `AI_TOOLS` config to map directory names to tool IDs
-- [x] 4.4 Add tests for available tools detection including cross-platform paths
+- [x] 4.1 创建 `src/core/available-tools.ts`（与现有 `tool-detection.ts` 分开）
+- [x] 4.2 实现 `getAvailableTools(projectPath)` 扫描 AI 工具目录（`.claude/`、`.cursor/` 等）
+- [x] 4.3 使用 `AI_TOOLS` 配置将目录名称映射到工具 ID
+- [x] 4.4 添加可用工具检测测试，包括跨平台路径
 
-## 5. Propose Workflow Template
+## 5. Propose 工作流模板
 
-- [x] 5.1 Create `src/core/templates/workflows/propose.ts`
-- [x] 5.2 Implement skill template that combines new + ff behavior
-- [x] 5.3 Ensure propose creates `.openspec.yaml` via `openspec new change` before generating artifacts
-- [x] 5.4 Add onboarding-style explanatory output to template
-- [x] 5.5 Implement command template for propose
-- [x] 5.6 Export templates from `src/core/templates/skill-templates.ts`
-- [x] 5.7 Add `openspec-propose` to `SKILL_NAMES` in `src/core/shared/tool-detection.ts`
-- [x] 5.8 Add `propose` to command templates in `src/core/shared/skill-generation.ts`
-- [x] 5.9 Add `propose` to `COMMAND_IDS` in `src/core/shared/tool-detection.ts`
-- [x] 5.10 Add tests for propose template (creates change, generates artifacts, equivalent to new + ff)
+- [x] 5.1 创建 `src/core/templates/workflows/propose.ts`
+- [x] 5.2 实现组合 new + ff 行为的技能模板
+- [x] 5.3 确保 propose 在生成产物前通过 `openspec new change` 创建 `.openspec.yaml`
+- [x] 5.4 向模板添加入门风格的解释性输出
+- [x] 5.5 为 propose 实现命令模板
+- [x] 5.6 从 `src/core/templates/skill-templates.ts` 导出模板
+- [x] 5.7 在 `src/core/shared/tool-detection.ts` 中向 `SKILL_NAMES` 添加 `openspec-propose`
+- [x] 5.8 在 `src/core/shared/skill-generation.ts` 中向命令模板添加 `propose`
+- [x] 5.9 在 `src/core/shared/tool-detection.ts` 中向 `COMMAND_IDS` 添加 `propose`
+- [x] 5.10 添加 propose 模板测试（创建变更，生成产物，等效于 new + ff）
 
-## 6. Conditional Skill/Command Generation
+## 6. 条件技能/命令生成
 
-- [x] 6.1 Update `getSkillTemplates()` to accept profile filter parameter
-- [x] 6.2 Update `getCommandTemplates()` to accept profile filter parameter
-- [x] 6.3 Update `generateSkillsAndCommands()` in init.ts to respect delivery setting
-- [x] 6.4 Add logic to skip skill generation when delivery is 'commands'
-- [x] 6.5 Add logic to skip command generation when delivery is 'skills'
-- [x] 6.6 Add tests for conditional generation
+- [x] 6.1 更新 `getSkillTemplates()` 以接受配置文件过滤参数
+- [x] 6.2 更新 `getCommandTemplates()` 以接受配置文件过滤参数
+- [x] 6.3 更新 init.ts 中的 `generateSkillsAndCommands()` 以尊重交付设置
+- [x] 6.4 添加当交付为 'commands' 时跳过技能生成的逻辑
+- [x] 6.5 添加当交付为 'skills' 时跳过命令生成的逻辑
+- [x] 6.6 添加条件生成测试
 
-## 7. Init Flow Updates
+## 7. Init 流程更新
 
-- [x] 7.1 Update init to call `getAvailableTools()` first
-- [x] 7.2 Update init to read global config for profile/delivery defaults
-- [x] 7.3 Add migration check to init: call shared `migrateIfNeeded()` before profile resolution
-- [x] 7.4 Change tool selection to show pre-selected detected tools
-- [x] 7.5 Apply configured profile directly in init (no profile confirmation prompt)
-- [x] 7.6 Update success message to show `/opsx:propose` prompt (only if propose is in the active profile)
-- [x] 7.7 Add `--profile` flag to override global config
-- [x] 7.8 Update non-interactive mode to use defaults without prompting
-- [x] 7.9 Add tests for init flow with various scenarios (including migration on re-init and custom profile behavior)
+- [x] 7.1 更新 init 以首先调用 `getAvailableTools()`
+- [x] 7.2 更新 init 以读取全局配置的配置文件/交付默认值
+- [x] 7.3 向 init 添加迁移检查：在配置文件解析前调用共享 `migrateIfNeeded()`
+- [x] 7.4 更改工具选择以显示预选检测到的工具
+- [x] 7.5 在 init 中直接应用配置的配置文件（无配置文件确认提示）
+- [x] 7.6 更新成功消息以显示 `/opsx:propose` 提示（仅当 propose 在活跃配置文件中时）
+- [x] 7.7 添加 `--profile` 标志以覆盖全局配置
+- [x] 7.8 更新非交互模式以使用默认值而不提示
+- [x] 7.9 添加各种场景的 init 流程测试（包括重新初始化时的迁移和自定义配置文件行为）
 
-## 8. Update Command (Profile Support + Migration)
+## 8. Update 命令（配置文件支持 + 迁移）
 
-- [x] 8.1 Modify existing `src/commands/update.ts` to read global config for profile/delivery/workflows
-- [x] 8.2 Implement shared `scanInstalledWorkflows(projectPath, tools)` — scan tool directories, match only against `ALL_WORKFLOWS` constant, return union across tools
-- [x] 8.3 Implement shared `migrateIfNeeded(projectPath, tools)` — one-time migration logic used by both `init` and `update`
-- [x] 8.4 Display migration message: "Migrated: custom profile with N workflows" + "New in this version: /opsx:propose. Try 'openspec config profile core' for the streamlined experience."
-- [x] 8.5 Add project check: exit with error if no `openspec/` directory exists
-- [x] 8.6 Add logic to detect which workflows are in config but not installed (to add)
-- [x] 8.7 Add logic to detect which workflows are installed and need refresh (to update)
-- [x] 8.8 Respect delivery setting: generate only skills if `skills`, only commands if `commands`
-- [x] 8.9 Delete files when delivery changes: remove commands if `skills`, remove skills if `commands`
-- [x] 8.10 Generate new workflow files for missing workflows in profile
-- [x] 8.11 Display summary: "Added: X, Y" / "Updated: Z" / "Removed: N files" / "Already up to date."
-- [x] 8.12 List affected tools in output: "Tools: Claude Code, Cursor"
-- [x] 8.13 Detect new tool directories not currently configured and display hint to re-init
-- [x] 8.14 Add tests for migration scenarios (existing user, partial workflows, multiple tools, idempotent, custom skills ignored)
-- [x] 8.15 Add tests for update command with profile scenarios (including delivery changes, outside-project error, new tool detection)
+- [x] 8.1 修改现有 `src/commands/update.ts` 以读取全局配置的 profile/delivery/workflows
+- [x] 8.2 实现共享 `scanInstalledWorkflows(projectPath, tools)` — 扫描工具目录，仅匹配 `ALL_WORKFLOWS` 常量，返回跨工具的并集
+- [x] 8.3 实现共享 `migrateIfNeeded(projectPath, tools)` — `init` 和 `update` 都使用的一次性迁移逻辑
+- [x] 8.4 显示迁移消息："已迁移：自定义配置文件包含 N 个工作流" + "此版本新功能：/opsx:propose。尝试 'openspec config profile core' 获得精简体验。"
+- [x] 8.5 添加项目检查：如果不存在 `openspec/` 目录则退出并报错
+- [x] 8.6 添加检测哪些工作流在配置中但未安装的逻辑（要添加）
+- [x] 8.7 添加检测哪些工作流已安装且需要刷新的逻辑（要更新）
+- [x] 8.8 尊重交付设置：如果 `skills` 仅生成技能，如果 `commands` 仅生成命令
+- [x] 8.9 交付更改时删除文件：如果 `skills` 移除命令，如果 `commands` 移除技能
+- [x] 8.10 为配置文件中缺失的工作流生成新工作流文件
+- [x] 8.11 显示摘要："已添加：X、Y" / "已更新：Z" / "已移除：N 个文件" / "已是最新。"
+- [x] 8.12 在输出中列出受影响的工具："工具：Claude Code、Cursor"
+- [x] 8.13 检测当前未配置的新工具目录并显示重新初始化提示
+- [x] 8.14 添加迁移场景测试（现有用户、部分工作流、多个工具、幂等、忽略自定义技能）
+- [x] 8.15 添加带配置文件场景的更新命令测试（包括交付更改、项目外错误、新工具检测）
 
-## 9. Tool Selection UX Fix
+## 9. 工具选择用户体验修复
 
-- [x] 9.1 Update `src/prompts/searchable-multi-select.ts` keybindings
-- [x] 9.2 Change Space to toggle selection
-- [x] 9.3 Change Enter to confirm selection
-- [x] 9.4 Remove Tab-to-confirm behavior
-- [x] 9.5 Add hint text "Space to toggle, Enter to confirm"
-- [x] 9.6 Add tests for keybinding behavior
+- [x] 9.1 更新 `src/prompts/searchable-multi-select.ts` 键绑定
+- [x] 9.2 更改空格为切换选择
+- [x] 9.3 更改回车为确认选择
+- [x] 9.4 移除 Tab 确认行为
+- [x] 9.5 添加提示文本"空格切换，回车确认"
+- [x] 9.6 添加键绑定行为测试
 
-## 10. Scaffolding Verification
+## 10. 脚手架验证
 
-- [x] 10.1 Verify `openspec new change` creates `.openspec.yaml` with schema and created fields
+- [x] 10.1 验证 `openspec new change` 创建带 schema 和 created 字段的 `.openspec.yaml`
 
-<!-- Note: 10.2 and 10.3 below are potential follow-up work, not core to this change -->
-<!-- - [ ] 10.2 Update ff skill to verify `.openspec.yaml` exists after `openspec new change` -->
-<!-- - [ ] 10.3 Add guardrail to skills: "Never manually create files in openspec/changes/ - use openspec new change" -->
+<!-- 注意：下面的 10.2 和 10.3 是潜在的后续工作，不是此变更的核心 -->
+<!-- - [ ] 10.2 更新 ff 技能以验证 `openspec new change` 后 `.openspec.yaml` 存在 -->
+<!-- - [ ] 10.3 向技能添加护栏："永远不要手动在 openspec/changes/ 中创建文件 - 使用 openspec new change" -->
 
-## 11. Template Next-Step Guidance
+## 11. 模板下一步指导
 
-- [x] 11.1 Audit all templates for hardcoded cross-workflow command references (e.g., `/opsx:propose`)
-- [x] 11.2 Replace any specific command references with generic concept-based guidance (e.g., "create a change proposal")
-- [x] 11.3 Review explore → propose transition UX (see `openspec/explorations/explore-workflow-ux.md` for open questions)
+- [x] 11.1 审计所有模板中硬编码的跨工作流命令引用（如 `/opsx:propose`）
+- [x] 11.2 用通用基于概念的指导替换任何特定命令引用（如"创建变更提案"）
+- [x] 11.3 审查 explore → propose 过渡用户体验（见 `openspec/explorations/explore-workflow-ux.md` 中的开放问题）
 
-## 12. Integration & Manual Testing
+## 12. 集成和手动测试
 
-- [x] 12.1 Run full test suite and fix any failures
-- [x] 12.2 Test on Windows (or verify CI passes on Windows)
-- [x] 12.3 Test end-to-end flow: init → propose → apply → archive
-- [x] 12.4 Update CLI help text for new commands
-- [x] 12.5 Manual: interactive init — verify detected tools are pre-selected, confirm prompt works, success message is correct
-- [x] 12.6 Manual: `openspec config profile` picker — verify delivery toggle, workflow toggles, pre-selection of current values, core preset shortcut
-- [x] 12.7 Manual: init with custom profile — verify init proceeds without profile confirmation prompt
-- [x] 12.8 Manual: delivery change via update — verify correct files are deleted/created when switching between skills/commands/both
-- [x] 12.9 Manual: migration flow — run update on a pre-existing project with no profile in config, verify migration message and resulting config
+- [x] 12.1 运行完整测试套件并修复任何失败
+- [x] 12.2 在 Windows 上测试（或验证 CI 在 Windows 上通过）
+- [x] 12.3 测试端到端流程：init → propose → apply → archive
+- [x] 12.4 更新新命令的 CLI 帮助文本
+- [x] 12.5 手动：交互式 init — 验证检测到的工具预选、确认提示工作、成功消息正确
+- [x] 12.6 手动：`openspec config profile` 选择器 — 验证交付切换、工作流切换、当前值预选、core 预设快捷方式
+- [x] 12.7 手动：使用自定义配置文件的 init — 验证 init 在无配置文件确认提示情况下继续
+- [x] 12.8 手动：通过更新的交付更改 — 验证在 skills/commands/both 之间切换时正确删除/创建文件
+- [x] 12.9 手动：迁移流程 — 在配置中没有配置文件的现有项目上运行更新，验证迁移消息和结果配置
 
-## 13. Post-Implementation Hardening (Review Follow-up)
+## 13. 实施后加固（审查后续）
 
-- [x] 13.1 Ensure `update` treats profile/delivery drift as update-required even when templates are current
-- [x] 13.2 Ensure `update` recognizes command-only installations as configured tools
-- [x] 13.3 Ensure `init` validates `--profile` values and errors on invalid overrides
-- [x] 13.4 Ensure re-running `init` applies delivery cleanup (removes files not matching current delivery mode)
-- [x] 13.5 Add/adjust regression tests for config drift sync, command-only detection, invalid profile override, and re-init delivery cleanup
+- [x] 13.1 确保 `update` 即使模板是当前的也将配置文件/交付漂移视为需要更新
+- [x] 13.2 确保 `update` 将仅命令安装识别为已配置的工具
+- [x] 13.3 确保 `init` 验证 `--profile` 值并在无效覆盖时报错
+- [x] 13.4 确保重新运行 `init` 应用交付清理（移除不匹配当前交付模式的文件）
+- [x] 13.5 添加/调整配置漂移同步、仅命令检测、无效配置文件覆盖和重新初始化交付清理的回归测试

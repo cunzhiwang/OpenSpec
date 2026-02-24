@@ -1,35 +1,35 @@
-## MODIFIED Requirements
+## 修改的需求
 
-### Requirement: AIToolOption skillsDir field
-The `AIToolOption` interface SHALL include scope support metadata in addition to path metadata.
+### 需求：AIToolOption skillsDir 字段
+`AIToolOption` 接口除路径元数据外应包含范围支持元数据。
 
-#### Scenario: Scope support metadata present
-- **WHEN** a tool entry is defined in `AI_TOOLS`
-- **THEN** it MAY declare supported install scopes for skills and commands
-- **AND** this metadata SHALL be used for effective scope resolution
+#### 场景：存在范围支持元数据
+- **当** 在 `AI_TOOLS` 中定义工具条目时
+- **则** 它可以为技能和命令声明支持的安装范围
+- **且** 此元数据应用于有效范围解析
 
-#### Scenario: Scope support metadata absent
-- **WHEN** a tool entry in `AI_TOOLS` omits scope support metadata for a surface
-- **THEN** resolver behavior SHALL default that surface to project-only support
-- **AND** effective scope resolution SHALL apply normal preferred/fallback rules against that default
+#### 场景：缺少范围支持元数据
+- **当** `AI_TOOLS` 中的工具条目为某个表面省略范围支持元数据时
+- **则** 解析器行为应将该表面默认为仅支持项目
+- **且** 有效范围解析应对该默认值应用正常的首选/回退规则
 
-### Requirement: Path configuration for supported tools
-Path metadata SHALL support both project and global install targets via resolver logic.
+### 需求：支持工具的路径配置
+路径元数据应通过解析器逻辑支持项目和全局安装目标。
 
-#### Scenario: Project scope path
-- **WHEN** effective scope is `project` for skills
-- **THEN** `skillsDir` SHALL be treated as a tool-specific container path under project root
-- **AND** managed skill artifacts SHALL be written under `<projectRoot>/<skillsDir>/skills/`
-- **AND** tool definitions SHALL set `skillsDir` accordingly (for example `.openspec` -> `.openspec/skills/`)
+#### 场景：项目范围路径
+- **当** 技能的有效范围是 `project` 时
+- **则** `skillsDir` 应被视为项目根目录下特定于工具的容器路径
+- **且** 托管技能产物应写入 `<projectRoot>/<skillsDir>/skills/`
+- **且** 工具定义应相应设置 `skillsDir`（例如 `.openspec` -> `.openspec/skills/`）
 
-#### Scenario: Global scope path
-- **WHEN** effective scope is `global` for a supported tool/surface
-- **THEN** paths SHALL resolve to tool-specific global directories
-- **AND** environment overrides (for example `CODEX_HOME`) SHALL be respected where applicable
+#### 场景：全局范围路径
+- **当** 支持的工具/表面的有效范围是 `global` 时
+- **则** 路径应解析到工具特定的全局目录
+- **且** 在适用时应尊重环境覆盖（例如 `CODEX_HOME`）
 
-#### Scenario: Windows global path resolution for Codex commands
-- **WHEN** effective scope is `global`
-- **AND** tool is Codex
-- **AND** platform is Windows
-- **THEN** command targets SHALL resolve to `%CODEX_HOME%\prompts` when `CODEX_HOME` is set
-- **AND** SHALL otherwise resolve to `%USERPROFILE%\.codex\prompts`
+#### 场景：Codex 命令的 Windows 全局路径解析
+- **当** 有效范围是 `global`
+- **且** 工具是 Codex
+- **且** 平台是 Windows
+- **则** 命令目标在设置 `CODEX_HOME` 时应解析为 `%CODEX_HOME%\prompts`
+- **且** 否则应解析为 `%USERPROFILE%\.codex\prompts`

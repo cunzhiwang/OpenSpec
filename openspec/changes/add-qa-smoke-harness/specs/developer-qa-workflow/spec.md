@@ -1,49 +1,49 @@
-## ADDED Requirements
+## 新增需求
 
-### Requirement: Makefile QA Entry Point
+### 需求：Makefile QA 入口点
 
-The repository SHALL provide Makefile targets as the primary developer entrypoint for CLI QA flows.
+仓库应提供 Makefile 目标作为 CLI QA 流程的主要开发者入口点。
 
-#### Scenario: Default QA target runs smoke suite
+#### 场景：默认 QA 目标运行冒烟套件
 
-- **WHEN** a developer runs `make qa`
-- **THEN** the command SHALL execute the non-interactive smoke suite
-- **AND** exit with status code 0 only when all smoke scenarios pass
+- **当** 开发者运行 `make qa`
+- **则** 命令应执行非交互式冒烟套件
+- **且** 仅当所有冒烟场景通过时退出状态码 0
 
-#### Scenario: Smoke suite target is directly invokable
+#### 场景：冒烟套件目标可直接调用
 
-- **WHEN** a developer runs `make qa-smoke`
-- **THEN** the command SHALL execute the same smoke suite used by `make qa`
-- **AND** return a non-zero exit code on assertion failure
+- **当** 开发者运行 `make qa-smoke`
+- **则** 命令应执行与 `make qa` 相同的冒烟套件
+- **且** 断言失败时返回非零退出代码
 
-#### Scenario: Interactive checklist target exists
+#### 场景：存在交互式检查清单目标
 
-- **WHEN** a developer runs `make qa-interactive`
-- **THEN** the command SHALL provide the manual interactive verification checklist
-- **AND** SHALL NOT run interactive prompt automation by default
+- **当** 开发者运行 `make qa-interactive`
+- **则** 命令应提供手动交互式验证检查清单
+- **且** 默认不运行交互式提示自动化
 
-### Requirement: Sandboxed Smoke Scenario Runner
+### 需求：沙箱冒烟场景运行器
 
-The smoke suite SHALL run CLI scenarios in isolated sandboxes so tests are repeatable and do not depend on machine-global state.
+冒烟套件应在隔离沙箱中运行 CLI 场景，使测试可重复且不依赖机器全局状态。
 
-#### Scenario: Scenario execution is environment-isolated
+#### 场景：场景执行是环境隔离的
 
-- **WHEN** a smoke scenario runs
-- **THEN** it SHALL use temporary values for `HOME`, `XDG_CONFIG_HOME`, `XDG_DATA_HOME`, and `CODEX_HOME`
-- **AND** global config from the host machine SHALL NOT affect scenario outcomes
+- **当** 冒烟场景运行时
+- **则** 它应使用临时值用于 `HOME`、`XDG_CONFIG_HOME`、`XDG_DATA_HOME` 和 `CODEX_HOME`
+- **且** 主机机器的全局配置不应影响场景结果
 
-#### Scenario: Scenario artifacts are captured for review
+#### 场景：场景产物被捕获以供审查
 
-- **WHEN** a smoke scenario completes
-- **THEN** the runner SHALL capture command output and exit status
-- **AND** SHALL capture enough filesystem state to inspect before/after behavior
+- **当** 冒烟场景完成时
+- **则** 运行器应捕获命令输出和退出状态
+- **且** 应捕获足够的文件系统状态以检查前后行为
 
-#### Scenario: High-risk workflow coverage exists
+#### 场景：存在高风险工作流覆盖
 
-- **WHEN** the smoke suite executes
-- **THEN** it SHALL include scenarios covering profile/delivery behavior and migration-sensitive flows
-- **AND** include at least:
-  - non-interactive tool detection
-  - migration when profile is unset
-  - delivery cleanup (`both -> skills`, `both -> commands`)
-  - commands-only update detection
+- **当** 冒烟套件执行时
+- **则** 它应包含覆盖配置文件/交付行为和迁移敏感流程的场景
+- **且** 至少包含：
+  - 非交互式工具检测
+  - 配置文件未设置时的迁移
+  - 交付清理（`both -> skills`、`both -> commands`）
+  - 仅命令更新检测

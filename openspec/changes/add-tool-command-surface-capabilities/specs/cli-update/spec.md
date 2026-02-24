@@ -1,48 +1,47 @@
-## ADDED Requirements
+## 新增需求
 
-### Requirement: Delivery sync by command surface capability
-The update command SHALL synchronize artifacts using each configured tool's command surface capability.
+### 需求：按命令表面能力的交付同步
+update 命令应使用每个配置工具的命令表面能力同步产物。
 
-#### Scenario: Commands delivery for adapter-backed configured tool
-- **WHEN** user runs `openspec update`
-- **AND** delivery is set to `commands`
-- **AND** a configured tool has an adapter-backed command surface
-- **THEN** the system SHALL generate or refresh command files for active workflows
-- **AND** the system SHALL remove managed skill directories for that tool
+#### 场景：适配器支持配置工具的 commands 交付
+- **当** 用户运行 `openspec update`
+- **且** 交付设置为 `commands`
+- **且** 配置工具有适配器支持的命令表面
+- **则** 系统应为活跃工作流生成或刷新命令文件
+- **且** 系统应移除该工具的托管技能目录
 
-#### Scenario: Commands delivery for skills-invocable configured tool
-- **WHEN** user runs `openspec update`
-- **AND** delivery is set to `commands`
-- **AND** a configured tool has `skills-invocable` command surface capability
-- **THEN** the system SHALL generate or refresh managed skill directories for active workflows
-- **AND** the system SHALL NOT remove those managed skill directories as part of commands-only cleanup
-- **AND** the system SHALL NOT attempt to require adapter-generated command files for that tool
+#### 场景：skills-invocable 配置工具的 commands 交付
+- **当** 用户运行 `openspec update`
+- **且** 交付设置为 `commands`
+- **且** 配置工具有 `skills-invocable` 命令表面能力
+- **则** 系统应为活跃工作流生成或刷新托管技能目录
+- **且** 系统不应作为 commands-only 清理的一部分移除那些托管技能目录
+- **且** 系统不应尝试要求该工具的适配器生成命令文件
 
-#### Scenario: Commands delivery with unsupported command surface
-- **WHEN** user runs `openspec update`
-- **AND** delivery is set to `commands`
-- **AND** a configured tool has no command surface capability
-- **THEN** the system SHALL fail with exit code 1 before applying partial updates
-- **AND** the output SHALL identify incompatible tools and recommended remediation
+#### 场景：不支持命令表面的 commands 交付
+- **当** 用户运行 `openspec update`
+- **且** 交付设置为 `commands`
+- **且** 配置工具没有命令表面能力
+- **则** 系统应在应用部分更新前以退出代码 1 失败
+- **且** 输出应识别不兼容的工具和推荐的补救措施
 
-### Requirement: Configured-tool detection for skills-invocable command surfaces
-The update command SHALL treat tools with skills-invocable command surfaces as configured when managed skill artifacts are present, including under commands delivery.
+### 需求：skills-invocable 命令表面的配置工具检测
+update 命令应在托管技能产物存在时将具有 skills-invocable 命令表面的工具视为已配置，包括在 commands 交付下。
 
-#### Scenario: Skills-invocable tool under commands delivery
-- **WHEN** user runs `openspec update`
-- **AND** delivery is set to `commands`
-- **AND** a tool has no adapter-generated command files
-- **AND** that tool is marked `skills-invocable` and has managed skills installed
-- **THEN** the system SHALL include the tool in configured-tool detection
-- **AND** the system SHALL apply normal version/profile/delivery sync to that tool
+#### 场景：commands 交付下的 skills-invocable 工具
+- **当** 用户运行 `openspec update`
+- **且** 交付设置为 `commands`
+- **且** 工具没有适配器生成的命令文件
+- **且** 该工具标记为 `skills-invocable` 并安装了托管技能
+- **则** 系统应在配置工具检测中包含该工具
+- **且** 系统应对该工具应用正常的版本/配置文件/交付同步
 
-### Requirement: Update summary reflects effective per-tool delivery
-The update command SHALL report effective artifact behavior when delivery intent and artifact type differ due to tool capability.
+### 需求：Update 摘要反映有效的每工具交付
+当交付意图和产物类型因工具能力而不同时，update 命令应报告有效的产物行为。
 
-#### Scenario: Summary for skills-invocable tools in commands delivery
-- **WHEN** update completes successfully
-- **AND** delivery is `commands`
-- **AND** at least one updated tool is `skills-invocable`
-- **THEN** output SHALL include a clear note that those tools use skills as their command surface
-- **AND** output SHALL avoid implying that command generation was skipped due to an error
-
+#### 场景：commands 交付中 skills-invocable 工具的摘要
+- **当** update 成功完成
+- **且** 交付是 `commands`
+- **且** 至少有一个更新的工具是 `skills-invocable`
+- **则** 输出应包含清晰的说明，指示那些工具使用技能作为其命令表面
+- **且** 输出应避免暗示命令生成因错误而被跳过

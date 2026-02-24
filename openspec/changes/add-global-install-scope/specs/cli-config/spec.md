@@ -1,21 +1,21 @@
-## ADDED Requirements
+## 新增需求
 
-### Requirement: Install scope configuration via profile flow
-The config profile workflow SHALL allow users to configure install scope preference.
+### 需求：通过配置文件流程配置安装范围
+config profile 工作流应允许用户配置安装范围偏好。
 
-#### Scenario: Interactive profile includes install scope
-- **WHEN** user runs `openspec config profile`
-- **THEN** the interactive flow SHALL include install scope selection with values `global` and `project`
-- **AND** the currently configured value SHALL be pre-selected
+#### 场景：交互式配置文件包含安装范围
+- **当** 用户运行 `openspec config profile`
+- **则** 交互流程应包含安装范围选择，值为 `global` 和 `project`
+- **且** 当前配置的值应预先选中
 
-#### Scenario: Save install scope
-- **WHEN** user confirms config profile changes
-- **THEN** selected install scope SHALL be saved to global config
+#### 场景：保存安装范围
+- **当** 用户确认配置文件更改时
+- **则** 选择的安装范围应保存到全局配置
 
-### Requirement: Install scope visibility in config output
-The config command SHALL display install scope preference in human-readable output.
+### 需求：配置输出中的安装范围可见性
+config 命令应在人类可读输出中显示安装范围偏好。
 
-#### Scenario: Config list shows install scope
-- **WHEN** user runs `openspec config list`
-- **THEN** output SHALL include current install scope value
-- **AND** indicate whether value is default or explicit
+#### 场景：Config list 显示安装范围
+- **当** 用户运行 `openspec config list`
+- **则** 输出应包含当前安装范围值
+- **且** 指示值是默认还是显式设置

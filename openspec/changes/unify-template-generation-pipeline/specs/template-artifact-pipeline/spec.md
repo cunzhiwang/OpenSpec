@@ -1,89 +1,89 @@
-# template-artifact-pipeline Specification
+# template-artifact-pipeline 规范
 
-## Purpose
+## 目的
 
-Define a unified architecture for workflow template generation that centralizes workflow definitions, tool capability wiring, transform execution, and artifact synchronization while preserving output fidelity.
+定义工作流模板生成的统一架构，集中工作流定义、工具能力连接、转换执行和产物同步，同时保持输出保真度。
 
-## ADDED Requirements
+## 新增需求
 
-### Requirement: Canonical Workflow Manifest
+### 需求：规范工作流清单
 
-The system SHALL define a canonical workflow manifest as the single source of truth for generated skill and command artifacts.
+系统应定义规范工作流清单作为生成的技能和命令产物的单一事实来源。
 
-#### Scenario: Register workflow once
+#### 场景：注册工作流一次
 
-- **WHEN** a workflow (for example `explore`, `ff`, or `onboard`) is added or modified
-- **THEN** its canonical definition SHALL be registered once in the workflow manifest
-- **AND** skill/command projections SHALL be derived from that manifest
-- **AND** duplicate hand-maintained lists SHALL NOT be required
+- **当** 添加或修改工作流（例如 `explore`、`ff` 或 `onboard`）时
+- **则** 其规范定义应在工作流清单中注册一次
+- **且** 技能/命令投影应从该清单派生
+- **且** 不应需要重复的手动维护列表
 
-#### Scenario: Required skill metadata
+#### 场景：必需的技能元数据
 
-- **WHEN** defining a workflow skill entry in the manifest
-- **THEN** it SHALL include required metadata fields (`license`, `compatibility`, and `metadata`)
-- **AND** generation SHALL use those values or explicit defaults in a consistent way for all workflows
+- **当** 在清单中定义工作流技能条目时
+- **则** 它应包含必需的元数据字段（`license`、`compatibility` 和 `metadata`）
+- **且** 生成应以一致的方式对所有工作流使用那些值或显式默认值
 
-### Requirement: Tool Profile Registry
+### 需求：工具配置文件注册表
 
-The system SHALL define a tool profile registry that captures generation capabilities per tool.
+系统应定义工具配置文件注册表，捕获每个工具的生成能力。
 
-#### Scenario: Resolve tool capabilities
+#### 场景：解析工具能力
 
-- **WHEN** generating artifacts for a selected tool
-- **THEN** the system SHALL resolve a tool profile that declares skill path capability, command adapter linkage, and transform set
-- **AND** tools with skills support but no command adapter SHALL be handled explicitly without implicit fallback behavior
+- **当** 为选定工具生成产物时
+- **则** 系统应解析声明技能路径能力、命令适配器链接和转换集的工具配置文件
+- **且** 具有技能支持但没有命令适配器的工具应被显式处理而无隐式回退行为
 
-#### Scenario: Capability consistency validation
+#### 场景：能力一致性验证
 
-- **WHEN** running validation checks
-- **THEN** the system SHALL detect mismatches between configured tools, profile definitions, and registered adapters
-- **AND** fail with actionable errors in development/CI
+- **当** 运行验证检查时
+- **则** 系统应检测配置工具、配置文件定义和注册适配器之间的不匹配
+- **且** 在开发/CI 中以可操作错误失败
 
-### Requirement: Ordered Transform Pipeline
+### 需求：有序转换管道
 
-The system SHALL support ordered artifact transforms with explicit scope and phase semantics.
+系统应支持具有显式范围和阶段语义的有序产物转换。
 
-#### Scenario: Execute pre-adapter and post-adapter transforms
+#### 场景：执行 pre-adapter 和 post-adapter 转换
 
-- **WHEN** generating an artifact
-- **THEN** matching transforms SHALL execute in deterministic order based on phase and priority
-- **AND** `preAdapter` transforms SHALL run before command adapter formatting
-- **AND** `postAdapter` transforms SHALL run after adapter formatting
+- **当** 生成产物时
+- **则** 匹配的转换应根据阶段和优先级以确定性顺序执行
+- **且** `preAdapter` 转换应在命令适配器格式化前运行
+- **且** `postAdapter` 转换应在适配器格式化后运行
 
-#### Scenario: Apply tool-specific rewrites declaratively
+#### 场景：声明式应用工具特定重写
 
-- **WHEN** a tool requires instruction rewrites (for example command reference syntax changes)
-- **THEN** those rewrites SHALL be implemented as registered transforms with explicit applicability predicates
-- **AND** generation entry points SHALL NOT implement ad-hoc rewrite logic
+- **当** 工具需要指令重写（例如命令引用语法更改）时
+- **则** 那些重写应实现为带显式适用性谓词的注册转换
+- **且** 生成入口点不应实现临时重写逻辑
 
-### Requirement: Shared Artifact Sync Engine
+### 需求：共享产物同步引擎
 
-The system SHALL provide a shared artifact sync engine used by all generation entry points.
+系统应提供由所有生成入口点使用的共享产物同步引擎。
 
-#### Scenario: Init and update use same engine
+#### 场景：Init 和 update 使用同一引擎
 
-- **WHEN** `openspec init` or `openspec update` writes skills/commands
-- **THEN** both flows SHALL use the same orchestration engine for planning, rendering, validating, and writing artifacts
-- **AND** behavior differences SHALL be configuration-driven rather than separate duplicated loops
+- **当** `openspec init` 或 `openspec update` 写入技能/命令时
+- **则** 两个流程应使用同一编排引擎进行规划、渲染、验证和写入产物
+- **且** 行为差异应由配置驱动，而不是分开的重复循环
 
-#### Scenario: Legacy upgrade path reuses engine
+#### 场景：遗留升级路径复用引擎
 
-- **WHEN** legacy cleanup triggers artifact regeneration
-- **THEN** the regeneration path SHALL use the same shared engine
-- **AND** generated outputs SHALL follow the same transform and validation rules
+- **当** 遗留清理触发产物重新生成时
+- **则** 重新生成路径应使用同一共享引擎
+- **且** 生成的输出应遵循相同的转换和验证规则
 
-### Requirement: Fidelity Guardrails
+### 需求：保真度护栏
 
-The system SHALL enforce guardrails that prevent output drift during refactors.
+系统应强制执行防止重构期间输出漂移的护栏。
 
-#### Scenario: Projection parity checks
+#### 场景：投影对等检查
 
-- **WHEN** CI runs template generation tests
-- **THEN** it SHALL verify manifest-derived projections remain consistent (workflows, command IDs, skill directories)
-- **AND** detect missing exports or missing workflow registration
+- **当** CI 运行模板生成测试时
+- **则** 它应验证清单派生的投影保持一致（工作流、命令 ID、技能目录）
+- **且** 检测缺失的导出或缺失的工作流注册
 
-#### Scenario: Output parity checks
+#### 场景：输出对等检查
 
-- **WHEN** running parity tests for representative workflow/tool combinations
-- **THEN** generated artifacts SHALL remain behaviorally equivalent to approved baselines unless intentionally changed
-- **AND** intentional changes SHALL be captured in explicit spec/proposal updates
+- **当** 为代表性工作流/工具组合运行对等测试时
+- **则** 生成的产物应与批准的基线保持行为等效，除非有意更改
+- **且** 有意更改应在显式规范/提案更新中捕获

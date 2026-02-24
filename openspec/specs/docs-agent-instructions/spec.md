@@ -1,62 +1,62 @@
-# docs-agent-instructions Specification
+# docs-agent-instructions 规范
 
-## Purpose
-Define authoring standards for generated agent instruction docs so templates, examples, and validation checklists are clear and copy-ready.
+## 目的
+定义生成的代理指令文档的编写标准，使模板、示例和验证清单清晰且可直接复制使用。
 
-## Requirements
-### Requirement: Quick Reference Placement
-The AI instructions SHALL begin with a quick-reference section that surfaces required file structures, templates, and formatting rules before any narrative guidance.
+## 需求
+### 需求：快速参考位置
+AI 指令应当以快速参考部分开始，在任何叙述性指导之前呈现所需的文件结构、模板和格式规则。
 
-#### Scenario: Loading templates at the top
-- **WHEN** `openspec/AGENTS.md` is regenerated or updated
-- **THEN** the first substantive section after the title SHALL provide copy-ready headings for `proposal.md`, `tasks.md`, spec deltas, and scenario formatting
-- **AND** link each template to the corresponding workflow step for deeper reading
+#### 场景：在顶部加载模板
+- **当** `openspec/AGENTS.md` 被重新生成或更新时
+- **则** 标题后的第一个实质性部分应当为 `proposal.md`、`tasks.md`、规范增量和场景格式提供可直接复制的标题
+- **且** 将每个模板链接到相应的工作流步骤以便深入阅读
 
-### Requirement: Embedded Templates and Examples
-`openspec/AGENTS.md` SHALL include complete copy/paste templates and inline examples exactly where agents make corresponding edits.
+### 需求：嵌入模板和示例
+`openspec/AGENTS.md` 应当在代理进行相应编辑的位置包含完整的复制/粘贴模板和内联示例。
 
-#### Scenario: Providing file templates
-- **WHEN** authors reach the workflow guidance for drafting proposals and deltas
-- **THEN** provide fenced Markdown templates that match the required structure (`## Why`, `## ADDED Requirements`, `#### Scenario:` etc.)
-- **AND** accompany each template with a brief example showing correct header usage and scenario bullets
+#### 场景：提供文件模板
+- **当** 作者到达起草提案和增量的工作流指导时
+- **则** 提供匹配所需结构的围栏式 Markdown 模板（`## Why`、`## ADDED Requirements`、`#### Scenario:` 等）
+- **且** 为每个模板附上简短示例，展示正确的标题使用和场景要点
 
-### Requirement: Pre-validation Checklist
-`openspec/AGENTS.md` SHALL offer a concise pre-validation checklist that highlights common formatting mistakes before running `openspec validate`.
+### 需求：预验证清单
+`openspec/AGENTS.md` 应当提供简洁的预验证清单，在运行 `openspec validate` 之前突出显示常见的格式错误。
 
-#### Scenario: Highlighting common validation failures
-- **WHEN** a reader reaches the validation guidance
-- **THEN** present a checklist reminding them to verify requirement headers, scenario formatting, and delta sections
-- **AND** include reminders about at least `#### Scenario:` usage and descriptive requirement text before scenarios
+#### 场景：突出显示常见验证失败
+- **当** 读者到达验证指导时
+- **则** 呈现清单提醒他们验证需求标题、场景格式和增量部分
+- **且** 包含至少关于 `#### Scenario:` 使用和场景前描述性需求文本的提醒
 
-### Requirement: Progressive Disclosure of Workflow Guidance
-The documentation SHALL separate beginner essentials from advanced topics so newcomers can focus on core steps without losing access to advanced workflows.
+### 需求：渐进式工作流指导披露
+文档应当将初学者必备知识与高级主题分开，使新手可以专注于核心步骤而不失去对高级工作流的访问。
 
-#### Scenario: Organizing beginner and advanced sections
-- **WHEN** reorganizing `openspec/AGENTS.md`
-- **THEN** keep an introductory section limited to the minimum steps (scaffold, draft, validate, request review)
-- **AND** move advanced topics (multi-capability changes, archiving details, tooling deep dives) into clearly labeled later sections
-- **AND** provide anchor links from the quick-reference to those advanced sections
+#### 场景：组织初学者和高级部分
+- **当** 重新组织 `openspec/AGENTS.md` 时
+- **则** 保持介绍部分仅限于最少步骤（搭建、起草、验证、请求审查）
+- **且** 将高级主题（多能力变更、归档详情、工具深入）移到明确标记的后续部分
+- **且** 从快速参考提供到这些高级部分的锚点链接
 
-### Requirement: Behavior-First Spec Authoring Guidance
-Agent instruction docs SHALL explicitly teach that specs capture observable behavior contracts, while implementation details belong in design/tasks.
+### 需求：行为优先的规范编写指导
+代理指令文档应当明确教导规范捕获可观察的行为契约，而实现细节属于设计/任务。
 
-#### Scenario: Distinguishing spec vs implementation content
-- **WHEN** `openspec/AGENTS.md` explains how to write `spec.md`
-- **THEN** it SHALL instruct agents to include externally verifiable behavior, inputs/outputs, errors, and constraints
-- **AND** it SHALL instruct agents to avoid internal library/framework choices and class/function-level implementation details in specs
+#### 场景：区分规范与实现内容
+- **当** `openspec/AGENTS.md` 解释如何编写 `spec.md` 时
+- **则** 它应当指导代理包含外部可验证的行为、输入/输出、错误和约束
+- **且** 它应当指导代理避免在规范中包含内部库/框架选择和类/函数级实现细节
 
-#### Scenario: Routing detail to the right artifact
-- **WHEN** implementation detail is necessary
-- **THEN** instructions SHALL direct the agent to place it in `design.md` or `tasks.md`, not in the behavioral requirements section of `spec.md`
+#### 场景：将细节路由到正确的产物
+- **当** 需要实现细节时
+- **则** 指令应当指导代理将其放在 `design.md` 或 `tasks.md` 中，而不是 `spec.md` 的行为需求部分
 
-### Requirement: Lightweight-by-Default Guidance
-Agent instruction docs SHALL promote minimal ceremony and proportional rigor for spec authoring.
+### 需求：默认轻量级指导
+代理指令文档应当促进规范编写的最小仪式和适当严谨性。
 
-#### Scenario: Applying progressive rigor
-- **WHEN** an agent drafts specs for routine changes
-- **THEN** instructions SHALL favor concise, lightweight requirements and scenarios
-- **AND** reserve deeper, fuller specification style for higher-risk changes (such as API breaks, migrations, cross-team, or security/privacy sensitive work)
+#### 场景：应用渐进式严谨性
+- **当** 代理为常规变更起草规范时
+- **则** 指令应当倾向于简洁、轻量的需求和场景
+- **且** 为更高风险的变更保留更深入、更完整的规范风格（如 API 破坏、迁移、跨团队或安全/隐私敏感工作）
 
-#### Scenario: Time-to-clarity optimization
-- **WHEN** guidance discusses drafting workflow
-- **THEN** it SHALL emphasize producing the smallest spec that is still testable and reviewable
+#### 场景：清晰度时间优化
+- **当** 指导讨论起草工作流时
+- **则** 它应当强调产生仍可测试和可审查的最小规范

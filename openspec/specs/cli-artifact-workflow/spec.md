@@ -1,277 +1,277 @@
-# cli-artifact-workflow Specification
+# CLI 产物工作流规范
 
-## Purpose
-Define artifact workflow CLI behavior (`status`, `instructions`, `templates`, and setup flows) for scaffolded and active changes.
+## 目的
+定义脚手架和活动变更的产物工作流 CLI 行为（`status`、`instructions`、`templates` 和设置流程）。
 
-## Requirements
-### Requirement: Status Command
+## 需求
+### 需求：状态命令
 
-The system SHALL display artifact completion status for a change, including scaffolded (empty) changes.
+系统应当为变更显示产物完成状态，包括脚手架（空）变更。
 
-> **Fixes bug**: Previously required `proposal.md` to exist via `getActiveChangeIds()`.
+> **修复 bug**：之前通过 `getActiveChangeIds()` 要求存在 `proposal.md`。
 
-#### Scenario: Show status with all states
+#### 场景：显示所有状态
 
-- **WHEN** user runs `openspec status --change <id>`
-- **THEN** the system displays each artifact with status indicator:
-  - `[x]` for completed artifacts
-  - `[ ]` for ready artifacts
-  - `[-]` for blocked artifacts (with missing dependencies listed)
+- **当** 用户运行 `openspec status --change <id>` 时
+- **则** 系统为每个产物显示状态指示器：
+  - `[x]` 表示已完成的产物
+  - `[ ]` 表示就绪的产物
+  - `[-]` 表示被阻塞的产物（列出缺失的依赖）
 
-#### Scenario: Status shows completion summary
+#### 场景：状态显示完成摘要
 
-- **WHEN** user runs `openspec status --change <id>`
-- **THEN** output includes completion percentage and count (e.g., "2/4 artifacts complete")
+- **当** 用户运行 `openspec status --change <id>` 时
+- **则** 输出包含完成百分比和计数（例如 "2/4 个产物完成"）
 
-#### Scenario: Status JSON output
+#### 场景：状态 JSON 输出
 
-- **WHEN** user runs `openspec status --change <id> --json`
-- **THEN** the system outputs JSON with changeName, schemaName, isComplete, and artifacts array
+- **当** 用户运行 `openspec status --change <id> --json` 时
+- **则** 系统输出包含 changeName、schemaName、isComplete 和 artifacts 数组的 JSON
 
-#### Scenario: Status JSON includes apply requirements
+#### 场景：状态 JSON 包含应用需求
 
-- **WHEN** user runs `openspec status --change <id> --json`
-- **THEN** the system outputs JSON with:
-  - `changeName`, `schemaName`, `isComplete`, `artifacts` array
-  - `applyRequires`: array of artifact IDs needed for apply phase
+- **当** 用户运行 `openspec status --change <id> --json` 时
+- **则** 系统输出 JSON，包含：
+  - `changeName`、`schemaName`、`isComplete`、`artifacts` 数组
+  - `applyRequires`：应用阶段所需的产物 ID 数组
 
-#### Scenario: Status on scaffolded change
+#### 场景：脚手架变更的状态
 
-- **WHEN** user runs `openspec status --change <id>` on a change with no artifacts
-- **THEN** system displays all artifacts with their status
-- **AND** root artifacts (no dependencies) show as ready `[ ]`
-- **AND** dependent artifacts show as blocked `[-]`
+- **当** 用户在没有产物的变更上运行 `openspec status --change <id>` 时
+- **则** 系统显示所有产物及其状态
+- **并且** 根产物（无依赖）显示为就绪 `[ ]`
+- **并且** 依赖产物显示为阻塞 `[-]`
 
-#### Scenario: Missing change parameter
+#### 场景：缺少变更参数
 
-- **WHEN** user runs `openspec status` without `--change`
-- **THEN** the system displays an error with list of available changes
-- **AND** includes scaffolded changes (directories without proposal.md)
+- **当** 用户运行 `openspec status` 而不带 `--change` 时
+- **则** 系统显示错误，列出可用变更
+- **并且** 包括脚手架变更（没有 proposal.md 的目录）
 
-#### Scenario: Unknown change
+#### 场景：未知变更
 
-- **WHEN** user runs `openspec status --change unknown-id`
-- **AND** directory `openspec/changes/unknown-id/` does not exist
-- **THEN** the system displays an error listing all available change directories
+- **当** 用户运行 `openspec status --change unknown-id` 时
+- **并且** 目录 `openspec/changes/unknown-id/` 不存在时
+- **则** 系统显示错误，列出所有可用的变更目录
 
-### Requirement: Next Artifact Discovery
+### 需求：下一个产物发现
 
-The workflow SHALL use `openspec status` output to determine what can be created next, rather than a separate next-command surface.
+工作流应当使用 `openspec status` 输出来确定接下来可以创建什么，而不是单独的 next 命令界面。
 
-#### Scenario: Discover next artifacts from status output
+#### 场景：从状态输出发现下一个产物
 
-- **WHEN** a user needs to know which artifact to create next
-- **THEN** `openspec status --change <id>` identifies ready artifacts with `[ ]`
-- **AND** no dedicated "next command" is required to continue the workflow
+- **当** 用户需要知道接下来创建哪个产物时
+- **则** `openspec status --change <id>` 用 `[ ]` 标识就绪产物
+- **并且** 不需要专门的"next 命令"来继续工作流
 
-### Requirement: Instructions Command
+### 需求：指令命令
 
-The system SHALL output enriched instructions for creating an artifact, including for scaffolded changes.
+系统应当输出用于创建产物的丰富指令，包括脚手架变更。
 
-#### Scenario: Show enriched instructions
+#### 场景：显示丰富指令
 
-- **WHEN** user runs `openspec instructions <artifact> --change <id>`
-- **THEN** the system outputs:
-  - Artifact metadata (ID, output path, description)
-  - Template content
-  - Dependency status (done/missing)
-  - Unlocked artifacts (what becomes available after completion)
+- **当** 用户运行 `openspec instructions <artifact> --change <id>` 时
+- **则** 系统输出：
+  - 产物元数据（ID、输出路径、描述）
+  - 模板内容
+  - 依赖状态（已完成/缺失）
+  - 解锁的产物（完成后可用的产物）
 
-#### Scenario: Instructions JSON output
+#### 场景：指令 JSON 输出
 
-- **WHEN** user runs `openspec instructions <artifact> --change <id> --json`
-- **THEN** the system outputs JSON matching ArtifactInstructions interface
+- **当** 用户运行 `openspec instructions <artifact> --change <id> --json` 时
+- **则** 系统输出匹配 ArtifactInstructions 接口的 JSON
 
-#### Scenario: Unknown artifact
+#### 场景：未知产物
 
-- **WHEN** user runs `openspec instructions unknown-artifact --change <id>`
-- **THEN** the system displays an error listing valid artifact IDs for the schema
+- **当** 用户运行 `openspec instructions unknown-artifact --change <id>` 时
+- **则** 系统显示错误，列出模式的有效产物 ID
 
-#### Scenario: Artifact with unmet dependencies
+#### 场景：有未满足依赖的产物
 
-- **WHEN** user requests instructions for a blocked artifact
-- **THEN** the system displays instructions with a warning about missing dependencies
+- **当** 用户请求被阻塞产物的指令时
+- **则** 系统显示指令并警告缺失依赖
 
-#### Scenario: Instructions on scaffolded change
+#### 场景：脚手架变更的指令
 
-- **WHEN** user runs `openspec instructions proposal --change <id>` on a scaffolded change
-- **THEN** system outputs template and metadata for creating the proposal
-- **AND** does not require any artifacts to already exist
+- **当** 用户在脚手架变更上运行 `openspec instructions proposal --change <id>` 时
+- **则** 系统输出创建提案的模板和元数据
+- **并且** 不要求已存在任何产物
 
-### Requirement: Templates Command
-The system SHALL show resolved template paths for all artifacts in a schema.
+### 需求：模板命令
+系统应当显示模式中所有产物的已解析模板路径。
 
-#### Scenario: List template paths with default schema
-- **WHEN** user runs `openspec templates`
-- **THEN** the system displays each artifact with its resolved template path using the default schema
+#### 场景：使用默认模式列出模板路径
+- **当** 用户运行 `openspec templates` 时
+- **则** 系统使用默认模式显示每个产物的已解析模板路径
 
-#### Scenario: List template paths with custom schema
-- **WHEN** user runs `openspec templates --schema tdd`
-- **THEN** the system displays template paths for the specified schema
+#### 场景：使用自定义模式列出模板路径
+- **当** 用户运行 `openspec templates --schema tdd` 时
+- **则** 系统显示指定模式的模板路径
 
-#### Scenario: Templates JSON output
-- **WHEN** user runs `openspec templates --json`
-- **THEN** the system outputs JSON mapping artifact IDs to template paths
+#### 场景：模板 JSON 输出
+- **当** 用户运行 `openspec templates --json` 时
+- **则** 系统输出将产物 ID 映射到模板路径的 JSON
 
-#### Scenario: Template resolution source
-- **WHEN** displaying template paths
-- **THEN** the system indicates whether each template is from user override or package built-in
+#### 场景：模板解析来源
+- **当** 显示模板路径时
+- **则** 系统指示每个模板是来自用户覆盖还是包内置
 
-### Requirement: New Change Command
-The system SHALL create new change directories with validation.
+### 需求：新变更命令
+系统应当创建带有验证的新变更目录。
 
-#### Scenario: Create valid change
-- **WHEN** user runs `openspec new change add-feature`
-- **THEN** the system creates `openspec/changes/add-feature/` directory
+#### 场景：创建有效变更
+- **当** 用户运行 `openspec new change add-feature` 时
+- **则** 系统创建 `openspec/changes/add-feature/` 目录
 
-#### Scenario: Invalid change name
-- **WHEN** user runs `openspec new change "Add Feature"` with invalid name
-- **THEN** the system displays validation error with guidance
+#### 场景：无效变更名称
+- **当** 用户使用无效名称运行 `openspec new change "Add Feature"` 时
+- **则** 系统显示验证错误和指导
 
-#### Scenario: Duplicate change name
-- **WHEN** user runs `openspec new change existing-change` for an existing change
-- **THEN** the system displays an error indicating the change already exists
+#### 场景：重复变更名称
+- **当** 用户为现有变更运行 `openspec new change existing-change` 时
+- **则** 系统显示错误，表明变更已存在
 
-#### Scenario: Create with description
-- **WHEN** user runs `openspec new change add-feature --description "Add new feature"`
-- **THEN** the system creates the change directory with description in README.md
+#### 场景：带描述创建
+- **当** 用户运行 `openspec new change add-feature --description "Add new feature"` 时
+- **则** 系统创建变更目录，在 README.md 中包含描述
 
-### Requirement: Schema Selection
-The system SHALL support custom schema selection for workflow commands.
+### 需求：模式选择
+系统应当支持工作流命令的自定义模式选择。
 
-#### Scenario: Default schema
-- **WHEN** user runs workflow commands without `--schema`
-- **THEN** the system uses the "spec-driven" schema
+#### 场景：默认模式
+- **当** 用户运行不带 `--schema` 的工作流命令时
+- **则** 系统使用 "spec-driven" 模式
 
-#### Scenario: Custom schema
-- **WHEN** user runs `openspec status --change <id> --schema tdd`
-- **THEN** the system uses the specified schema for artifact graph
+#### 场景：自定义模式
+- **当** 用户运行 `openspec status --change <id> --schema tdd` 时
+- **则** 系统使用指定的模式作为产物图
 
-#### Scenario: Unknown schema
-- **WHEN** user specifies an unknown schema
-- **THEN** the system displays an error listing available schemas
+#### 场景：未知模式
+- **当** 用户指定未知模式时
+- **则** 系统显示错误，列出可用模式
 
-### Requirement: Output Formatting
-The system SHALL provide consistent output formatting.
+### 需求：输出格式化
+系统应当提供一致的输出格式化。
 
-#### Scenario: Color output
-- **WHEN** terminal supports colors
-- **THEN** status indicators use colors: green (done), yellow (ready), red (blocked)
+#### 场景：彩色输出
+- **当** 终端支持颜色时
+- **则** 状态指示器使用颜色：绿色（完成）、黄色（就绪）、红色（阻塞）
 
-#### Scenario: No color output
-- **WHEN** `--no-color` flag is used or NO_COLOR environment variable is set
-- **THEN** output uses text-only indicators without ANSI colors
+#### 场景：无颜色输出
+- **当** 使用 `--no-color` 标志或设置了 NO_COLOR 环境变量时
+- **则** 输出使用纯文本指示器，不使用 ANSI 颜色
 
-#### Scenario: Progress indication
-- **WHEN** loading change state takes time
-- **THEN** the system displays a spinner during loading
+#### 场景：进度指示
+- **当** 加载变更状态需要时间时
+- **则** 系统在加载期间显示加载动画
 
-### Requirement: Experimental Isolation
-The system SHALL implement artifact workflow commands in isolation for easy removal.
+### 需求：实验性隔离
+系统应当在隔离中实现产物工作流命令，以便于移除。
 
-#### Scenario: Single file implementation
-- **WHEN** artifact workflow feature is implemented
-- **THEN** all commands are in `src/commands/artifact-workflow.ts`
+#### 场景：单文件实现
+- **当** 实现产物工作流功能时
+- **则** 所有命令都在 `src/commands/artifact-workflow.ts` 中
 
-#### Scenario: Help text marking
-- **WHEN** user runs `--help` on any artifact workflow command
-- **THEN** help text indicates the command is experimental
+#### 场景：帮助文本标记
+- **当** 用户在任何产物工作流命令上运行 `--help` 时
+- **则** 帮助文本表明该命令是实验性的
 
-### Requirement: Schema Apply Block
+### 需求：模式 Apply 块
 
-The system SHALL support an `apply` block in schema definitions that controls when and how implementation begins.
+系统应当支持模式定义中的 `apply` 块，控制何时以及如何开始实现。
 
-#### Scenario: Schema with apply block
+#### 场景：带 apply 块的模式
 
-- **WHEN** a schema defines an `apply` block
-- **THEN** the system uses `apply.requires` to determine which artifacts must exist before apply
-- **AND** uses `apply.tracks` to identify the file for progress tracking (or null if none)
-- **AND** uses `apply.instruction` for guidance shown to the agent
+- **当** 模式定义了 `apply` 块时
+- **则** 系统使用 `apply.requires` 来确定应用前必须存在哪些产物
+- **并且** 使用 `apply.tracks` 来识别用于进度跟踪的文件（或如果没有则为 null）
+- **并且** 使用 `apply.instruction` 显示给代理的指导
 
-#### Scenario: Schema without apply block
+#### 场景：没有 apply 块的模式
 
-- **WHEN** a schema has no `apply` block
-- **THEN** the system requires all artifacts to exist before apply is available
-- **AND** uses default instruction: "All artifacts complete. Proceed with implementation."
+- **当** 模式没有 `apply` 块时
+- **则** 系统要求所有产物存在后才能应用
+- **并且** 使用默认指令："所有产物已完成。继续实现。"
 
-### Requirement: Apply Instructions Command
+### 需求：Apply 指令命令
 
-The system SHALL generate schema-aware apply instructions via `openspec instructions apply`.
+系统应当通过 `openspec instructions apply` 生成模式感知的应用指令。
 
-#### Scenario: Generate apply instructions
+#### 场景：生成 apply 指令
 
-- **WHEN** user runs `openspec instructions apply --change <id>`
-- **AND** all required artifacts (per schema's `apply.requires`) exist
-- **THEN** the system outputs:
-  - Context files from all existing artifacts
-  - Schema-specific instruction text
-  - Progress tracking file path (if `apply.tracks` is set)
+- **当** 用户运行 `openspec instructions apply --change <id>` 时
+- **并且** 所有必需产物（按模式的 `apply.requires`）存在时
+- **则** 系统输出：
+  - 所有现有产物的上下文文件
+  - 模式特定的指令文本
+  - 进度跟踪文件路径（如果设置了 `apply.tracks`）
 
-#### Scenario: Apply blocked by missing artifacts
+#### 场景：Apply 被缺失产物阻塞
 
-- **WHEN** user runs `openspec instructions apply --change <id>`
-- **AND** required artifacts are missing
-- **THEN** the system indicates apply is blocked
-- **AND** lists which artifacts must be created first
+- **当** 用户运行 `openspec instructions apply --change <id>` 时
+- **并且** 缺少必需产物时
+- **则** 系统指示 apply 被阻塞
+- **并且** 列出必须先创建的产物
 
-#### Scenario: Apply instructions JSON output
+#### 场景：Apply 指令 JSON 输出
 
-- **WHEN** user runs `openspec instructions apply --change <id> --json`
-- **THEN** the system outputs JSON with:
-  - `contextFiles`: array of paths to existing artifacts
-  - `instruction`: the apply instruction text
-  - `tracks`: path to progress file or null
-  - `applyRequires`: list of required artifact IDs
+- **当** 用户运行 `openspec instructions apply --change <id> --json` 时
+- **则** 系统输出 JSON，包含：
+  - `contextFiles`：现有产物路径数组
+  - `instruction`：apply 指令文本
+  - `tracks`：进度文件路径或 null
+  - `applyRequires`：必需产物 ID 列表
 
-### Requirement: Tool selection flag
+### 需求：工具选择标志
 
-The `artifact-experimental-setup` command SHALL accept a `--tool <tool-id>` flag to specify the target AI tool.
+`artifact-experimental-setup` 命令应当接受 `--tool <tool-id>` 标志来指定目标 AI 工具。
 
-#### Scenario: Specify tool via flag
+#### 场景：通过标志指定工具
 
-- **WHEN** user runs `openspec artifact-experimental-setup --tool cursor`
-- **THEN** skill files are generated in `.cursor/skills/`
-- **AND** command files are generated using Cursor's frontmatter format
+- **当** 用户运行 `openspec artifact-experimental-setup --tool cursor` 时
+- **则** 技能文件生成在 `.cursor/skills/`
+- **并且** 命令文件使用 Cursor 的 frontmatter 格式生成
 
-#### Scenario: Missing tool flag
+#### 场景：缺少工具标志
 
-- **WHEN** user runs `openspec artifact-experimental-setup` without `--tool`
-- **THEN** the system displays an error requiring the `--tool` flag
-- **AND** lists valid tool IDs in the error message
+- **当** 用户运行 `openspec artifact-experimental-setup` 而不带 `--tool` 时
+- **则** 系统显示错误，要求 `--tool` 标志
+- **并且** 在错误消息中列出有效的工具 ID
 
-#### Scenario: Unknown tool ID
+#### 场景：未知工具 ID
 
-- **WHEN** user runs `openspec artifact-experimental-setup --tool unknown-tool`
-- **AND** the tool ID is not in `AI_TOOLS`
-- **THEN** the system displays an error listing valid tool IDs
+- **当** 用户运行 `openspec artifact-experimental-setup --tool unknown-tool` 时
+- **并且** 工具 ID 不在 `AI_TOOLS` 中时
+- **则** 系统显示错误，列出有效的工具 ID
 
-#### Scenario: Tool without skillsDir
+#### 场景：没有 skillsDir 的工具
 
-- **WHEN** user specifies a tool that has no `skillsDir` configured
-- **THEN** the system displays an error indicating skill generation is not supported for that tool
+- **当** 用户指定没有配置 `skillsDir` 的工具时
+- **则** 系统显示错误，表明该工具不支持技能生成
 
-#### Scenario: Tool without command adapter
+#### 场景：没有命令适配器的工具
 
-- **WHEN** user specifies a tool that has `skillsDir` but no command adapter registered
-- **THEN** skill files are generated successfully
-- **AND** command generation is skipped with informational message
+- **当** 用户指定有 `skillsDir` 但没有注册命令适配器的工具时
+- **则** 技能文件成功生成
+- **并且** 命令生成被跳过，显示信息消息
 
-### Requirement: Output messaging
+### 需求：输出消息
 
-The setup command SHALL display clear output about what was generated.
+设置命令应当显示关于生成内容的清晰输出。
 
-#### Scenario: Show target tool in output
+#### 场景：在输出中显示目标工具
 
-- **WHEN** setup command runs successfully
-- **THEN** output includes the target tool name (e.g., "Setting up for Cursor...")
+- **当** 设置命令成功运行时
+- **则** 输出包含目标工具名称（例如 "正在为 Cursor 设置..."）
 
-#### Scenario: Show generated paths
+#### 场景：显示生成的路径
 
-- **WHEN** setup command completes
-- **THEN** output lists all generated skill file paths
-- **AND** lists all generated command file paths (if applicable)
+- **当** 设置命令完成时
+- **则** 输出列出所有生成的技能文件路径
+- **并且** 列出所有生成的命令文件路径（如果适用）
 
-#### Scenario: Show skipped commands message
+#### 场景：显示跳过命令消息
 
-- **WHEN** command generation is skipped due to missing adapter
-- **THEN** output includes message: "Command generation skipped - no adapter for <tool>"
+- **当** 因缺少适配器而跳过命令生成时
+- **则** 输出包含消息："命令生成已跳过 - <tool> 没有适配器"

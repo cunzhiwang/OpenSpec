@@ -1,97 +1,96 @@
-# command-generation Specification
+# command-generation 规范
 
-## Purpose
-Define tool-agnostic command content and adapter contracts for generating tool-specific OpenSpec command files.
+## 目的
+定义工具无关的命令内容和适配器契约，用于生成工具特定的 OpenSpec 命令文件。
 
-## Requirements
-### Requirement: CommandContent interface
+## 需求
+### 需求：CommandContent 接口
 
-The system SHALL define a tool-agnostic `CommandContent` interface for command data.
+系统应当为命令数据定义工具无关的 `CommandContent` 接口。
 
-#### Scenario: CommandContent structure
+#### 场景：CommandContent 结构
 
-- **WHEN** defining a command to generate
-- **THEN** `CommandContent` SHALL include:
-  - `id`: string identifier (e.g., 'explore', 'apply')
-  - `name`: human-readable name (e.g., 'OpenSpec Explore')
-  - `description`: brief description of command purpose
-  - `category`: grouping category (e.g., 'OpenSpec')
-  - `tags`: array of tag strings
-  - `body`: the command instruction content
+- **当** 定义要生成的命令时
+- **则** `CommandContent` 应当包含：
+  - `id`：字符串标识符（例如 'explore'、'apply'）
+  - `name`：人类可读名称（例如 'OpenSpec Explore'）
+  - `description`：命令目的的简要描述
+  - `category`：分组类别（例如 'OpenSpec'）
+  - `tags`：标签字符串数组
+  - `body`：命令指令内容
 
-### Requirement: ToolCommandAdapter interface
+### 需求：ToolCommandAdapter 接口
 
-The system SHALL define a `ToolCommandAdapter` interface for per-tool formatting.
+系统应当为每个工具的格式化定义 `ToolCommandAdapter` 接口。
 
-#### Scenario: Adapter interface structure
+#### 场景：适配器接口结构
 
-- **WHEN** implementing a tool adapter
-- **THEN** `ToolCommandAdapter` SHALL require:
-  - `toolId`: string identifier matching `AIToolOption.value`
-  - `getFilePath(commandId: string)`: returns file path for command (relative from project root, or absolute for global-scoped tools like Codex)
-  - `formatFile(content: CommandContent)`: returns complete file content with frontmatter
+- **当** 实现工具适配器时
+- **则** `ToolCommandAdapter` 应当要求：
+  - `toolId`：匹配 `AIToolOption.value` 的字符串标识符
+  - `getFilePath(commandId: string)`：返回命令的文件路径（从项目根目录的相对路径，或对于 Codex 等全局作用域工具的绝对路径）
+  - `formatFile(content: CommandContent)`：返回带 frontmatter 的完整文件内容
 
-#### Scenario: Claude adapter formatting
+#### 场景：Claude 适配器格式化
 
-- **WHEN** formatting a command for Claude Code
-- **THEN** the adapter SHALL output YAML frontmatter with `name`, `description`, `category`, `tags` fields
-- **AND** file path SHALL follow pattern `.claude/commands/opsx/<id>.md`
+- **当** 为 Claude Code 格式化命令时
+- **则** 适配器应当输出带有 `name`、`description`、`category`、`tags` 字段的 YAML frontmatter
+- **且** 文件路径应当遵循模式 `.claude/commands/opsx/<id>.md`
 
-#### Scenario: Cursor adapter formatting
+#### 场景：Cursor 适配器格式化
 
-- **WHEN** formatting a command for Cursor
-- **THEN** the adapter SHALL output YAML frontmatter with `name` as `/opsx-<id>`, `id`, `category`, `description` fields
-- **AND** file path SHALL follow pattern `.cursor/commands/opsx-<id>.md`
+- **当** 为 Cursor 格式化命令时
+- **则** 适配器应当输出带有 `name` 为 `/opsx-<id>`、`id`、`category`、`description` 字段的 YAML frontmatter
+- **且** 文件路径应当遵循模式 `.cursor/commands/opsx-<id>.md`
 
-#### Scenario: Windsurf adapter formatting
+#### 场景：Windsurf 适配器格式化
 
-- **WHEN** formatting a command for Windsurf
-- **THEN** the adapter SHALL output YAML frontmatter with `name`, `description`, `category`, `tags` fields
-- **AND** file path SHALL follow pattern `.windsurf/workflows/opsx-<id>.md`
+- **当** 为 Windsurf 格式化命令时
+- **则** 适配器应当输出带有 `name`、`description`、`category`、`tags` 字段的 YAML frontmatter
+- **且** 文件路径应当遵循模式 `.windsurf/workflows/opsx-<id>.md`
 
-### Requirement: Command generator function
+### 需求：命令生成器函数
 
-The system SHALL provide a `generateCommand` function that combines content with adapter.
+系统应当提供将内容与适配器结合的 `generateCommand` 函数。
 
-#### Scenario: Generate command file
+#### 场景：生成命令文件
 
-- **WHEN** calling `generateCommand(content, adapter)`
-- **THEN** it SHALL return an object with:
-  - `path`: the file path from `adapter.getFilePath(content.id)`
-  - `fileContent`: the formatted content from `adapter.formatFile(content)`
+- **当** 调用 `generateCommand(content, adapter)` 时
+- **则** 它应当返回包含以下内容的对象：
+  - `path`：来自 `adapter.getFilePath(content.id)` 的文件路径
+  - `fileContent`：来自 `adapter.formatFile(content)` 的格式化内容
 
-#### Scenario: Generate multiple commands
+#### 场景：生成多个命令
 
-- **WHEN** generating all opsx commands for a tool
-- **THEN** the system SHALL iterate over command contents and generate each using the tool's adapter
+- **当** 为某个工具生成所有 opsx 命令时
+- **则** 系统应当遍历命令内容并使用该工具的适配器生成每个命令
 
-### Requirement: CommandAdapterRegistry
+### 需求：CommandAdapterRegistry
 
-The system SHALL provide a registry for looking up tool adapters.
+系统应当提供用于查找工具适配器的注册表。
 
-#### Scenario: Get adapter by tool ID
+#### 场景：通过工具 ID 获取适配器
 
-- **WHEN** calling `CommandAdapterRegistry.get('cursor')`
-- **THEN** it SHALL return the Cursor adapter or undefined if not registered
+- **当** 调用 `CommandAdapterRegistry.get('cursor')` 时
+- **则** 它应当返回 Cursor 适配器，如果未注册则返回 undefined
 
-#### Scenario: Get all adapters
+#### 场景：获取所有适配器
 
-- **WHEN** calling `CommandAdapterRegistry.getAll()`
-- **THEN** it SHALL return array of all registered adapters
+- **当** 调用 `CommandAdapterRegistry.getAll()` 时
+- **则** 它应当返回所有已注册适配器的数组
 
-#### Scenario: Adapter not found
+#### 场景：未找到适配器
 
-- **WHEN** looking up an adapter for unregistered tool
-- **THEN** `CommandAdapterRegistry.get()` SHALL return undefined
-- **AND** caller SHALL handle missing adapter appropriately
+- **当** 为未注册的工具查找适配器时
+- **则** `CommandAdapterRegistry.get()` 应当返回 undefined
+- **且** 调用者应当适当处理缺失的适配器
 
-### Requirement: Shared command body content
+### 需求：共享命令正文内容
 
-The body content of commands SHALL be shared across all tools.
+命令的正文内容应当在所有工具间共享。
 
-#### Scenario: Same instructions across tools
+#### 场景：跨工具相同的指令
 
-- **WHEN** generating the 'explore' command for Claude and Cursor
-- **THEN** both SHALL use the same `body` content
-- **AND** only the frontmatter and file path SHALL differ
-
+- **当** 为 Claude 和 Cursor 生成 'explore' 命令时
+- **则** 两者应当使用相同的 `body` 内容
+- **且** 仅 frontmatter 和文件路径应当不同

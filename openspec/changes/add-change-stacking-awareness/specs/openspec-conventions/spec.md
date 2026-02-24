@@ -1,29 +1,29 @@
-## ADDED Requirements
+## 新增需求
 
-### Requirement: Stack-Aware Change Planning Conventions
-OpenSpec conventions SHALL define optional metadata fields for sequencing and decomposition across concurrent changes.
+### 需求：堆叠感知变更规划约定
+OpenSpec 约定应为跨并发变更的排序和分解定义可选元数据字段。
 
-#### Scenario: Declaring change dependencies
-- **WHEN** authors need to sequence related changes
-- **THEN** conventions SHALL define how to declare dependencies and provided/required capability markers
-- **AND** validation guidance SHALL distinguish hard blockers from soft overlap warnings
+#### 场景：声明变更依赖
+- **当** 作者需要对相关变更进行排序时
+- **则** 约定应定义如何声明依赖和提供的/所需的能力标记
+- **且** 验证指导应区分硬阻塞器和软重叠警告
 
-#### Scenario: Dependency source of truth during migration
-- **WHEN** both stack metadata and `openspec/changes/IMPLEMENTATION_ORDER.md` are present
-- **THEN** conventions SHALL treat per-change stack metadata as the normative dependency source
-- **AND** `IMPLEMENTATION_ORDER.md` SHALL be treated as optional narrative guidance
+#### 场景：迁移期间的依赖事实来源
+- **当** 堆叠元数据和 `openspec/changes/IMPLEMENTATION_ORDER.md` 同时存在时
+- **则** 约定应将每变更堆叠元数据视为规范的依赖来源
+- **且** `IMPLEMENTATION_ORDER.md` 应被视为可选的叙述指导
 
-#### Scenario: Explicit ordering remains required for capability markers
-- **WHEN** authors use `provides` and `requires` markers to describe capability contracts
-- **THEN** conventions SHALL require explicit `dependsOn` edges for ordering relationships
-- **AND** conventions SHALL prohibit treating `requires` as an implicit dependency edge
+#### 场景：能力标记仍需要显式排序
+- **当** 作者使用 `provides` 和 `requires` 标记描述能力契约时
+- **则** 约定应要求显式 `dependsOn` 边用于排序关系
+- **且** 约定应禁止将 `requires` 视为隐式依赖边
 
-#### Scenario: Declaring advisory overlap via touches
-- **WHEN** a change may affect capability/spec areas shared by concurrent changes without requiring ordering
-- **THEN** conventions SHALL allow authors to declare `touches` with advisory area identifiers (for example capability IDs, spec area names, or paths)
-- **AND** tooling SHALL treat `touches` as informational only (no implicit dependency edge, non-blocking validation signal)
+#### 场景：通过 touches 声明建议性重叠
+- **当** 变更可能影响并发变更共享的能力/规范区域而不需要排序时
+- **则** 约定应允许作者使用建议性区域标识符（例如能力 ID、规范区域名称或路径）声明 `touches`
+- **且** 工具应将 `touches` 仅视为信息性的（无隐式依赖边，非阻塞验证信号）
 
-#### Scenario: Declaring parent-child split structure
-- **WHEN** a large change is decomposed into smaller slices
-- **THEN** conventions SHALL define parent-child metadata and expected ordering semantics
-- **AND** docs SHALL describe when to split versus keep a single change
+#### 场景：声明父-子拆分结构
+- **当** 大型变更被分解为更小的切片时
+- **则** 约定应定义父-子元数据和预期的排序语义
+- **且** 文档应描述何时拆分与保持单一变更

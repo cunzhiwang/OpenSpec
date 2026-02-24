@@ -1,27 +1,27 @@
-## ADDED Requirements
+## 新增需求
 
-### Requirement: Stack Planning Commands
-The change CLI SHALL provide commands for dependency-aware sequencing of active changes.
+### 需求：堆叠规划命令
+change CLI 应提供用于活跃变更的依赖感知排序命令。
 
-#### Scenario: Show dependency graph
-- **WHEN** a user runs `openspec change graph`
-- **THEN** the CLI SHALL display dependency relationships for active changes
-- **AND** SHALL include a deterministic recommended order for execution
+#### 场景：显示依赖图
+- **当** 用户运行 `openspec change graph`
+- **则** CLI 应显示活跃变更的依赖关系
+- **且** 应包含执行的确定性推荐顺序
 
-#### Scenario: Show next unblocked changes
-- **WHEN** a user runs `openspec change next`
-- **THEN** the CLI SHALL list changes that are not blocked by unresolved dependencies
-- **AND** SHALL use deterministic tie-breaking when multiple options are available
+#### 场景：显示下一个未阻塞的变更
+- **当** 用户运行 `openspec change next`
+- **则** CLI 应列出未被未解决依赖阻塞的变更
+- **且** 当有多个选项可用时应使用确定性打破平局
 
-### Requirement: Split Large Change Scaffolding
-The change CLI SHALL support scaffolding child slices from an existing large change.
+### 需求：拆分大型变更脚手架
+change CLI 应支持从现有大型变更搭建子切片。
 
-#### Scenario: Split command scaffolds child changes
-- **WHEN** a user runs `openspec change split <change-id>`
-- **THEN** the CLI SHALL create child change directories with proposal/tasks stubs
-- **AND** generated metadata SHALL include `parent` and dependency links back to the source change
+#### 场景：split 命令搭建子变更
+- **当** 用户运行 `openspec change split <change-id>`
+- **则** CLI 应创建带提案/任务存根的子变更目录
+- **且** 生成的元数据应包含 `parent` 和指向源变更的依赖链接
 
-#### Scenario: Re-running split on an already-split change
-- **WHEN** a user runs `openspec change split <change-id>` for a parent whose generated child directories already exist
-- **THEN** the CLI SHALL fail with a deterministic, actionable error
-- **AND** SHALL NOT mutate existing child change content unless an explicit overwrite mode is requested
+#### 场景：对已拆分变更重新运行 split
+- **当** 用户对其生成的子目录已存在的父变更运行 `openspec change split <change-id>`
+- **则** CLI 应以确定性、可操作的错误失败
+- **且** 除非请求显式覆盖模式，否则不应修改现有子变更内容

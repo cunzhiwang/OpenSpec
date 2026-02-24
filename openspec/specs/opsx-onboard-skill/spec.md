@@ -1,167 +1,166 @@
-# opsx-onboard-skill Specification
+# opsx-onboard-skill 规范
 
-## Purpose
-Define `/opsx:onboard` behavior for guiding users through an end-to-end OpenSpec workflow on their real codebase.
+## 目的
+定义 `/opsx:onboard` 行为，用于引导用户在其真实代码库上完成端到端的 OpenSpec 工作流。
 
-## Requirements
-### Requirement: OPSX Onboard Skill
+## 需求
+### 需求：OPSX Onboard 技能
 
-The system SHALL provide an `/opsx:onboard` skill that guides users through their first complete OpenSpec workflow cycle with narration and real codebase work.
+系统应当提供 `/opsx:onboard` 技能，通过叙述和真实代码库工作引导用户完成他们的第一个完整 OpenSpec 工作流周期。
 
-#### Scenario: Skill invocation
+#### 场景：技能调用
 
-- **WHEN** user invokes `/opsx:onboard`
-- **THEN** agent checks if OpenSpec is initialized
-- **AND** if not initialized, prompts user to run `openspec init` first
-- **AND** if initialized, proceeds with onboarding flow
+- **当** 用户调用 `/opsx:onboard` 时
+- **则** 代理检查 OpenSpec 是否已初始化
+- **且** 如果未初始化，提示用户先运行 `openspec init`
+- **且** 如果已初始化，继续入门流程
 
-#### Scenario: Welcome and expectations
+#### 场景：欢迎和期望
 
-- **WHEN** onboarding begins
-- **THEN** agent displays welcome message explaining what will happen
-- **AND** sets expectation of ~15 minute duration
-- **AND** explains the workflow phases: explore → new → artifacts → apply → archive
+- **当** 入门开始时
+- **则** 代理显示欢迎消息解释将发生什么
+- **且** 设置约 15 分钟持续时间的期望
+- **且** 解释工作流阶段：explore → new → artifacts → apply → archive
 
-### Requirement: Codebase Analysis for Task Suggestions
+### 需求：代码库分析以建议任务
 
-The skill SHALL analyze the user's codebase to suggest appropriately-scoped starter tasks.
+技能应当分析用户的代码库以建议适当范围的入门任务。
 
-#### Scenario: Codebase scanning
+#### 场景：代码库扫描
 
-- **WHEN** onboarding reaches task selection phase
-- **THEN** agent scans codebase for small improvement opportunities
-- **AND** looks for: TODO/FIXME comments, missing error handling, functions without tests, outdated dependencies, type: any in TypeScript, console.log in production code, missing input validation
-- **AND** checks recent git commits for context on current work
+- **当** 入门到达任务选择阶段时
+- **则** 代理扫描代码库寻找小的改进机会
+- **且** 查找：TODO/FIXME 注释、缺失的错误处理、没有测试的函数、过时的依赖、TypeScript 中的 type: any、生产代码中的 console.log、缺失的输入验证
+- **且** 检查最近的 git 提交以获取当前工作的上下文
 
-#### Scenario: Task suggestion presentation
+#### 场景：任务建议展示
 
-- **WHEN** agent has analyzed codebase
-- **THEN** agent presents 3-4 specific task suggestions with scope estimates
-- **AND** each suggestion includes: task description, estimated scope (files/lines), why it's a good starter
-- **AND** offers option for user to specify their own task
+- **当** 代理分析完代码库后
+- **则** 代理展示 3-4 个带有范围估计的具体任务建议
+- **且** 每个建议包含：任务描述、估计范围（文件/行数）、为什么是好的入门任务
+- **且** 提供用户指定自己任务的选项
 
-#### Scenario: Scope guardrail
+#### 场景：范围护栏
 
-- **WHEN** user selects or describes a task that is too large
-- **THEN** agent gently redirects toward smaller scope
-- **AND** suggests breaking down or deferring the large task
-- **AND** offers appropriately-sized alternatives
+- **当** 用户选择或描述的任务过大时
+- **则** 代理温和地引导向更小范围
+- **且** 建议分解或推迟大任务
+- **且** 提供适当大小的替代方案
 
-### Requirement: Explore Phase Demo
+### 需求：探索阶段演示
 
-The skill SHALL briefly demonstrate explore mode before creating a change.
+技能应当在创建变更之前简要演示探索模式。
 
-#### Scenario: Brief explore demonstration
+#### 场景：简短探索演示
 
-- **WHEN** task is selected
-- **THEN** agent briefly demonstrates `/opsx:explore` by investigating relevant code
-- **AND** explains explore mode is for thinking before doing
-- **AND** keeps this phase short (not a full exploration session)
-- **AND** transitions to change creation
+- **当** 任务被选择后
+- **则** 代理通过调查相关代码简要演示 `/opsx:explore`
+- **且** 解释探索模式是在行动之前思考
+- **且** 保持此阶段简短（不是完整的探索会话）
+- **且** 过渡到变更创建
 
-### Requirement: Guided Artifact Creation
+### 需求：引导式产物创建
 
-The skill SHALL guide users through each artifact with narration explaining the purpose.
+技能应当引导用户完成每个产物，并解释其目的。
 
-#### Scenario: Change creation with narration
+#### 场景：带叙述的变更创建
 
-- **WHEN** creating the change directory
-- **THEN** agent runs `openspec new change "<name>"` with derived kebab-case name
-- **AND** explains what a "change" is (container for thinking and planning)
-- **AND** shows the folder structure that was created
-- **AND** pauses for user acknowledgment before proceeding
+- **当** 创建变更目录时
+- **则** 代理使用派生的 kebab-case 名称运行 `openspec new change "<name>"`
+- **且** 解释什么是"变更"（思考和计划的容器）
+- **且** 显示创建的文件夹结构
+- **且** 在继续之前暂停等待用户确认
 
-#### Scenario: Proposal creation with narration
+#### 场景：带叙述的提案创建
 
-- **WHEN** creating proposal.md
-- **THEN** agent explains proposals capture WHY we're making this change
-- **AND** drafts proposal based on selected task
-- **AND** shows draft to user for approval before saving
-- **AND** explains the sections (Why, What Changes, Capabilities, Impact)
+- **当** 创建 proposal.md 时
+- **则** 代理解释提案捕获我们为什么要做这个变更
+- **且** 根据选择的任务起草提案
+- **且** 在保存前向用户展示草稿以供批准
+- **且** 解释各部分（Why、What Changes、Capabilities、Impact）
 
-#### Scenario: Specs creation with narration
+#### 场景：带叙述的规范创建
 
-- **WHEN** creating spec files
-- **THEN** agent explains specs define WHAT we're building in detail
-- **AND** explains the requirement/scenario format
-- **AND** creates spec file(s) based on proposal capabilities
-- **AND** notes that specs become documentation that stays in sync
+- **当** 创建规范文件时
+- **则** 代理解释规范详细定义我们要构建什么
+- **且** 解释需求/场景格式
+- **且** 根据提案能力创建规范文件
+- **且** 注意规范成为保持同步的文档
 
-#### Scenario: Design creation with narration
+#### 场景：带叙述的设计创建
 
-- **WHEN** creating design.md
-- **THEN** agent explains design captures HOW we'll build it
-- **AND** notes this is where technical decisions and tradeoffs live
-- **AND** for small changes, acknowledges design may be brief
-- **AND** creates design based on proposal and specs
+- **当** 创建 design.md 时
+- **则** 代理解释设计捕获我们将如何构建它
+- **且** 注意这是技术决策和权衡所在
+- **且** 对于小变更，承认设计可能很简短
+- **且** 根据提案和规范创建设计
 
-#### Scenario: Tasks creation with narration
+#### 场景：带叙述的任务创建
 
-- **WHEN** creating tasks.md
-- **THEN** agent explains tasks break work into checkboxes
-- **AND** explains these drive the apply phase
-- **AND** generates task list from design and specs
-- **AND** shows tasks and asks if ready to implement
+- **当** 创建 tasks.md 时
+- **则** 代理解释任务将工作分解为复选框
+- **且** 解释这些驱动应用阶段
+- **且** 从设计和规范生成任务列表
+- **且** 显示任务并询问是否准备好实现
 
-### Requirement: Guided Implementation
+### 需求：引导式实现
 
-The skill SHALL implement tasks with narration connecting back to artifacts.
+技能应当实现任务，并通过叙述连接回产物。
 
-#### Scenario: Implementation with narration
+#### 场景：带叙述的实现
 
-- **WHEN** implementing tasks
-- **THEN** agent announces each task before working on it
-- **AND** implements the change in the codebase
-- **AND** occasionally references how specs/design informed decisions
-- **AND** marks each task complete as it finishes
-- **AND** keeps narration light (not over-explaining)
+- **当** 实现任务时
+- **则** 代理在处理每个任务前宣布
+- **且** 在代码库中实现变更
+- **且** 偶尔引用规范/设计如何影响决策
+- **且** 完成时将每个任务标记为完成
+- **且** 保持叙述轻量（不过度解释）
 
-#### Scenario: Implementation completion
+#### 场景：实现完成
 
-- **WHEN** all tasks are complete
-- **THEN** agent announces completion
-- **AND** summarizes what was done
-- **AND** transitions to archive phase
+- **当** 所有任务完成时
+- **则** 代理宣布完成
+- **且** 总结完成了什么
+- **且** 过渡到归档阶段
 
-### Requirement: Archive with Explanation
+### 需求：带解释的归档
 
-The skill SHALL archive the completed change and explain what happened.
+技能应当归档已完成的变更并解释发生了什么。
 
-#### Scenario: Archive with narration
+#### 场景：带叙述的归档
 
-- **WHEN** archiving the change
-- **THEN** agent explains archive moves change to dated folder
-- **AND** runs archive process
-- **AND** shows where archived change lives
-- **AND** explains the long-term value (finding decisions later)
+- **当** 归档变更时
+- **则** 代理解释归档将变更移动到带日期的文件夹
+- **且** 运行归档流程
+- **且** 显示归档的变更所在位置
+- **且** 解释长期价值（以后找到决策）
 
-### Requirement: Recap and Next Steps
+### 需求：回顾和后续步骤
 
-The skill SHALL conclude with a recap and command reference.
+技能应当以回顾和命令参考结束。
 
-#### Scenario: Final recap
+#### 场景：最终回顾
 
-- **WHEN** onboarding is complete
-- **THEN** agent summarizes the workflow phases completed
-- **AND** emphasizes this rhythm works for any size change
-- **AND** provides command reference table (/opsx:explore, /opsx:new, /opsx:ff, /opsx:continue, /opsx:apply, /opsx:verify, /opsx:archive)
-- **AND** suggests next actions (try /opsx:new or /opsx:ff on something)
+- **当** 入门完成时
+- **则** 代理总结完成的工作流阶段
+- **且** 强调这种节奏适用于任何大小的变更
+- **且** 提供命令参考表（/opsx:explore、/opsx:new、/opsx:ff、/opsx:continue、/opsx:apply、/opsx:verify、/opsx:archive）
+- **且** 建议下一步行动（尝试 /opsx:new 或 /opsx:ff）
 
-### Requirement: Graceful Exit Handling
+### 需求：优雅退出处理
 
-The skill SHALL handle users who want to stop mid-way.
+技能应当处理想要中途停止的用户。
 
-#### Scenario: User wants to stop
+#### 场景：用户想要停止
 
-- **WHEN** user indicates they want to stop during onboarding
-- **THEN** agent acknowledges gracefully
-- **AND** notes that the in-progress change is saved
-- **AND** explains how to continue later with `/opsx:continue <name>`
-- **AND** exits without pressure
+- **当** 用户在入门期间表示想要停止时
+- **则** 代理优雅地确认
+- **且** 注意进行中的变更已保存
+- **且** 解释如何稍后使用 `/opsx:continue <name>` 继续
+- **且** 无压力退出
 
-#### Scenario: User wants quick reference only
+#### 场景：用户只想要快速参考
 
-- **WHEN** user says they just want to see the commands
-- **THEN** agent provides command cheat sheet
-- **AND** exits gracefully with encouragement to try `/opsx:new`
-
+- **当** 用户说只想看命令时
+- **则** 代理提供命令速查表
+- **且** 优雅退出并鼓励尝试 `/opsx:new`

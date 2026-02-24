@@ -1,131 +1,130 @@
-# artifact-graph Specification
+# 产物图规范
 
-## Purpose
-Define the artifact graph model, dependency validation, and completion-state logic used by schema-driven workflows.
+## 目的
+定义模式驱动工作流使用的产物图模型、依赖验证和完成状态逻辑。
 
-## Requirements
-### Requirement: Schema Loading
-The system SHALL load artifact graph definitions from YAML schema files within schema directories.
+## 需求
+### 需求：模式加载
+系统应当从模式目录中的 YAML 模式文件加载产物图定义。
 
-#### Scenario: Valid schema loaded
-- **WHEN** a schema directory contains a valid `schema.yaml` file
-- **THEN** the system returns an ArtifactGraph with all artifacts and dependencies
+#### 场景：加载有效模式
+- **当** 模式目录包含有效的 `schema.yaml` 文件时
+- **则** 系统返回包含所有产物和依赖关系的 ArtifactGraph
 
-#### Scenario: Invalid schema rejected
-- **WHEN** a schema YAML file is missing required fields
-- **THEN** the system throws an error with a descriptive message
+#### 场景：拒绝无效模式
+- **当** 模式 YAML 文件缺少必需字段时
+- **则** 系统抛出带有描述性消息的错误
 
-#### Scenario: Cyclic dependencies detected
-- **WHEN** a schema contains cyclic artifact dependencies
-- **THEN** the system throws an error listing the artifact IDs in the cycle
+#### 场景：检测循环依赖
+- **当** 模式包含循环产物依赖时
+- **则** 系统抛出错误，列出循环中的产物 ID
 
-#### Scenario: Invalid dependency reference
-- **WHEN** an artifact's `requires` array references a non-existent artifact ID
-- **THEN** the system throws an error identifying the invalid reference
+#### 场景：无效依赖引用
+- **当** 产物的 `requires` 数组引用不存在的产物 ID 时
+- **则** 系统抛出错误，标识无效引用
 
-#### Scenario: Duplicate artifact IDs rejected
-- **WHEN** a schema contains multiple artifacts with the same ID
-- **THEN** the system throws an error identifying the duplicate
+#### 场景：拒绝重复产物 ID
+- **当** 模式包含多个相同 ID 的产物时
+- **则** 系统抛出错误，标识重复项
 
-#### Scenario: Schema directory not found
-- **WHEN** resolving a schema name that has no corresponding directory
-- **THEN** the system throws an error listing available schemas
+#### 场景：未找到模式目录
+- **当** 解析没有对应目录的模式名称时
+- **则** 系统抛出错误，列出可用模式
 
-### Requirement: Build Order Calculation
-The system SHALL compute a valid topological build order for artifacts.
+### 需求：构建顺序计算
+系统应当计算产物的有效拓扑构建顺序。
 
-#### Scenario: Linear dependency chain
-- **WHEN** artifacts form a linear chain (A → B → C)
-- **THEN** getBuildOrder() returns [A, B, C]
+#### 场景：线性依赖链
+- **当** 产物形成线性链（A → B → C）时
+- **则** getBuildOrder() 返回 [A, B, C]
 
-#### Scenario: Diamond dependency
-- **WHEN** artifacts form a diamond (A → B, A → C, B → D, C → D)
-- **THEN** getBuildOrder() returns A before B and C, and D last
+#### 场景：菱形依赖
+- **当** 产物形成菱形（A → B，A → C，B → D，C → D）时
+- **则** getBuildOrder() 返回 A 在 B 和 C 之前，D 在最后
 
-#### Scenario: Independent artifacts
-- **WHEN** artifacts have no dependencies
-- **THEN** getBuildOrder() returns them in a stable order
+#### 场景：独立产物
+- **当** 产物没有依赖时
+- **则** getBuildOrder() 以稳定顺序返回它们
 
-### Requirement: State Detection
-The system SHALL detect artifact completion state by scanning the filesystem.
+### 需求：状态检测
+系统应当通过扫描文件系统检测产物完成状态。
 
-#### Scenario: Simple file exists
-- **WHEN** an artifact generates "proposal.md" and the file exists
-- **THEN** the artifact is marked as completed
+#### 场景：简单文件存在
+- **当** 产物生成 "proposal.md" 且文件存在时
+- **则** 产物标记为已完成
 
-#### Scenario: Simple file missing
-- **WHEN** an artifact generates "proposal.md" and the file does not exist
-- **THEN** the artifact is not marked as completed
+#### 场景：简单文件缺失
+- **当** 产物生成 "proposal.md" 且文件不存在时
+- **则** 产物不标记为已完成
 
-#### Scenario: Glob pattern with files
-- **WHEN** an artifact generates "specs/*.md" and the specs/ directory contains .md files
-- **THEN** the artifact is marked as completed
+#### 场景：Glob 模式匹配到文件
+- **当** 产物生成 "specs/*.md" 且 specs/ 目录包含 .md 文件时
+- **则** 产物标记为已完成
 
-#### Scenario: Glob pattern empty
-- **WHEN** an artifact generates "specs/*.md" and the specs/ directory is empty or missing
-- **THEN** the artifact is not marked as completed
+#### 场景：Glob 模式为空
+- **当** 产物生成 "specs/*.md" 且 specs/ 目录为空或不存在时
+- **则** 产物不标记为已完成
 
-#### Scenario: Missing change directory
-- **WHEN** the change directory does not exist
-- **THEN** all artifacts are marked as not completed (empty state)
+#### 场景：变更目录缺失
+- **当** 变更目录不存在时
+- **则** 所有产物标记为未完成（空状态）
 
-### Requirement: Ready Artifact Query
-The system SHALL identify which artifacts are ready to be created based on dependency completion.
+### 需求：就绪产物查询
+系统应当根据依赖完成情况识别哪些产物可以创建。
 
-#### Scenario: Root artifacts ready initially
-- **WHEN** no artifacts are completed
-- **THEN** getNextArtifacts() returns artifacts with no dependencies
+#### 场景：根产物初始就绪
+- **当** 没有产物完成时
+- **则** getNextArtifacts() 返回没有依赖的产物
 
-#### Scenario: Dependent artifact becomes ready
-- **WHEN** an artifact's dependencies are all completed
-- **THEN** getNextArtifacts() includes that artifact
+#### 场景：依赖产物变为就绪
+- **当** 产物的所有依赖都已完成时
+- **则** getNextArtifacts() 包含该产物
 
-#### Scenario: Blocked artifacts excluded
-- **WHEN** an artifact has uncompleted dependencies
-- **THEN** getNextArtifacts() does not include that artifact
+#### 场景：排除阻塞产物
+- **当** 产物有未完成的依赖时
+- **则** getNextArtifacts() 不包含该产物
 
-### Requirement: Completion Check
-The system SHALL determine when all artifacts in a graph are complete.
+### 需求：完成检查
+系统应当确定图中的所有产物何时全部完成。
 
-#### Scenario: All complete
-- **WHEN** all artifacts in the graph are in the completed set
-- **THEN** isComplete() returns true
+#### 场景：全部完成
+- **当** 图中的所有产物都在已完成集合中时
+- **则** isComplete() 返回 true
 
-#### Scenario: Partially complete
-- **WHEN** some artifacts in the graph are not completed
-- **THEN** isComplete() returns false
+#### 场景：部分完成
+- **当** 图中的某些产物未完成时
+- **则** isComplete() 返回 false
 
-### Requirement: Blocked Query
-The system SHALL identify which artifacts are blocked and return all their unmet dependencies.
+### 需求：阻塞查询
+系统应当识别哪些产物被阻塞并返回所有未满足的依赖。
 
-#### Scenario: Artifact blocked by single dependency
-- **WHEN** artifact B requires artifact A and A is not complete
-- **THEN** getBlocked() returns `{ B: ['A'] }`
+#### 场景：产物被单个依赖阻塞
+- **当** 产物 B 需要产物 A 且 A 未完成时
+- **则** getBlocked() 返回 `{ B: ['A'] }`
 
-#### Scenario: Artifact blocked by multiple dependencies
-- **WHEN** artifact C requires A and B, and only A is complete
-- **THEN** getBlocked() returns `{ C: ['B'] }`
+#### 场景：产物被多个依赖阻塞
+- **当** 产物 C 需要 A 和 B，且只有 A 完成时
+- **则** getBlocked() 返回 `{ C: ['B'] }`
 
-#### Scenario: Artifact blocked by all dependencies
-- **WHEN** artifact C requires A and B, and neither is complete
-- **THEN** getBlocked() returns `{ C: ['A', 'B'] }`
+#### 场景：产物被所有依赖阻塞
+- **当** 产物 C 需要 A 和 B，且都未完成时
+- **则** getBlocked() 返回 `{ C: ['A', 'B'] }`
 
-### Requirement: Schema Directory Structure
-The system SHALL support self-contained schema directories with co-located templates.
+### 需求：模式目录结构
+系统应当支持带有共置模板的自包含模式目录。
 
-#### Scenario: Schema with templates
-- **WHEN** a schema directory contains `schema.yaml` and `templates/` subdirectory
-- **THEN** artifacts can reference templates relative to the schema's templates directory
+#### 场景：带模板的模式
+- **当** 模式目录包含 `schema.yaml` 和 `templates/` 子目录时
+- **则** 产物可以引用相对于模式 templates 目录的模板
 
-#### Scenario: User schema override
-- **WHEN** a schema directory exists at `${XDG_DATA_HOME}/openspec/schemas/<name>/`
-- **THEN** the system uses that directory instead of the built-in
+#### 场景：用户模式覆盖
+- **当** 模式目录存在于 `${XDG_DATA_HOME}/openspec/schemas/<name>/` 时
+- **则** 系统使用该目录而不是内置目录
 
-#### Scenario: Built-in schema fallback
-- **WHEN** no user override exists for a schema
-- **THEN** the system uses the package built-in schema directory
+#### 场景：内置模式回退
+- **当** 不存在模式的用户覆盖时
+- **则** 系统使用包内置的模式目录
 
-#### Scenario: List available schemas
-- **WHEN** listing schemas
-- **THEN** the system returns schema names from both user and package directories
-
+#### 场景：列出可用模式
+- **当** 列出模式时
+- **则** 系统返回用户目录和包目录中的模式名称

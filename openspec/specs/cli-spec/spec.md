@@ -1,88 +1,87 @@
-# cli-spec Specification
+# CLI Spec 规范
 
-## Purpose
-Define `openspec spec` command behavior for listing, showing, and validating source-of-truth specifications.
+## 目的
+定义 `openspec spec` 命令行为，用于列出、显示和验证权威规范。
 
-## Requirements
-### Requirement: Interactive spec show
+## 需求
+### 需求：交互式规范 show
 
-The spec show command SHALL support interactive selection when no spec-id is provided.
+当不提供 spec-id 时，spec show 命令应当支持交互式选择。
 
-#### Scenario: Interactive spec selection for show
+#### 场景：show 的交互式规范选择
 
-- **WHEN** executing `openspec spec show` without arguments
-- **THEN** display an interactive list of available specs
-- **AND** allow the user to select a spec to show
-- **AND** display the selected spec content
-- **AND** maintain all existing show options (--json, --requirements, --no-scenarios, -r)
+- **当** 执行 `openspec spec show` 而不带参数时
+- **则** 显示可用规范的交互式列表
+- **并且** 允许用户选择要显示的规范
+- **并且** 显示所选规范内容
+- **并且** 保持所有现有 show 选项（--json、--requirements、--no-scenarios、-r）
 
-#### Scenario: Non-interactive fallback keeps current behavior
+#### 场景：非交互式回退保持当前行为
 
-- **GIVEN** stdin is not a TTY or `--no-interactive` is provided or environment variable `OPEN_SPEC_INTERACTIVE=0`
-- **WHEN** executing `openspec spec show` without a spec-id
-- **THEN** do not prompt interactively
-- **AND** print the existing error message for missing spec-id
-- **AND** set non-zero exit code
+- **前提** stdin 不是 TTY 或提供了 `--no-interactive` 或环境变量 `OPEN_SPEC_INTERACTIVE=0`
+- **当** 执行 `openspec spec show` 而不带 spec-id 时
+- **则** 不进行交互式提示
+- **并且** 打印缺少 spec-id 的现有错误消息
+- **并且** 设置非零退出码
 
-### Requirement: Spec Command
+### 需求：Spec 命令
 
-The system SHALL provide a `spec` command with subcommands for displaying, listing, and validating specifications.
+系统应当提供带有子命令的 `spec` 命令，用于显示、列出和验证规范。
 
-#### Scenario: Show spec as JSON
+#### 场景：以 JSON 格式显示规范
 
-- **WHEN** executing `openspec spec show init --json`
-- **THEN** parse the markdown spec file
-- **AND** extract headings and content hierarchically
-- **AND** output valid JSON to stdout
+- **当** 执行 `openspec spec show init --json` 时
+- **则** 解析 markdown 规范文件
+- **并且** 层次化提取标题和内容
+- **并且** 将有效 JSON 输出到 stdout
 
-#### Scenario: List all specs
+#### 场景：列出所有规范
 
-- **WHEN** executing `openspec spec list`
-- **THEN** scan the openspec/specs directory
-- **AND** return list of all available capabilities
-- **AND** support JSON output with `--json` flag
+- **当** 执行 `openspec spec list` 时
+- **则** 扫描 openspec/specs 目录
+- **并且** 返回所有可用能力的列表
+- **并且** 支持使用 `--json` 标志输出 JSON
 
-#### Scenario: Filter spec content
+#### 场景：过滤规范内容
 
-- **WHEN** executing `openspec spec show init --requirements`
-- **THEN** display only requirement names and SHALL statements
-- **AND** exclude scenario content
+- **当** 执行 `openspec spec show init --requirements` 时
+- **则** 仅显示需求名称和 SHALL 陈述
+- **并且** 排除场景内容
 
-#### Scenario: Validate spec structure
+#### 场景：验证规范结构
 
-- **WHEN** executing `openspec spec validate init`
-- **THEN** parse the spec file
-- **AND** validate against Zod schema
-- **AND** report any structural issues
+- **当** 执行 `openspec spec validate init` 时
+- **则** 解析规范文件
+- **并且** 根据 Zod 模式验证
+- **并且** 报告任何结构问题
 
-### Requirement: JSON Schema Definition
+### 需求：JSON 模式定义
 
-The system SHALL define Zod schemas that accurately represent the spec structure for runtime validation.
+系统应当定义准确表示规范结构的 Zod 模式，用于运行时验证。
 
-#### Scenario: Schema validation
+#### 场景：模式验证
 
-- **WHEN** parsing a spec into JSON
-- **THEN** validate the structure using Zod schemas
-- **AND** ensure all required fields are present
-- **AND** provide clear error messages for validation failures
+- **当** 将规范解析为 JSON 时
+- **则** 使用 Zod 模式验证结构
+- **并且** 确保所有必需字段存在
+- **并且** 为验证失败提供清晰的错误消息
 
-### Requirement: Interactive spec validation
+### 需求：交互式规范验证
 
-The spec validate command SHALL support interactive selection when no spec-id is provided.
+当不提供 spec-id 时，spec validate 命令应当支持交互式选择。
 
-#### Scenario: Interactive spec selection for validation
+#### 场景：验证的交互式规范选择
 
-- **WHEN** executing `openspec spec validate` without arguments
-- **THEN** display an interactive list of available specs
-- **AND** allow the user to select a spec to validate
-- **AND** validate the selected spec
-- **AND** maintain all existing validation options (--strict, --json)
+- **当** 执行 `openspec spec validate` 而不带参数时
+- **则** 显示可用规范的交互式列表
+- **并且** 允许用户选择要验证的规范
+- **并且** 验证所选规范
+- **并且** 保持所有现有验证选项（--strict、--json）
 
-#### Scenario: Non-interactive fallback keeps current behavior
+#### 场景：非交互式回退保持当前行为
 
-- **GIVEN** stdin is not a TTY or `--no-interactive` is provided or environment variable `OPEN_SPEC_INTERACTIVE=0`
-- **WHEN** executing `openspec spec validate` without a spec-id
-- **THEN** do not prompt interactively
-- **AND** print the existing error message for missing spec-id
-- **AND** set non-zero exit code
-
+- **前提** stdin 不是 TTY 或提供了 `--no-interactive` 或环境变量 `OPEN_SPEC_INTERACTIVE=0`
+- **当** 执行 `openspec spec validate` 而不带 spec-id 时
+- **则** 不进行交互式提示
+- **并且** 打印缺少 spec-id 的现有错误消息
+- **并且** 设置非零退出码

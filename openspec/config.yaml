@@ -1,29 +1,29 @@
 schema: spec-driven
 
 context: |
-  Tech stack: TypeScript, Node.js (≥20.19.0), ESM modules
-  Package manager: pnpm
-  CLI framework: Commander.js
+  技术栈：TypeScript、Node.js（≥20.19.0）、ESM 模块
+  包管理器：pnpm
+  CLI 框架：Commander.js
 
-  Cross-platform requirements:
-  - This tool runs on macOS, Linux, AND Windows
-  - Always use path.join() or path.resolve() for file paths - never hardcode slashes
-  - Never assume forward-slash path separators
-  - Tests must use path.join() for expected path values, not hardcoded strings
-  - Consider case sensitivity differences in file systems
+  跨平台要求：
+  - 本工具需在 macOS、Linux 和 Windows 上运行
+  - 始终使用 path.join() 或 path.resolve() 处理文件路径 - 禁止硬编码斜杠
+  - 不要假设使用正斜杠作为路径分隔符
+  - 测试中必须使用 path.join() 生成预期路径值，不要使用硬编码字符串
+  - 考虑不同文件系统的大小写敏感性差异
 
 rules:
   specs:
-    - Include scenarios for Windows path handling when dealing with file paths
-    - Requirements involving paths must specify cross-platform behavior
-    - Be explicit about mechanisms, not just outcomes (say HOW, not just WHAT)
-    - If we generate artifacts, specify deletion/modification by explicit list lookup, not pattern matching
+    - 处理文件路径时，需包含 Windows 路径处理的场景
+    - 涉及路径的需求必须明确跨平台行为
+    - 明确说明机制，而不仅仅是结果（说明"如何做"，而不仅是"做什么"）
+    - 如果生成产物，通过显式列表查找来指定删除/修改，而非模式匹配
   tasks:
-    - Add Windows CI verification as a task when changes involve file paths
-    - Include cross-platform testing considerations
+    - 当变更涉及文件路径时，添加 Windows CI 验证任务
+    - 包含跨平台测试考虑事项
   design:
-    - Document any platform-specific behavior or limitations
-    - Prefer Node.js path module over string manipulation for paths
-    - Use existing constants and lists - don't invent detection mechanisms
-    - Prefer explicit lookups over pattern matching or regex
-    - If we generate it, we track it by name in a constant
+    - 记录任何平台特定的行为或限制
+    - 优先使用 Node.js path 模块，而非字符串操作处理路径
+    - 使用现有常量和列表 - 不要发明新的检测机制
+    - 优先使用显式查找，而非模式匹配或正则表达式
+    - 如果是我们生成的，就通过常量中的名称来追踪它

@@ -1,60 +1,59 @@
-# ai-tool-paths Specification
+# AI 工具路径规范
 
-## Purpose
-Define AI tool path metadata used to generate OpenSpec skills and commands in tool-specific directories.
+## 目的
+定义用于在工具特定目录中生成 OpenSpec 技能和命令的 AI 工具路径元数据。
 
-## Requirements
-### Requirement: AIToolOption skillsDir field
+## 需求
+### 需求：AIToolOption skillsDir 字段
 
-The `AIToolOption` interface SHALL include an optional `skillsDir` field for skill generation path configuration.
+`AIToolOption` 接口应当包含一个可选的 `skillsDir` 字段，用于技能生成路径配置。
 
-#### Scenario: Interface includes skillsDir field
+#### 场景：接口包含 skillsDir 字段
 
-- **WHEN** a tool entry is defined in `AI_TOOLS` that supports skill generation
-- **THEN** it SHALL include a `skillsDir` field specifying the project-local base directory (e.g., `.claude`)
+- **当** 在 `AI_TOOLS` 中定义支持技能生成的工具条目时
+- **则** 应当包含 `skillsDir` 字段，指定项目本地基目录（例如 `.claude`）
 
-#### Scenario: Skills path follows Agent Skills spec
+#### 场景：技能路径遵循 Agent Skills 规范
 
-- **WHEN** generating skills for a tool with `skillsDir: '.claude'`
-- **THEN** skills SHALL be written to `<projectRoot>/<skillsDir>/skills/`
-- **AND** the `/skills` suffix is appended per Agent Skills specification
+- **当** 为配置了 `skillsDir: '.claude'` 的工具生成技能时
+- **则** 技能应当写入 `<projectRoot>/<skillsDir>/skills/`
+- **并且** 按照 Agent Skills 规范附加 `/skills` 后缀
 
-### Requirement: Path configuration for supported tools
+### 需求：支持工具的路径配置
 
-The `AI_TOOLS` array SHALL include `skillsDir` for tools that support the Agent Skills specification.
+`AI_TOOLS` 数组应当为支持 Agent Skills 规范的工具包含 `skillsDir`。
 
-#### Scenario: Claude Code paths defined
+#### 场景：Claude Code 路径定义
 
-- **WHEN** looking up the `claude` tool
-- **THEN** `skillsDir` SHALL be `.claude`
+- **当** 查找 `claude` 工具时
+- **则** `skillsDir` 应当为 `.claude`
 
-#### Scenario: Cursor paths defined
+#### 场景：Cursor 路径定义
 
-- **WHEN** looking up the `cursor` tool
-- **THEN** `skillsDir` SHALL be `.cursor`
+- **当** 查找 `cursor` 工具时
+- **则** `skillsDir` 应当为 `.cursor`
 
-#### Scenario: Windsurf paths defined
+#### 场景：Windsurf 路径定义
 
-- **WHEN** looking up the `windsurf` tool
-- **THEN** `skillsDir` SHALL be `.windsurf`
+- **当** 查找 `windsurf` 工具时
+- **则** `skillsDir` 应当为 `.windsurf`
 
-#### Scenario: Tools without skillsDir
+#### 场景：没有 skillsDir 的工具
 
-- **WHEN** a tool has no `skillsDir` defined
-- **THEN** skill generation SHALL error with message indicating the tool is not supported
+- **当** 工具没有定义 `skillsDir` 时
+- **则** 技能生成应当报错，提示该工具不受支持
 
-### Requirement: Cross-platform path handling
+### 需求：跨平台路径处理
 
-The system SHALL handle paths correctly across operating systems.
+系统应当在不同操作系统上正确处理路径。
 
-#### Scenario: Path construction on Windows
+#### 场景：Windows 上的路径构建
 
-- **WHEN** constructing skill paths on Windows
-- **THEN** the system SHALL use `path.join()` for all path construction
-- **AND** SHALL NOT hardcode forward slashes
+- **当** 在 Windows 上构建技能路径时
+- **则** 系统应当使用 `path.join()` 进行所有路径构建
+- **并且** 不应当硬编码正斜杠
 
-#### Scenario: Path construction on Unix
+#### 场景：Unix 上的路径构建
 
-- **WHEN** constructing skill paths on macOS or Linux
-- **THEN** the system SHALL use `path.join()` for consistency
-
+- **当** 在 macOS 或 Linux 上构建技能路径时
+- **则** 系统应当使用 `path.join()` 以保持一致性

@@ -1,75 +1,75 @@
-## Context
+## 上下文
 
-OpenSpec currently installs 10 workflows (skills + commands) for every user, overwhelming new users. The init flow asks multiple questions (profile, delivery, tools) creating friction before users can experience value.
+OpenSpec 目前为每个用户安装 10 个工作流（技能 + 命令），让新用户感到不知所措。init 流程在用户体验价值之前询问多个问题（配置文件、交付、工具），造成摩擦。
 
-Current architecture:
-- `src/core/init.ts` - Handles tool selection and skill/command generation
-- `src/core/config.ts` - Defines `AI_TOOLS` with `skillsDir` mappings
-- `src/core/shared/skill-generation.ts` - Generates skill files from templates
-- `src/core/templates/workflows/*.ts` - Individual workflow templates
-- `src/prompts/searchable-multi-select.ts` - Tool selection UI
+当前架构：
+- `src/core/init.ts` - 处理工具选择和技能/命令生成
+- `src/core/config.ts` - 定义带 `skillsDir` 映射的 `AI_TOOLS`
+- `src/core/shared/skill-generation.ts` - 从模板生成技能文件
+- `src/core/templates/workflows/*.ts` - 单个工作流模板
+- `src/prompts/searchable-multi-select.ts` - 工具选择 UI
 
-Global config exists at `~/.config/openspec/config.json` for telemetry/feature flags. Profile/delivery settings will extend this existing config.
+全局配置存在于 `~/.config/openspec/config.json` 用于遥测/功能标志。配置文件/交付设置将扩展此现有配置。
 
-## Goals / Non-Goals
+## 目标/非目标
 
-**Goals:**
-- Get new users to "aha moment" in under 1 minute
-- Smart defaults init with auto-detection and confirmation (core profile, both delivery)
-- Auto-detect installed tools from existing directories
-- Introduce profile system (core/custom) for workflow selection
-- Introduce delivery config (skills/commands/both) as power-user setting
-- Create new `propose` workflow combining `new` + `ff`
-- Fix tool selection UX (space to select, enter to confirm)
-- Maintain backwards compatibility for existing users
+**目标：**
+- 让新用户在 1 分钟内达到"啊哈时刻"
+- 带自动检测和确认的智能默认 init（core 配置文件，both 交付）
+- 从现有目录自动检测已安装的工具
+- 引入配置文件系统（core/custom）用于工作流选择
+- 引入交付配置（skills/commands/both）作为高级用户设置
+- 创建新的 `propose` 工作流组合 `new` + `ff`
+- 修复工具选择用户体验（空格选择，回车确认）
+- 为现有用户保持向后兼容性
 
-**Non-Goals:**
-- Removing any existing workflows (all remain available via custom profile)
-- Per-project profile/delivery settings (user-level only)
-- Changing the artifact structure or schema system
-- Modifying how skills/commands are formatted or written
+**非目标：**
+- 移除任何现有工作流（所有通过自定义配置文件保持可用）
+- 每项目配置文件/交付设置（仅用户级）
+- 更改产物结构或模式系统
+- 修改技能/命令的格式化或写入方式
 
-## Decisions
+## 决策
 
-### 1. Extend Existing Global Config
+### 1. 扩展现有全局配置
 
-Add profile/delivery settings to existing `~/.config/openspec/config.json` (via `src/core/global-config.ts`).
+将配置文件/交付设置添加到现有 `~/.config/openspec/config.json`（通过 `src/core/global-config.ts`）。
 
-**Rationale:** Global config already exists with XDG/APPDATA cross-platform path handling, schema evolution, and merge-with-defaults behavior. Reusing it avoids a second config file and leverages existing infrastructure.
+**理由：** 全局配置已经存在，具有 XDG/APPDATA 跨平台路径处理、模式演进和合并默认值行为。复用它避免了第二个配置文件并利用现有基础设施。
 
-**Schema extension:**
+**模式扩展：**
 ```json
 {
-  "telemetry": { ... },     // existing
-  "featureFlags": { ... },  // existing
-  "profile": "core",        // NEW
-  "delivery": "both",       // NEW
-  "workflows": [...]        // NEW (only for custom profile)
+  "telemetry": { ... },     // 现有
+  "featureFlags": { ... },  // 现有
+  "profile": "core",        // 新
+  "delivery": "both",       // 新
+  "workflows": [...]        // 新（仅用于 custom 配置文件）
 }
 ```
 
-**Alternatives considered:**
-- New `~/.openspec/config.yaml`: Creates second config file, different format, path confusion
-- Project config: Would require syncing mechanism, users edit it directly
-- Environment variables: Less discoverable, harder to persist
+**考虑的替代方案：**
+- 新 `~/.openspec/config.yaml`：创建第二个配置文件，不同格式，路径混淆
+- 项目配置：需要同步机制，用户直接编辑它
+- 环境变量：可发现性较差，难以持久化
 
-### 2. Profile System with Two Tiers
+### 2. 两层配置文件系统
 
 ```
-core (default):     propose, explore, apply, archive (4)
-custom:             user-defined subset of workflows
+core（默认）：     propose、explore、apply、archive（4 个）
+custom：          用户定义的工作流子集
 ```
 
-**Rationale:** Core covers the essential loop (propose → explore → apply → archive). Custom allows users to pick exactly what they need via an interactive picker.
+**理由：** Core 涵盖基本循环（propose → explore → apply → archive）。Custom 允许用户通过交互式选择器精确选择需要的内容。
 
-**Configuration UX:**
+**配置用户体验：**
 ```
 $ openspec config profile
 
-Delivery: [skills] [commands] [both]
-                              ^^^^^^
+交付：[skills] [commands] [both]
+                          ^^^^^^
 
-Workflows: (space to toggle, enter to save)
+工作流：（空格切换，回车保存）
 [x] propose
 [x] explore
 [x] apply
@@ -79,94 +79,94 @@ Workflows: (space to toggle, enter to save)
 ...
 ```
 
-**Alternatives considered:**
-- Three tiers (core/extended/custom): Extended is redundant - users who want all workflows can select them in custom
-- Separate commands for profile and delivery: Combining into one picker reduces cognitive load
+**考虑的替代方案：**
+- 三层（core/extended/custom）：Extended 是多余的 - 想要所有工作流的用户可以在 custom 中选择它们
+- 配置文件和交付的单独命令：合并到一个选择器中减少认知负担
 
-### 3. Propose Workflow = New + FF Combined
+### 3. Propose 工作流 = New + FF 组合
 
-Single workflow that creates a change and generates all artifacts in one step.
+创建变更并在一步中生成所有产物的单一工作流。
 
-**Rationale:** Most users want to go from idea to implementation-ready. Separating `new` (creates folder) and `ff` (generates artifacts) adds unnecessary steps. Power users who want control can use `new` + `continue` via custom profile.
+**理由：** 大多数用户想从想法到实施就绪。分离 `new`（创建文件夹）和 `ff`（生成产物）添加了不必要的步骤。想要控制的高级用户可以通过自定义配置文件使用 `new` + `continue`。
 
-**Implementation:** New template in `src/core/templates/workflows/propose.ts` that:
-1. Creates change directory via `openspec new change`
-2. Runs artifact generation loop (like ff does)
-3. Includes onboarding-style explanations in output
+**实现：** `src/core/templates/workflows/propose.ts` 中的新模板：
+1. 通过 `openspec new change` 创建变更目录
+2. 运行产物生成循环（像 ff 那样）
+3. 在输出中包含入门风格的解释
 
-### 4. Auto-Detection with Confirmation
+### 4. 带确认的自动检测
 
-Scan for existing tool directories, pre-select detected tools, ask for confirmation.
+扫描现有工具目录，预选检测到的工具，要求确认。
 
-**Rationale:** Reduces questions while still giving user control. Better than full auto (no confirmation) which might install unwanted tools, or no detection (always ask) which adds friction.
+**理由：** 减少问题同时仍给用户控制。比完全自动（无确认）可能安装不需要的工具更好，或无检测（总是询问）增加摩擦。
 
-**Detection logic:**
+**检测逻辑：**
 ```typescript
-// Use existing AI_TOOLS config to get directory mappings
-// Each tool in AI_TOOLS has a skillsDir property (e.g., '.claude', '.cursor', '.windsurf')
-// Scan cwd for existing directories matching skillsDir values, pre-select matches
+// 使用现有 AI_TOOLS 配置获取目录映射
+// AI_TOOLS 中的每个工具都有一个 skillsDir 属性（如 '.claude'、'.cursor'、'.windsurf'）
+// 扫描 cwd 中与 skillsDir 值匹配的现有目录，预选匹配项
 const detectedTools = AI_TOOLS.filter(tool =>
   fs.existsSync(path.join(cwd, tool.skillsDir))
 );
 ```
 
-### 5. Delivery as Part of Profile Config
+### 5. 交付作为配置文件配置的一部分
 
-Delivery preference (skills/commands/both) stored in global config, defaulting to "both".
+交付偏好（skills/commands/both）存储在全局配置中，默认为"both"。
 
-**Rationale:** Most users don't know or care about this distinction. Power users who have a preference can set it via `openspec config profile` interactive picker. Not worth asking during init.
+**理由：** 大多数用户不知道或不关心这个区别。有偏好的高级用户可以通过 `openspec config profile` 交互式选择器设置它。不值得在 init 期间询问。
 
-### 6. Filesystem as Truth for Installed Workflows
+### 6. 文件系统作为已安装工作流的事实
 
-What's installed in `.claude/skills/` (etc.) is the source of truth, not config.
+`.claude/skills/`（等）中安装的内容是事实来源，而不是配置。
 
-**Rationale:**
-- Backwards compatible with existing installs
-- User can manually add/remove skill directories
-- Config profile is a "template" for what to install, not a constraint
+**理由：**
+- 与现有安装向后兼容
+- 用户可以手动添加/移除技能目录
+- 配置配置文件是安装内容的"模板"，不是约束
 
-**Behavior:**
-- `openspec init` sets up new projects OR re-initializes existing projects (selects tools, generates workflows)
-- `openspec update` refreshes an existing project to match current config (no tool selection)
-- `openspec config profile` updates global config only, offers to run update if in a project
-- Extra workflows (not in profile) are preserved
-- Delivery changes are applied: switching to `skills` removes commands, switching to `commands` removes skills
+**行为：**
+- `openspec init` 设置新项目或重新初始化现有项目（选择工具，生成工作流）
+- `openspec update` 刷新现有项目以匹配当前配置（无工具选择）
+- `openspec config profile` 仅更新全局配置，如果在项目中则提供运行更新
+- 额外工作流（不在配置文件中）被保留
+- 交付更改会应用：切换到 `skills` 移除命令，切换到 `commands` 移除技能
 
-**Why not a separate tool manifest?**
+**为什么不使用单独的工具清单？**
 
-Tool selection (which assistants a project uses) is per-user AND per-project, but the two config locations are per-user-only (global config) or per-project-shared (checked-in project config). A separate manifest was explored and rejected:
+工具选择（项目使用哪些助手）是每用户且每项目的，但两个配置位置是仅每用户（全局配置）或每项目共享（签入的项目配置）。探索了单独的清单但被拒绝：
 
-- *Path-keyed global config* (`projects: { "/path": { tools: [...] } }`): Fragile on directory move/rename/delete, symlink ambiguity, and project behavior depends on invisible external state.
-- *Gitignored local file* (`.openspec.local`): Lost on fresh clone, adds file management overhead.
-- *Checked-in project config* (`openspec/config.yaml` with `tools` field): Forces tool choices on the whole team — Alice uses Claude Code, Bob uses Cursor, neither wants the other's tools mandated.
+- *路径键控全局配置*（`projects: { "/path": { tools: [...] } }`）：在目录移动/重命名/删除时脆弱，符号链接歧义，项目行为取决于不可见的外部状态。
+- *Gitignored 本地文件*（`.openspec.local`）：新克隆时丢失，增加文件管理开销。
+- *签入的项目配置*（`openspec/config.yaml` 带 `tools` 字段）：强制工具选择给整个团队 — Alice 使用 Claude Code，Bob 使用 Cursor，两者都不想强制使用对方的工具。
 
-The filesystem approach avoids all three problems. For teams, it's actually beneficial: checked-in skill files mean `openspec update` from any team member refreshes skills for all tools the project supports. The generated files serve as both the deliverable and the implicit tool manifest.
+文件系统方法避免了所有三个问题。对于团队，它实际上是有益的：签入的技能文件意味着任何团队成员的 `openspec update` 会刷新项目支持的所有工具的技能。生成的文件既作为可交付成果又作为隐式工具清单。
 
-Known gap: a tool that stores config outside the project tree (no local directory to scan) would need tool-specific handling, since there's nothing in the project to scan. Address if/when such a tool is supported.
+已知差距：在项目树外存储配置的工具（没有本地目录可扫描）需要工具特定处理，因为项目中没有可扫描的内容。如果/当支持这样的工具时再处理。
 
-**When to use init vs update:**
-- `init`: First time setup, or when you want to change which tools are configured
-- `update`: After changing config, or to refresh templates to latest version
+**何时使用 init vs update：**
+- `init`：首次设置，或当你想更改配置的工具时
+- `update`：更改配置后，或刷新模板到最新版本
 
-### 8. Existing User Migration
+### 8. 现有用户迁移
 
-When `openspec init` or `openspec update` encounters a project with existing workflows but no `profile` field in global config, it performs a one-time migration to preserve the user's current setup.
+当 `openspec init` 或 `openspec update` 遇到具有现有工作流但全局配置中没有 `profile` 字段的项目时，它执行一次性迁移以保留用户当前设置。
 
-**Rationale:** Without migration, existing users would default to `core` profile, causing `propose` to be added on top of their 10 workflows — making things worse, not better. Migration ensures existing users keep exactly what they have.
+**理由：** 没有迁移，现有用户将默认使用 `core` 配置文件，导致 `propose` 添加到他们的 10 个工作流之上 — 使事情变得更糟，而不是更好。迁移确保现有用户保持他们拥有的完全内容。
 
-**Triggered by:** Both `init` (re-init on existing project) and `update`. The migration check is a shared function called early in both commands, before profile resolution.
+**触发者：** `init`（在现有项目上重新初始化）和 `update`。迁移检查是在两个命令中早期调用的共享函数，在配置文件解析之前。
 
-**Detection logic:**
+**检测逻辑：**
 ```typescript
-// Shared migration check, called by both init and update:
+// 共享迁移检查，由 init 和 update 调用：
 function migrateIfNeeded(projectPath: string, tools: AiTool[]): void {
   const globalConfig = readGlobalConfig();
-  if (globalConfig.profile) return; // already migrated or explicitly set
+  if (globalConfig.profile) return; // 已迁移或显式设置
 
   const installedWorkflows = scanInstalledWorkflows(projectPath, tools);
-  if (installedWorkflows.length === 0) return; // new user, use core defaults
+  if (installedWorkflows.length === 0) return; // 新用户，使用 core 默认值
 
-  // Existing user — migrate to custom profile
+  // 现有用户 — 迁移到 custom 配置文件
   writeGlobalConfig({
     ...globalConfig,
     profile: 'custom',
@@ -176,113 +176,113 @@ function migrateIfNeeded(projectPath: string, tools: AiTool[]): void {
 }
 ```
 
-**Scanning logic:**
-- Scan all tool directories (`.claude/skills/`, `.cursor/skills/`, etc.) for workflow directories/files
-- Match only against `ALL_WORKFLOWS` constant — ignore user-created custom skills/commands
-- Map directory names back to workflow IDs (e.g., `openspec-explore/` → `explore`, `opsx-explore.md` → `explore`)
-- Take the union of detected workflow names across all tools
+**扫描逻辑：**
+- 扫描所有工具目录（`.claude/skills/`、`.cursor/skills/` 等）中的工作流目录/文件
+- 仅匹配 `ALL_WORKFLOWS` 常量 — 忽略用户创建的自定义技能/命令
+- 将目录名称映射回工作流 ID（如 `openspec-explore/` → `explore`，`opsx-explore.md` → `explore`）
+- 取所有工具中检测到的工作流名称的并集
 
-**Edge cases:**
-- **User manually deleted some workflows:** Migration scans what's actually installed, respecting their choices
-- **Multiple projects with different workflow sets:** First project to trigger migration sets global config; subsequent projects use it
-- **User has custom (non-OpenSpec) skills in the directory:** Ignored — scanner only matches known workflow IDs from `ALL_WORKFLOWS`
-- **Migration is idempotent:** If `profile` is already set in config, no re-migration occurs
-- **Non-interactive (CI):** Same migration logic, no confirmation needed — it's preserving existing state
+**边缘情况：**
+- **用户手动删除了一些工作流：** 迁移扫描实际安装的内容，尊重他们的选择
+- **具有不同工作流集的多个项目：** 第一个触发迁移的项目设置全局配置；后续项目使用它
+- **用户在目录中有自定义（非 OpenSpec）技能：** 忽略 — 扫描器仅匹配 `ALL_WORKFLOWS` 中的已知工作流 ID
+- **迁移是幂等的：** 如果配置中已设置 `profile`，不会重新迁移
+- **非交互式（CI）：** 相同的迁移逻辑，不需要确认 — 它保留现有状态
 
-**Alternatives considered:**
-- Migrate during `init` instead of `update`: Init already has its own flow (tool selection, etc.). Mixing migration with init creates confusing UX
-- Don't migrate, just default to core: Breaks existing users by adding `propose` and showing "extra workflows" warnings
-- Migrate at global config read time: Too implicit, hard to show feedback to user
+**考虑的替代方案：**
+- 在 `init` 而不是 `update` 期间迁移：Init 已经有自己的流程（工具选择等）。将迁移与 init 混合会造成混乱的用户体验
+- 不迁移，只默认使用 core：通过添加 `propose` 和显示"额外工作流"警告来破坏现有用户
+- 在全局配置读取时迁移：太隐式，难以向用户显示反馈
 
-### 9. Generic Next-Step Guidance in Templates
+### 9. 模板中的通用下一步指导
 
-Workflow templates use generic, concept-based next-step guidance rather than referencing specific workflow commands. For example, instead of "run `/opsx:propose`", templates say "create a change proposal".
+工作流模板使用通用的、基于概念的下一步指导，而不是引用特定的工作流命令。例如，模板不说"运行 `/opsx:propose`"，而是说"创建变更提案"。
 
-**Rationale:** Conditional cross-referencing (where each template checks which other workflows are installed and renders different command names) adds significant complexity to template generation, testing, and maintenance. Generic guidance avoids this entirely while still being useful — users already know their installed workflows.
+**理由：** 条件交叉引用（每个模板检查安装了哪些其他工作流并渲染不同的命令名称）给模板生成、测试和维护增加了显著复杂性。通用指导完全避免了这一点，同时仍然有用 — 用户已经知道他们安装的工作流。
 
-**Note:** If we find that users consistently struggle to map concepts to commands, we can revisit this with conditional cross-references. For now, simplicity wins.
+**注意：** 如果我们发现用户一直难以将概念映射到命令，我们可以用条件交叉引用重新审视这一点。现在，简单性获胜。
 
-### 7. Fix Multi-Select Keybindings
+### 7. 修复多选键绑定
 
-Change from tab-to-confirm to industry-standard space/enter.
+从 tab 确认更改为行业标准的空格/回车。
 
-**Rationale:** Tab to confirm is non-standard and confuses users. Most CLI tools use space to toggle, enter to confirm.
+**理由：** Tab 确认是非标准的，让用户困惑。大多数 CLI 工具使用空格切换，回车确认。
 
-**Implementation:** Modify `src/prompts/searchable-multi-select.ts` keybinding configuration.
+**实现：** 修改 `src/prompts/searchable-multi-select.ts` 键绑定配置。
 
-### 10. Update Sync Must Consider Config Drift, Not Just Version Drift
+### 10. 更新同步必须考虑配置漂移，而不仅是版本漂移
 
-`openspec update` cannot rely only on `generatedBy` version checks for deciding whether work is needed.
+`openspec update` 不能仅依赖 `generatedBy` 版本检查来决定是否需要工作。
 
-**Rationale:** profile and delivery changes can require file add/remove operations even when existing skill templates are current. If we only check template versions, update may incorrectly return "up to date" and skip required sync.
+**理由：** 即使现有技能模板是当前的，配置文件和交付更改也可能需要文件添加/移除操作。如果我们只检查模板版本，update 可能会错误地返回"最新"并跳过所需的同步。
 
-**Implementation:**
-- Keep version checks for template refresh decisions
-- Add file-state drift checks for profile/delivery (missing expected files or stale files from removed delivery mode)
-- Treat either version drift OR config drift as update-required
+**实现：**
+- 保留模板刷新决策的版本检查
+- 为配置文件/交付添加文件状态漂移检查（缺失的预期文件或已移除交付模式的过期文件）
+- 将版本漂移或配置漂移视为需要更新
 
-### 11. Tool Configuration Detection Includes Commands-Only Installs
+### 11. 工具配置检测包括仅命令安装
 
-Configured-tool detection for update must include command files, not only skill files.
+更新的配置工具检测必须包括命令文件，而不仅是技能文件。
 
-**Rationale:** with `delivery: commands`, a project can be fully configured without skill files. Skill-only detection incorrectly reports "No configured tools found."
+**理由：** 使用 `delivery: commands`，项目可以在没有技能文件的情况下完全配置。仅技能检测错误地报告"未找到配置的工具"。
 
-**Implementation:**
-- For update flows, treat a tool as configured if it has either generated skills or generated commands
-- Keep migration workflow scanning behavior unchanged (skills remain the migration source of truth)
+**实现：**
+- 对于更新流程，如果工具有生成的技能或生成的命令，则将其视为已配置
+- 保持迁移工作流扫描行为不变（技能仍然是迁移的事实来源）
 
-### 12. Init Profile Override Is Strictly Validated
+### 12. Init 配置文件覆盖是严格验证的
 
-`openspec init --profile` must validate allowed values before proceeding.
+`openspec init --profile` 必须在继续前验证允许的值。
 
-**Rationale:** silently accepting unknown profile values hides user errors and produces implicit fallback behavior.
+**理由：** 静默接受未知的配置文件值隐藏用户错误并产生隐式回退行为。
 
-**Implementation:** accept only `core` and `custom`; throw a clear CLI error for invalid values.
+**实现：** 仅接受 `core` 和 `custom`；对无效值抛出清晰的 CLI 错误。
 
-## Risks / Trade-offs
+## 风险/权衡
 
-**Risk: Breaking existing user workflows**
-→ Mitigation: Filesystem is truth, existing installs untouched. All workflows available via custom profile.
+**风险：破坏现有用户工作流**
+→ 缓解：文件系统是事实，现有安装不受影响。所有工作流通过自定义配置文件可用。
 
-**Risk: Propose workflow duplicates ff logic**
-→ Mitigation: Extract shared artifact generation into reusable function, both `propose` and `ff` call it.
+**风险：Propose 工作流复制 ff 逻辑**
+→ 缓解：将共享产物生成提取到可重用函数，`propose` 和 `ff` 都调用它。
 
-**Risk: Global config file management**
-→ Mitigation: Create directory/file on first use. Handle missing file gracefully (use defaults).
+**风险：全局配置文件管理**
+→ 缓解：首次使用时创建目录/文件。优雅处理缺失文件（使用默认值）。
 
-**Risk: Auto-detection false positives**
-→ Mitigation: Show detected tools and ask for confirmation, don't auto-install silently.
+**风险：自动检测误报**
+→ 缓解：显示检测到的工具并要求确认，不要静默自动安装。
 
-**Trade-off: Core profile has only 4 workflows**
-→ Acceptable: These cover the main loop. Users who need more can use `openspec config profile` to select additional workflows.
+**权衡：Core 配置文件只有 4 个工作流**
+→ 可接受：这些涵盖了主要循环。需要更多的用户可以使用 `openspec config profile` 选择额外的工作流。
 
-## Migration Plan
+## 迁移计划
 
-1. **Phase 1: Add infrastructure**
-   - Extend global-config.ts with profile/delivery/workflows fields
-   - Profile definitions and resolution
-   - Tool auto-detection
+1. **第一阶段：添加基础设施**
+   - 用 profile/delivery/workflows 字段扩展 global-config.ts
+   - 配置文件定义和解析
+   - 工具自动检测
 
-2. **Phase 2: Create propose workflow**
-   - New template combining new + ff
-   - Enhanced UX with explanatory output
+2. **第二阶段：创建 propose 工作流**
+   - 组合 new + ff 的新模板
+   - 带解释性输出的增强用户体验
 
-3. **Phase 3: Update init flow**
-   - Smart defaults with tool confirmation
-   - Auto-detect and confirm tools
-   - Respect profile/delivery settings
+3. **第三阶段：更新 init 流程**
+   - 带工具确认的智能默认
+   - 自动检测并确认工具
+   - 尊重配置文件/交付设置
 
-4. **Phase 4: Add config profile command**
-   - `openspec config profile` interactive picker
-   - `openspec config profile core` preset shortcut
+4. **第四阶段：添加 config profile 命令**
+   - `openspec config profile` 交互式选择器
+   - `openspec config profile core` 预设快捷方式
 
-5. **Phase 5: Update the update command**
-   - Read global config for profile/delivery
-   - Add missing workflows from profile
-   - Delete files when delivery changes (e.g., commands removed if `skills`)
-   - Display summary of changes
+5. **第五阶段：更新 update 命令**
+   - 读取全局配置的配置文件/交付
+   - 从配置文件添加缺失的工作流
+   - 当交付更改时删除文件（如 `skills` 时移除命令）
+   - 显示更改摘要
 
-6. **Phase 6: Fix multi-select UX**
-   - Update keybindings in searchable-multi-select
+6. **第六阶段：修复多选用户体验**
+   - 更新 searchable-multi-select 中的键绑定
 
-**Rollback:** All changes are additive. Existing behavior preserved via custom profile with all workflows selected.
+**回滚：** 所有更改都是增量的。通过选择所有工作流的自定义配置文件保留现有行为。

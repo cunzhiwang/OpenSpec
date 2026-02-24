@@ -1,31 +1,32 @@
-# CLI Init Specification
+# CLI 初始化规范
 
-## Purpose
+## 目的
 
-The `openspec init` command SHALL create a complete OpenSpec directory structure in any project, enabling immediate adoption of OpenSpec conventions with support for multiple AI coding assistants.
-## Requirements
-### Requirement: Progress Indicators
+`openspec init` 命令应当在任何项目中创建完整的 OpenSpec 目录结构，支持多个 AI 编程助手，实现即时采用 OpenSpec 约定。
 
-The command SHALL display progress indicators during initialization to provide clear feedback about each step.
+## 需求
+### 需求：进度指示器
 
-#### Scenario: Displaying initialization progress
+命令应当在初始化期间显示进度指示器，为每个步骤提供清晰的反馈。
 
-- **WHEN** executing initialization steps
-- **THEN** validate environment silently in background (no output unless error)
-- **AND** display progress with ora spinners:
-  - Show spinner: "⠋ Creating OpenSpec structure..."
-  - Then success: "✔ OpenSpec structure created"
-  - Show spinner: "⠋ Configuring AI tools..."
-  - Then success: "✔ AI tools configured"
+#### 场景：显示初始化进度
 
-### Requirement: Directory Creation
+- **当** 执行初始化步骤时
+- **则** 在后台静默验证环境（除非出错否则不输出）
+- **并且** 使用 ora 加载动画显示进度：
+  - 显示加载动画："⠋ 正在创建 OpenSpec 结构..."
+  - 然后成功："✔ OpenSpec 结构已创建"
+  - 显示加载动画："⠋ 正在配置 AI 工具..."
+  - 然后成功："✔ AI 工具已配置"
 
-The command SHALL create the OpenSpec directory structure with config file.
+### 需求：目录创建
 
-#### Scenario: Creating OpenSpec structure
+命令应当创建带有配置文件的 OpenSpec 目录结构。
 
-- **WHEN** `openspec init` is executed
-- **THEN** create the following directory structure:
+#### 场景：创建 OpenSpec 结构
+
+- **当** 执行 `openspec init` 时
+- **则** 创建以下目录结构：
 ```
 openspec/
 ├── config.yaml
@@ -34,158 +35,159 @@ openspec/
     └── archive/
 ```
 
-### Requirement: AI Tool Configuration
+### 需求：AI 工具配置
 
-The command SHALL configure AI coding assistants with skills and slash commands using a searchable multi-select experience.
+命令应当使用可搜索的多选体验配置 AI 编程助手的技能和斜杠命令。
 
-#### Scenario: Prompting for AI tool selection
+#### 场景：提示 AI 工具选择
 
-- **WHEN** run interactively
-- **THEN** display animated welcome screen with OpenSpec logo
-- **AND** present a searchable multi-select that shows all available tools
-- **AND** mark already configured tools with "(configured ✓)" indicator
-- **AND** pre-select configured tools for easy refresh
-- **AND** sort configured tools to appear first in the list
-- **AND** allow filtering by typing to search
+- **当** 交互式运行时
+- **则** 显示带有 OpenSpec logo 的动画欢迎屏幕
+- **并且** 展示一个可搜索的多选界面，显示所有可用工具
+- **并且** 用"(已配置 ✓)"指示器标记已配置的工具
+- **并且** 预选已配置的工具以便于刷新
+- **并且** 将已配置的工具排序显示在列表顶部
+- **并且** 允许通过输入进行过滤搜索
 
-#### Scenario: Selecting tools to configure
+#### 场景：选择要配置的工具
 
-- **WHEN** user selects tools and confirms
-- **THEN** generate skills in `.<tool>/skills/` directory for each selected tool
-- **AND** generate slash commands in `.<tool>/commands/opsx/` directory for each selected tool
-- **AND** create `openspec/config.yaml` with default schema setting
+- **当** 用户选择工具并确认时
+- **则** 为每个选定的工具在 `.<tool>/skills/` 目录生成技能
+- **并且** 为每个选定的工具在 `.<tool>/commands/opsx/` 目录生成斜杠命令
+- **并且** 创建带有默认模式设置的 `openspec/config.yaml`
 
-### Requirement: Interactive Mode
-The command SHALL provide an interactive menu for AI tool selection with clear navigation instructions.
-#### Scenario: Displaying interactive menu
-- **WHEN** run in fresh or extend mode
-- **THEN** present a looping select menu that lets users toggle tools with Space and review selections with Enter
-- **AND** when Enter is pressed on a highlighted selectable tool that is not already selected, automatically add it to the selection before moving to review so the highlighted tool is configured
-- **AND** label already configured tools with "(already configured)" while keeping disabled options marked "coming soon"
-- **AND** change the prompt copy in extend mode to "Which AI tools would you like to add or refresh?"
-- **AND** display inline instructions clarifying that Space toggles tools and Enter selects the highlighted tool before reviewing selections
+### 需求：交互模式
+命令应当为 AI 工具选择提供带有清晰导航说明的交互式菜单。
 
-### Requirement: Safety Checks
-The command SHALL perform safety checks to prevent overwriting existing structures and ensure proper permissions.
+#### 场景：显示交互式菜单
+- **当** 在全新或扩展模式下运行时
+- **则** 展示一个循环选择菜单，让用户用空格键切换工具，用回车键查看选择
+- **并且** 当在高亮的可选工具上按回车键且该工具尚未选中时，自动将其添加到选择中再进入查看，以便高亮的工具被配置
+- **并且** 用"(已配置)"标记已配置的工具，保持禁用选项标记为"即将推出"
+- **并且** 在扩展模式下将提示文案改为"您想添加或刷新哪些 AI 工具？"
+- **并且** 显示内联说明，说明空格键切换工具，回车键在查看选择前选中高亮的工具
 
-#### Scenario: Detecting existing initialization
-- **WHEN** the `openspec/` directory already exists
-- **THEN** inform the user that OpenSpec is already initialized, skip recreating the base structure, and enter an extend mode
-- **AND** continue to the AI tool selection step so additional tools can be configured
-- **AND** display the existing-initialization error message only when the user declines to add any AI tools
+### 需求：安全检查
+命令应当执行安全检查，防止覆盖现有结构并确保适当的权限。
 
-### Requirement: Success Output
+#### 场景：检测现有初始化
+- **当** `openspec/` 目录已存在时
+- **则** 通知用户 OpenSpec 已初始化，跳过重新创建基本结构，进入扩展模式
+- **并且** 继续到 AI 工具选择步骤，以便配置额外的工具
+- **并且** 仅当用户拒绝添加任何 AI 工具时才显示现有初始化错误消息
 
-The command SHALL provide clear, actionable next steps upon successful initialization.
+### 需求：成功输出
 
-#### Scenario: Displaying success message
+命令应当在成功初始化后提供清晰、可操作的下一步建议。
 
-- **WHEN** initialization completes successfully
-- **THEN** display categorized summary:
-  - "Created: <tools>" for newly configured tools
-  - "Refreshed: <tools>" for already-configured tools that were updated
-  - Count of skills and commands generated
-- **AND** display getting started section with:
-  - `/opsx:new` - Start a new change
-  - `/opsx:continue` - Create the next artifact
-  - `/opsx:apply` - Implement tasks
-- **AND** display links to documentation and feedback
+#### 场景：显示成功消息
 
-#### Scenario: Displaying restart instruction
+- **当** 初始化成功完成时
+- **则** 显示分类摘要：
+  - "已创建：<tools>" 表示新配置的工具
+  - "已刷新：<tools>" 表示已配置但被更新的工具
+  - 生成的技能和命令数量
+- **并且** 显示入门部分，包含：
+  - `/opsx:new` - 开始新变更
+  - `/opsx:continue` - 创建下一个产物
+  - `/opsx:apply` - 实现任务
+- **并且** 显示文档和反馈链接
 
-- **WHEN** initialization completes successfully and tools were created or refreshed
-- **THEN** display instruction to restart IDE for slash commands to take effect
+#### 场景：显示重启说明
 
-### Requirement: Exit Codes
+- **当** 初始化成功完成且工具已创建或刷新时
+- **则** 显示重启 IDE 以使斜杠命令生效的说明
 
-The command SHALL use consistent exit codes to indicate different failure modes.
+### 需求：退出码
 
-#### Scenario: Returning exit codes
+命令应当使用一致的退出码来指示不同的失败模式。
 
-- **WHEN** the command completes
-- **THEN** return appropriate exit code:
-  - 0: Success
-  - 1: General error (including when OpenSpec directory already exists)
-  - 2: Insufficient permissions (reserved for future use)
-  - 3: User cancelled operation (reserved for future use)
+#### 场景：返回退出码
 
-### Requirement: Additional AI Tool Initialization
-`openspec init` SHALL allow users to add configuration files for new AI coding assistants after the initial setup.
+- **当** 命令完成时
+- **则** 返回适当的退出码：
+  - 0：成功
+  - 1：一般错误（包括 OpenSpec 目录已存在时）
+  - 2：权限不足（保留供将来使用）
+  - 3：用户取消操作（保留供将来使用）
 
-#### Scenario: Configuring an extra tool after initial setup
-- **GIVEN** an `openspec/` directory already exists and at least one AI tool file is present
-- **WHEN** the user runs `openspec init` and selects a different supported AI tool
-- **THEN** generate that tool's configuration files with OpenSpec markers the same way as during first-time initialization
-- **AND** leave existing tool configuration files unchanged except for managed sections that need refreshing
-- **AND** exit with code 0 and display a success summary highlighting the newly added tool files
+### 需求：额外 AI 工具初始化
+`openspec init` 应当允许用户在初始设置后为新的 AI 编程助手添加配置文件。
 
-### Requirement: Success Output Enhancements
-`openspec init` SHALL summarize tool actions when initialization or extend mode completes.
+#### 场景：在初始设置后配置额外工具
+- **前提** `openspec/` 目录已存在且至少有一个 AI 工具文件
+- **当** 用户运行 `openspec init` 并选择不同的支持 AI 工具时
+- **则** 以与首次初始化相同的方式为该工具生成带有 OpenSpec 标记的配置文件
+- **并且** 保持现有工具配置文件不变，除了需要刷新的托管部分
+- **并且** 以退出码 0 退出，显示成功摘要，突出显示新添加的工具文件
 
-#### Scenario: Showing tool summary
-- **WHEN** the command completes successfully
-- **THEN** display a categorized summary of tools that were created, refreshed, or skipped (including already-configured skips)
-- **AND** personalize the "Next steps" header using the names of the selected tools, defaulting to a generic label when none remain
+### 需求：成功输出增强
+`openspec init` 应当在初始化或扩展模式完成时汇总工具操作。
 
-### Requirement: Exit Code Adjustments
-`openspec init` SHALL treat extend mode without new native tool selections as a successful refresh.
+#### 场景：显示工具摘要
+- **当** 命令成功完成时
+- **则** 显示已创建、已刷新或已跳过（包括已配置跳过）的工具分类摘要
+- **并且** 使用所选工具的名称个性化"下一步"标题，当没有工具时使用通用标签
 
-#### Scenario: Allowing empty extend runs
-- **WHEN** OpenSpec is already initialized and the user selects no additional natively supported tools
-- **THEN** complete successfully without requiring additional tool setup
-- **AND** preserve the existing OpenSpec structure and config files
-- **AND** exit with code 0
+### 需求：退出码调整
+`openspec init` 应当将没有新原生工具选择的扩展模式视为成功刷新。
 
-### Requirement: Non-Interactive Mode
+#### 场景：允许空扩展运行
+- **当** OpenSpec 已初始化且用户未选择额外的原生支持工具时
+- **则** 成功完成，不要求额外的工具设置
+- **并且** 保留现有的 OpenSpec 结构和配置文件
+- **并且** 以退出码 0 退出
 
-The command SHALL support non-interactive operation through command-line options.
+### 需求：非交互模式
 
-#### Scenario: Select all tools non-interactively
+命令应当通过命令行选项支持非交互操作。
 
-- **WHEN** run with `--tools all`
-- **THEN** automatically select every available AI tool without prompting
-- **AND** proceed with skill and command generation
+#### 场景：非交互式选择所有工具
 
-#### Scenario: Select specific tools non-interactively
+- **当** 使用 `--tools all` 运行时
+- **则** 自动选择所有可用的 AI 工具而不提示
+- **并且** 继续技能和命令生成
 
-- **WHEN** run with `--tools claude,cursor`
-- **THEN** parse the comma-separated tool IDs
-- **AND** generate skills and commands for specified tools only
+#### 场景：非交互式选择特定工具
 
-#### Scenario: Skip tool configuration non-interactively
+- **当** 使用 `--tools claude,cursor` 运行时
+- **则** 解析逗号分隔的工具 ID
+- **并且** 仅为指定工具生成技能和命令
 
-- **WHEN** run with `--tools none`
-- **THEN** create only the openspec directory structure
-- **AND** skip skill and command generation
-- **AND** create config only when config creation conditions are met
+#### 场景：非交互式跳过工具配置
 
-#### Scenario: Invalid tool specification
+- **当** 使用 `--tools none` 运行时
+- **则** 仅创建 openspec 目录结构
+- **并且** 跳过技能和命令生成
+- **并且** 仅在满足配置创建条件时创建配置
 
-- **WHEN** run with `--tools invalid-tool`
-- **THEN** fail with exit code 1
-- **AND** display an error listing available values (`all`, `none`, and supported tool IDs)
+#### 场景：无效工具规格
 
-#### Scenario: Reserved value combined with tool IDs
+- **当** 使用 `--tools invalid-tool` 运行时
+- **则** 以退出码 1 失败
+- **并且** 显示错误，列出可用值（`all`、`none` 和支持的工具 ID）
 
-- **WHEN** run with `--tools all,claude` or `--tools none,cursor`
-- **THEN** fail with exit code 1
-- **AND** display an error explaining reserved values cannot be combined with specific tool IDs
+#### 场景：保留值与工具 ID 组合
 
-#### Scenario: Missing --tools in non-interactive mode
+- **当** 使用 `--tools all,claude` 或 `--tools none,cursor` 运行时
+- **则** 以退出码 1 失败
+- **并且** 显示错误，说明保留值不能与特定工具 ID 组合
 
-- **GIVEN** prompts are unavailable in non-interactive execution
-- **WHEN** user runs `openspec init` without `--tools`
-- **THEN** fail with exit code 1
-- **AND** instruct to use `--tools all`, `--tools none`, or explicit tool IDs
+#### 场景：非交互模式下缺少 --tools
 
-### Requirement: Skill Generation
+- **前提** 在非交互式执行中提示不可用
+- **当** 用户运行 `openspec init` 而不带 `--tools` 时
+- **则** 以退出码 1 失败
+- **并且** 指示使用 `--tools all`、`--tools none` 或显式工具 ID
 
-The command SHALL generate Agent Skills for selected AI tools.
+### 需求：技能生成
 
-#### Scenario: Generating skills for a tool
+命令应当为选定的 AI 工具生成 Agent Skills。
 
-- **WHEN** a tool is selected during initialization
-- **THEN** create 9 skill directories under `.<tool>/skills/`:
+#### 场景：为工具生成技能
+
+- **当** 在初始化期间选择工具时
+- **则** 在 `.<tool>/skills/` 下创建 9 个技能目录：
   - `openspec-explore/SKILL.md`
   - `openspec-new-change/SKILL.md`
   - `openspec-continue-change/SKILL.md`
@@ -195,17 +197,17 @@ The command SHALL generate Agent Skills for selected AI tools.
   - `openspec-sync-specs/SKILL.md`
   - `openspec-archive-change/SKILL.md`
   - `openspec-bulk-archive-change/SKILL.md`
-- **AND** each SKILL.md SHALL contain YAML frontmatter with name and description
-- **AND** each SKILL.md SHALL contain the skill instructions
+- **并且** 每个 SKILL.md 应当包含带有名称和描述的 YAML frontmatter
+- **并且** 每个 SKILL.md 应当包含技能说明
 
-### Requirement: Slash Command Generation
+### 需求：斜杠命令生成
 
-The command SHALL generate opsx slash commands for selected AI tools.
+命令应当为选定的 AI 工具生成 opsx 斜杠命令。
 
-#### Scenario: Generating slash commands for a tool
+#### 场景：为工具生成斜杠命令
 
-- **WHEN** a tool is selected during initialization
-- **THEN** create 9 slash command files using the tool's command adapter:
+- **当** 在初始化期间选择工具时
+- **则** 使用工具的命令适配器创建 9 个斜杠命令文件：
   - `/opsx:explore`
   - `/opsx:new`
   - `/opsx:continue`
@@ -215,41 +217,41 @@ The command SHALL generate opsx slash commands for selected AI tools.
   - `/opsx:sync`
   - `/opsx:archive`
   - `/opsx:bulk-archive`
-- **AND** use tool-specific path conventions (e.g., `.claude/commands/opsx/` for Claude)
-- **AND** include tool-specific frontmatter format
+- **并且** 使用工具特定的路径约定（例如，Claude 使用 `.claude/commands/opsx/`）
+- **并且** 包含工具特定的 frontmatter 格式
 
-### Requirement: Config File Generation
+### 需求：配置文件生成
 
-The command SHALL create an OpenSpec config file with schema settings.
+命令应当创建带有模式设置的 OpenSpec 配置文件。
 
-#### Scenario: Creating config.yaml
+#### 场景：创建 config.yaml
 
-- **WHEN** initialization completes
-- **AND** config.yaml does not exist
-- **THEN** create `openspec/config.yaml` with default schema setting
-- **AND** display config location in output
+- **当** 初始化完成时
+- **并且** config.yaml 不存在时
+- **则** 创建带有默认模式设置的 `openspec/config.yaml`
+- **并且** 在输出中显示配置位置
 
-#### Scenario: Preserving existing config.yaml
+#### 场景：保留现有 config.yaml
 
-- **WHEN** initialization runs in extend mode
-- **AND** `openspec/config.yaml` already exists
-- **THEN** preserve the existing config file
-- **AND** display "(exists)" indicator in output
+- **当** 在扩展模式下运行初始化时
+- **并且** `openspec/config.yaml` 已存在时
+- **则** 保留现有配置文件
+- **并且** 在输出中显示"(已存在)"指示器
 
-### Requirement: Experimental Command Alias
+### 需求：实验性命令别名
 
-The command SHALL maintain backward compatibility with the experimental command.
+命令应当保持与实验性命令的向后兼容性。
 
-#### Scenario: Running openspec experimental
+#### 场景：运行 openspec experimental
 
-- **WHEN** user runs `openspec experimental`
-- **THEN** delegate to `openspec init`
-- **AND** the command SHALL be hidden from help output
+- **当** 用户运行 `openspec experimental` 时
+- **则** 委托给 `openspec init`
+- **并且** 命令应当在帮助输出中隐藏
 
-## Why
+## 原因
 
-Manual creation of OpenSpec structure is error-prone and creates adoption friction. A standardized init command ensures:
-- Consistent structure across all projects
-- Proper AI instruction files are always included
-- Quick onboarding for new projects
-- Clear conventions from the start
+手动创建 OpenSpec 结构容易出错，会造成采用摩擦。标准化的 init 命令确保：
+- 所有项目结构一致
+- 始终包含正确的 AI 指令文件
+- 新项目快速入门
+- 从一开始就有清晰的约定

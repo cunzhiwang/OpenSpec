@@ -1,172 +1,172 @@
-# schema-resolution Specification
+# schema-resolution 规范
 
-## Purpose
-Define project-local schema resolution behavior, including precedence order (project-local, then user override, then package built-in) and backward-compatible fallback when `projectRoot` is not provided.
+## 目的
+定义项目本地模式解析行为，包括优先级顺序（项目本地，然后用户覆盖，然后包内置）以及在未提供 `projectRoot` 时的向后兼容回退。
 
-## Requirements
-### Requirement: Project-local schema resolution
+## 需求
+### 需求：项目本地模式解析
 
-The system SHALL resolve schemas from the project-local directory (`./openspec/schemas/<name>/`) with highest priority when a `projectRoot` is provided.
+当提供 `projectRoot` 时，系统应当以最高优先级从项目本地目录（`./openspec/schemas/<name>/`）解析模式。
 
-#### Scenario: Project-local schema takes precedence over user override
-- **WHEN** a schema named "my-workflow" exists at `./openspec/schemas/my-workflow/schema.yaml`
-- **AND** a schema named "my-workflow" exists at `~/.local/share/openspec/schemas/my-workflow/schema.yaml`
-- **AND** `getSchemaDir("my-workflow", projectRoot)` is called
-- **THEN** the system SHALL return the project-local path
+#### 场景：项目本地模式优先于用户覆盖
+- **当** 名为 "my-workflow" 的模式存在于 `./openspec/schemas/my-workflow/schema.yaml` 时
+- **且** 名为 "my-workflow" 的模式存在于 `~/.local/share/openspec/schemas/my-workflow/schema.yaml` 时
+- **且** 调用 `getSchemaDir("my-workflow", projectRoot)`
+- **则** 系统应当返回项目本地路径
 
-#### Scenario: Project-local schema takes precedence over package built-in
-- **WHEN** a schema named "spec-driven" exists at `./openspec/schemas/spec-driven/schema.yaml`
-- **AND** "spec-driven" is a package built-in schema
-- **AND** `getSchemaDir("spec-driven", projectRoot)` is called
-- **THEN** the system SHALL return the project-local path
+#### 场景：项目本地模式优先于包内置
+- **当** 名为 "spec-driven" 的模式存在于 `./openspec/schemas/spec-driven/schema.yaml` 时
+- **且** "spec-driven" 是包内置模式
+- **且** 调用 `getSchemaDir("spec-driven", projectRoot)`
+- **则** 系统应当返回项目本地路径
 
-#### Scenario: Falls back to user override when no project-local schema
-- **WHEN** no schema named "my-workflow" exists at `./openspec/schemas/my-workflow/`
-- **AND** a schema named "my-workflow" exists at `~/.local/share/openspec/schemas/my-workflow/schema.yaml`
-- **AND** `getSchemaDir("my-workflow", projectRoot)` is called
-- **THEN** the system SHALL return the user override path
+#### 场景：无项目本地模式时回退到用户覆盖
+- **当** `./openspec/schemas/my-workflow/` 不存在名为 "my-workflow" 的模式时
+- **且** 名为 "my-workflow" 的模式存在于 `~/.local/share/openspec/schemas/my-workflow/schema.yaml` 时
+- **且** 调用 `getSchemaDir("my-workflow", projectRoot)`
+- **则** 系统应当返回用户覆盖路径
 
-#### Scenario: Falls back to package built-in when no project-local or user schema
-- **WHEN** no schema named "spec-driven" exists at `./openspec/schemas/spec-driven/`
-- **AND** no schema named "spec-driven" exists at `~/.local/share/openspec/schemas/spec-driven/`
-- **AND** "spec-driven" is a package built-in schema
-- **AND** `getSchemaDir("spec-driven", projectRoot)` is called
-- **THEN** the system SHALL return the package built-in path
+#### 场景：无项目本地或用户模式时回退到包内置
+- **当** `./openspec/schemas/spec-driven/` 不存在名为 "spec-driven" 的模式时
+- **且** `~/.local/share/openspec/schemas/spec-driven/` 不存在名为 "spec-driven" 的模式时
+- **且** "spec-driven" 是包内置模式
+- **且** 调用 `getSchemaDir("spec-driven", projectRoot)`
+- **则** 系统应当返回包内置路径
 
-#### Scenario: Backward compatibility when projectRoot not provided
-- **WHEN** `getSchemaDir("my-workflow")` is called without a `projectRoot` parameter
-- **THEN** the system SHALL only check user override and package built-in locations
-- **AND** the system SHALL NOT check project-local location
+#### 场景：未提供 projectRoot 时的向后兼容性
+- **当** 不带 `projectRoot` 参数调用 `getSchemaDir("my-workflow")` 时
+- **则** 系统应当仅检查用户覆盖和包内置位置
+- **且** 系统不应当检查项目本地位置
 
-### Requirement: Project schemas directory helper
+### 需求：项目模式目录辅助函数
 
-The system SHALL provide a `getProjectSchemasDir(projectRoot)` function that returns the project-local schemas directory path.
+系统应当提供 `getProjectSchemasDir(projectRoot)` 函数，返回项目本地模式目录路径。
 
-#### Scenario: Returns correct path
-- **WHEN** `getProjectSchemasDir("/path/to/project")` is called
-- **THEN** the system SHALL return `/path/to/project/openspec/schemas`
+#### 场景：返回正确路径
+- **当** 调用 `getProjectSchemasDir("/path/to/project")` 时
+- **则** 系统应当返回 `/path/to/project/openspec/schemas`
 
-### Requirement: List schemas includes project-local
+### 需求：列出模式包含项目本地
 
-The system SHALL include project-local schemas when listing available schemas if `projectRoot` is provided.
+如果提供了 `projectRoot`，系统应当在列出可用模式时包含项目本地模式。
 
-#### Scenario: Project-local schemas appear in list
-- **WHEN** a schema named "team-flow" exists at `./openspec/schemas/team-flow/schema.yaml`
-- **AND** `listSchemas(projectRoot)` is called
-- **THEN** the returned list SHALL include "team-flow"
+#### 场景：项目本地模式出现在列表中
+- **当** 名为 "team-flow" 的模式存在于 `./openspec/schemas/team-flow/schema.yaml` 时
+- **且** 调用 `listSchemas(projectRoot)`
+- **则** 返回的列表应当包含 "team-flow"
 
-#### Scenario: Project-local schema shadows same-named user schema in list
-- **WHEN** a schema named "custom" exists at both project-local and user override locations
-- **AND** `listSchemas(projectRoot)` is called
-- **THEN** the returned list SHALL include "custom" exactly once
+#### 场景：项目本地模式在列表中遮蔽同名用户模式
+- **当** 名为 "custom" 的模式同时存在于项目本地和用户覆盖位置时
+- **且** 调用 `listSchemas(projectRoot)`
+- **则** 返回的列表应当恰好包含一次 "custom"
 
-#### Scenario: Backward compatibility for listSchemas
-- **WHEN** `listSchemas()` is called without a `projectRoot` parameter
-- **THEN** the system SHALL only include user override and package built-in schemas
+#### 场景：listSchemas 的向后兼容性
+- **当** 不带 `projectRoot` 参数调用 `listSchemas()` 时
+- **则** 系统应当仅包含用户覆盖和包内置模式
 
-### Requirement: Schema info includes project source
+### 需求：模式信息包含项目来源
 
-The system SHALL indicate `source: 'project'` for project-local schemas in `listSchemasWithInfo()` results.
+系统应当在 `listSchemasWithInfo()` 结果中为项目本地模式指示 `source: 'project'`。
 
-#### Scenario: Project-local schema shows project source
-- **WHEN** a schema named "team-flow" exists at `./openspec/schemas/team-flow/schema.yaml`
-- **AND** `listSchemasWithInfo(projectRoot)` is called
-- **THEN** the schema info for "team-flow" SHALL have `source: 'project'`
+#### 场景：项目本地模式显示项目来源
+- **当** 名为 "team-flow" 的模式存在于 `./openspec/schemas/team-flow/schema.yaml` 时
+- **且** 调用 `listSchemasWithInfo(projectRoot)`
+- **则** "team-flow" 的模式信息应当有 `source: 'project'`
 
-#### Scenario: User override schema shows user source
-- **WHEN** a schema named "my-custom" exists only at `~/.local/share/openspec/schemas/my-custom/`
-- **AND** `listSchemasWithInfo(projectRoot)` is called
-- **THEN** the schema info for "my-custom" SHALL have `source: 'user'`
+#### 场景：用户覆盖模式显示用户来源
+- **当** 名为 "my-custom" 的模式仅存在于 `~/.local/share/openspec/schemas/my-custom/` 时
+- **且** 调用 `listSchemasWithInfo(projectRoot)`
+- **则** "my-custom" 的模式信息应当有 `source: 'user'`
 
-#### Scenario: Package built-in schema shows package source
-- **WHEN** "spec-driven" exists only as a package built-in
-- **AND** `listSchemasWithInfo(projectRoot)` is called
-- **THEN** the schema info for "spec-driven" SHALL have `source: 'package'`
+#### 场景：包内置模式显示包来源
+- **当** "spec-driven" 仅作为包内置存在时
+- **且** 调用 `listSchemasWithInfo(projectRoot)`
+- **则** "spec-driven" 的模式信息应当有 `source: 'package'`
 
-### Requirement: Schemas command shows source
+### 需求：Schemas 命令显示来源
 
-The `openspec schemas` command SHALL display the source of each schema.
+`openspec schemas` 命令应当显示每个模式的来源。
 
-#### Scenario: Display format includes source
-- **WHEN** user runs `openspec schemas`
-- **THEN** the output SHALL show each schema with its source label (project, user, or package)
+#### 场景：显示格式包含来源
+- **当** 用户运行 `openspec schemas` 时
+- **则** 输出应当显示每个模式及其来源标签（project、user 或 package）
 
-### Requirement: Use config schema as default for new changes
+### 需求：使用配置模式作为新变更的默认值
 
-The system SHALL use the schema field from `openspec/config.yaml` as the default when creating new changes without explicit `--schema` flag.
+系统应当在创建新变更时使用 `openspec/config.yaml` 中的 schema 字段作为默认值（如果没有显式 `--schema` 标志）。
 
-#### Scenario: Create change without --schema flag and config exists
-- **WHEN** user runs `openspec new change foo` and config contains `schema: "tdd"`
-- **THEN** system creates change with schema "tdd"
+#### 场景：创建变更时无 --schema 标志且配置存在
+- **当** 用户运行 `openspec new change foo` 且配置包含 `schema: "tdd"` 时
+- **则** 系统使用模式 "tdd" 创建变更
 
-#### Scenario: Create change without --schema flag and no config
-- **WHEN** user runs `openspec new change foo` and no config file exists
-- **THEN** system creates change with default schema "spec-driven"
+#### 场景：创建变更时无 --schema 标志且无配置
+- **当** 用户运行 `openspec new change foo` 且不存在配置文件时
+- **则** 系统使用默认模式 "spec-driven" 创建变更
 
-#### Scenario: Create change with explicit --schema flag
-- **WHEN** user runs `openspec new change foo --schema custom` and config contains `schema: "tdd"`
-- **THEN** system creates change with schema "custom" (CLI flag overrides config)
+#### 场景：创建变更时有显式 --schema 标志
+- **当** 用户运行 `openspec new change foo --schema custom` 且配置包含 `schema: "tdd"` 时
+- **则** 系统使用模式 "custom" 创建变更（CLI 标志覆盖配置）
 
-### Requirement: Resolve schema with updated precedence order
+### 需求：使用更新的优先级顺序解析模式
 
-The system SHALL resolve the schema for a change using the following precedence order: CLI flag, change metadata, project config, hardcoded default.
+系统应当使用以下优先级顺序解析变更的模式：CLI 标志、变更元数据、项目配置、硬编码默认值。
 
-#### Scenario: CLI flag is provided
-- **WHEN** user runs command with `--schema custom`
-- **THEN** system uses "custom" regardless of change metadata or config
+#### 场景：提供了 CLI 标志
+- **当** 用户运行命令时带有 `--schema custom`
+- **则** 系统使用 "custom"，无论变更元数据或配置如何
 
-#### Scenario: Change metadata specifies schema
-- **WHEN** change has `.openspec.yaml` with `schema: bound` and config has `schema: tdd`
-- **THEN** system uses "bound" from change metadata
+#### 场景：变更元数据指定模式
+- **当** 变更有 `.openspec.yaml` 且包含 `schema: bound`，配置有 `schema: tdd` 时
+- **则** 系统使用来自变更元数据的 "bound"
 
-#### Scenario: Only project config specifies schema
-- **WHEN** no CLI flag or change metadata, but config has `schema: tdd`
-- **THEN** system uses "tdd" from project config
+#### 场景：仅项目配置指定模式
+- **当** 没有 CLI 标志或变更元数据，但配置有 `schema: tdd` 时
+- **则** 系统使用来自项目配置的 "tdd"
 
-#### Scenario: No schema specified anywhere
-- **WHEN** no CLI flag, change metadata, or project config
-- **THEN** system uses hardcoded default "spec-driven"
+#### 场景：任何地方都未指定模式
+- **当** 没有 CLI 标志、变更元数据或项目配置时
+- **则** 系统使用硬编码默认值 "spec-driven"
 
-### Requirement: Support project-local schema names in config
+### 需求：配置中支持项目本地模式名称
 
-The system SHALL allow the config schema field to reference project-local schemas defined in `openspec/schemas/`.
+系统应当允许配置 schema 字段引用定义在 `openspec/schemas/` 中的项目本地模式。
 
-#### Scenario: Config references project-local schema
-- **WHEN** config contains `schema: "my-workflow"` and `openspec/schemas/my-workflow/` exists
-- **THEN** system resolves to the project-local schema
+#### 场景：配置引用项目本地模式
+- **当** 配置包含 `schema: "my-workflow"` 且 `openspec/schemas/my-workflow/` 存在时
+- **则** 系统解析到项目本地模式
 
-#### Scenario: Config references non-existent schema
-- **WHEN** config contains `schema: "nonexistent"` and that schema does not exist
-- **THEN** system shows error when attempting to load the schema with fuzzy match suggestions and list of all valid schemas
+#### 场景：配置引用不存在的模式
+- **当** 配置包含 `schema: "nonexistent"` 且该模式不存在时
+- **则** 系统在尝试加载模式时显示错误，带有模糊匹配建议和所有有效模式列表
 
-### Requirement: Provide helpful error message for invalid schema
+### 需求：为无效模式提供有用的错误消息
 
-The system SHALL display schema error with fuzzy match suggestions, list of available schemas, and fix instructions.
+系统应当显示模式错误，包含模糊匹配建议、可用模式列表和修复指示。
 
-#### Scenario: Schema name with typo (close match)
-- **WHEN** config contains `schema: "spce-driven"` (typo)
-- **THEN** error message includes "Did you mean: spec-driven (built-in)" as suggestion
+#### 场景：模式名称有拼写错误（接近匹配）
+- **当** 配置包含 `schema: "spce-driven"`（拼写错误）时
+- **则** 错误消息包含 "Did you mean: spec-driven (built-in)" 作为建议
 
-#### Scenario: Schema name with no close matches
-- **WHEN** config contains `schema: "completely-wrong"`
-- **THEN** error message shows list of all available built-in and project-local schemas
+#### 场景：模式名称无接近匹配
+- **当** 配置包含 `schema: "completely-wrong"` 时
+- **则** 错误消息显示所有可用的内置和项目本地模式列表
 
-#### Scenario: Error message includes fix instructions
-- **WHEN** config references invalid schema
-- **THEN** error message includes "Fix: Edit openspec/config.yaml and change 'schema: X' to a valid schema name"
+#### 场景：错误消息包含修复指示
+- **当** 配置引用无效模式时
+- **则** 错误消息包含 "Fix: Edit openspec/config.yaml and change 'schema: X' to a valid schema name"
 
-#### Scenario: Error distinguishes built-in vs project-local schemas
-- **WHEN** error lists available schemas
-- **THEN** output clearly labels each as "built-in" or "project-local"
+#### 场景：错误区分内置与项目本地模式
+- **当** 错误列出可用模式时
+- **则** 输出清楚地标记每个为 "built-in" 或 "project-local"
 
-### Requirement: Maintain backwards compatibility for existing changes
+### 需求：保持现有变更的向后兼容性
 
-The system SHALL continue to work with existing changes that do not have project config.
+系统应当继续与没有项目配置的现有变更一起工作。
 
-#### Scenario: Existing change without config
-- **WHEN** change was created before config feature and no config file exists
-- **THEN** system resolves schema using existing logic (change metadata or hardcoded default)
+#### 场景：无配置的现有变更
+- **当** 变更在配置功能之前创建且不存在配置文件时
+- **则** 系统使用现有逻辑解析模式（变更元数据或硬编码默认值）
 
-#### Scenario: Existing change with config added later
-- **WHEN** config file is added to project with existing changes
-- **THEN** existing changes continue to use their bound schema from `.openspec.yaml`
+#### 场景：后来添加配置的现有变更
+- **当** 配置文件被添加到带有现有变更的项目时
+- **则** 现有变更继续使用其 `.openspec.yaml` 中绑定的模式

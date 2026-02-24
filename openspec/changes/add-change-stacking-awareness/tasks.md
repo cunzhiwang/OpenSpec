@@ -1,39 +1,39 @@
-## 1. Metadata Model
+## 1. 元数据模型
 
-- [ ] 1.1 Add optional stack metadata fields (`dependsOn`, `provides`, `requires`, `touches`, `parent`) to change metadata schema
-- [ ] 1.2 Keep metadata backward compatible for existing changes without new fields
-- [ ] 1.3 Add tests for valid/invalid metadata and schema evolution behavior
+- [ ] 1.1 向变更元数据模式添加可选的堆叠元数据字段（`dependsOn`、`provides`、`requires`、`touches`、`parent`）
+- [ ] 1.2 保持元数据对没有新字段的现有变更向后兼容
+- [ ] 1.3 添加有效/无效元数据和模式演进行为的测试
 
-## 2. Stack-Aware Validation
+## 2. 堆叠感知验证
 
-- [ ] 2.1 Detect dependency cycles and fail validation with deterministic errors
-- [ ] 2.2 Detect missing `dependsOn` targets (referenced change ID does not exist) and detect changes transitively blocked by unresolved/cyclic dependency paths
-- [ ] 2.3 Add overlap warnings for active changes that touch the same capability/spec areas
-- [ ] 2.4 Emit advisory warnings for unmatched `requires` markers when no provider exists in active history
-- [ ] 2.5 Add tests for cycle, missing dependency, overlap warning, and unmatched `requires` cases
+- [ ] 2.1 检测依赖循环并以确定性错误使验证失败
+- [ ] 2.2 检测缺失的 `dependsOn` 目标（引用的变更 ID 不存在）并检测被未解决/循环依赖路径传递阻塞的变更
+- [ ] 2.3 为触及相同能力/规范区域的活跃变更添加重叠警告
+- [ ] 2.4 当活跃历史中没有提供者存在时，为不匹配的 `requires` 标记发出建议警告
+- [ ] 2.5 添加循环、缺失依赖、重叠警告和不匹配 `requires` 情况的测试
 
-## 3. Sequencing Commands
+## 3. 排序命令
 
-- [ ] 3.1 Add `openspec change graph` to display dependency order for active changes
-- [ ] 3.2 Add `openspec change next` to suggest unblocked changes in recommended order
-- [ ] 3.3 Add tests for topological ordering and deterministic tie-breaking (lexicographic by change ID at equal depth)
+- [ ] 3.1 添加 `openspec change graph` 以显示活跃变更的依赖顺序
+- [ ] 3.2 添加 `openspec change next` 以按推荐顺序建议未阻塞的变更
+- [ ] 3.3 添加拓扑排序和确定性打破平局（相同深度时按变更 ID 字典序）的测试
 
-## 4. Split Scaffolding
+## 4. 拆分脚手架
 
-- [ ] 4.1 Add `openspec change split <change-id>` to scaffold child slices
-- [ ] 4.2 Ensure generated children include parent/dependency metadata and stub proposal/tasks files
-- [ ] 4.3 Convert the source change into a parent planning container as part of split (no duplicate child implementation tasks)
-- [ ] 4.4 Add tests for split output structure, source-change parent conversion, and deterministic re-split error behavior when overwrite mode is not requested
-- [ ] 4.5 Implement and test explicit overwrite mode for `openspec change split` (`--overwrite` / `--force`) for controlled re-splitting
+- [ ] 4.1 添加 `openspec change split <change-id>` 以搭建子切片
+- [ ] 4.2 确保生成的子项包含父/依赖元数据和存根提案/任务文件
+- [ ] 4.3 作为拆分的一部分将源变更转换为父规划容器（没有重复的子实现任务）
+- [ ] 4.4 添加拆分输出结构、源变更父转换和未请求覆盖模式时确定性重新拆分错误行为的测试
+- [ ] 4.5 为 `openspec change split` 实现和测试显式覆盖模式（`--overwrite` / `--force`）用于受控的重新拆分
 
-## 5. Documentation
+## 5. 文档
 
-- [ ] 5.1 Document stack metadata and sequencing workflow in `docs/concepts.md`
-- [ ] 5.2 Document new change commands and usage examples in `docs/cli.md`
-- [ ] 5.3 Add guidance for breaking large changes into independently mergeable slices
-- [ ] 5.4 Document migration guidance for `openspec/changes/IMPLEMENTATION_ORDER.md` as optional narrative, not dependency source of truth
+- [ ] 5.1 在 `docs/concepts.md` 中文档化堆叠元数据和排序工作流
+- [ ] 5.2 在 `docs/cli.md` 中文档化新的变更命令和使用示例
+- [ ] 5.3 添加将大型变更拆分为独立可合并切片的指导
+- [ ] 5.4 文档化 `openspec/changes/IMPLEMENTATION_ORDER.md` 作为可选叙述而非依赖事实来源的迁移指导
 
-## 6. Verification
+## 6. 验证
 
-- [ ] 6.1 Run targeted tests for change parsing, validation, and CLI commands
-- [ ] 6.2 Run full test suite (`pnpm test`) and resolve regressions
+- [ ] 6.1 运行变更解析、验证和 CLI 命令的定向测试
+- [ ] 6.2 运行完整测试套件（`pnpm test`）并解决回归问题

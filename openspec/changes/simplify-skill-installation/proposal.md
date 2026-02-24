@@ -1,119 +1,119 @@
-## Why
+## 为什么
 
-Users have complained that there are too many skills/commands (currently 10) and new users feel overwhelmed. We want to simplify the default experience while preserving power-user capabilities and backwards compatibility.
+用户抱怨技能/命令太多（目前有 10 个），新用户感到不知所措。我们想简化默认体验，同时保留高级用户能力和向后兼容性。
 
-The goal: **get users to an "aha moment" in under a minute**.
+目标：**让用户在一分钟内达到"啊哈时刻"**。
 
 ```text
 0:00  $ openspec init
-      ✓ Done. Run /opsx:propose "your idea"
+      ✓ 完成。运行 /opsx:propose "你的想法"
 
-0:15  /opsx:propose "add user authentication"
+0:15  /opsx:propose "添加用户认证"
 
-0:45  Agent creates proposal.md, design.md, tasks.md
-      "Whoa, it planned the whole thing for me" ← AHA
+0:45  代理创建 proposal.md、design.md、tasks.md
+      "哇，它为我规划了整个事情" ← 啊哈
 
 1:00  /opsx:apply
 ```
 
-Additionally, users have different preferences for how workflows are delivered (skills vs commands vs both), but this should be a power-user configuration, not something new users think about.
+此外，用户对工作流如何交付有不同的偏好（技能 vs 命令 vs 两者），但这应该是高级用户配置，而不是新用户需要考虑的事情。
 
-## What Changes
+## 变更内容
 
-### 1. Smart Defaults Init
+### 1. 智能默认 Init
 
-Init auto-detects tools and asks for confirmation:
+Init 自动检测工具并要求确认：
 
 ```text
 $ openspec init
 
-Detected tools:
+检测到的工具：
   [x] Claude Code
   [x] Cursor
   [ ] Windsurf
 
-Press Enter to confirm, or Space to toggle
+按 Enter 确认，或按空格切换
 
-Setting up OpenSpec...
-✓ Done
+正在设置 OpenSpec...
+✓ 完成
 
-Start your first change:
-  /opsx:propose "add dark mode"
+开始你的第一个变更：
+  /opsx:propose "添加深色模式"
 ```
 
-**No prompts for profile or delivery.** Defaults are:
-- Profile: core
-- Delivery: both
+**不提示配置文件或交付。** 默认值是：
+- 配置文件：core
+- 交付：both
 
-Power users can customize via `openspec config profile`.
+高级用户可以通过 `openspec config profile` 自定义。
 
-### 2. Tool Detection Behavior
+### 2. 工具检测行为
 
-Init scans for existing tool directories (`.claude/`, `.cursor/`, etc.):
-- **Tools detected (interactive):** Shows pre-selected checkboxes, user confirms or adjusts
-- **No tools detected (interactive):** Prompts for full tool selection
-- **Non-interactive (CI):** Uses detected tools automatically, fails if none detected
+Init 扫描现有工具目录（`.claude/`、`.cursor/` 等）：
+- **检测到工具（交互式）：** 显示预选复选框，用户确认或调整
+- **未检测到工具（交互式）：** 提示完整的工具选择
+- **非交互式（CI）：** 自动使用检测到的工具，如果未检测到则失败
 
-### 3. Fix Tool Selection UX
+### 3. 修复工具选择用户体验
 
-Current behavior confuses users:
-- Tab to confirm (unexpected)
+当前行为让用户困惑：
+- Tab 确认（意外）
 
-New behavior:
-- **Space** to toggle selection
-- **Enter** to confirm
+新行为：
+- **空格** 切换选择
+- **Enter** 确认
 
-### 4. Introduce Profiles
+### 4. 引入配置文件
 
-Profiles define which workflows to install:
+配置文件定义安装哪些工作流：
 
-- **core** (default): `propose`, `explore`, `apply`, `archive` (4 workflows)
-- **custom**: User-selected subset of workflows
+- **core**（默认）：`propose`、`explore`、`apply`、`archive`（4 个工作流）
+- **custom**：用户选择的工作流子集
 
-The `propose` workflow is new - it combines `new` + `ff` into a single command that creates a change and generates all artifacts.
+`propose` 工作流是新的 - 它将 `new` + `ff` 合并为一个命令，创建变更并生成所有产物。
 
-### 5. Improved Propose UX
+### 5. 改进的 Propose 用户体验
 
-`/opsx:propose` should naturally onboard users by explaining what it's doing:
+`/opsx:propose` 应该通过解释它正在做什么来自然地引导用户：
 
 ```text
-I'll create a change with 3 artifacts:
-- proposal.md (what & why)
-- design.md (how)
-- tasks.md (implementation steps)
+我将创建一个包含 3 个产物的变更：
+- proposal.md（什么和为什么）
+- design.md（如何）
+- tasks.md（实施步骤）
 
-When ready to implement, run /opsx:apply
+准备好实施后，运行 /opsx:apply
 ```
 
-This teaches as it goes - no separate onboarding needed for most users.
+这边学边教 - 大多数用户不需要单独的入门。
 
-### 6. Introduce Delivery Config
+### 6. 引入交付配置
 
-Delivery controls how workflows are installed:
+交付控制工作流如何安装：
 
-- **both** (default): Skills and commands
-- **skills**: Skills only
-- **commands**: Commands only
+- **both**（默认）：技能和命令
+- **skills**：仅技能
+- **commands**：仅命令
 
-Stored in existing global config (`~/.config/openspec/config.json`). Not prompted during init.
+存储在现有全局配置（`~/.config/openspec/config.json`）中。init 期间不提示。
 
-### 7. New CLI Commands
+### 7. 新 CLI 命令
 
 ```shell
-# Profile configuration (interactive picker for delivery + workflows)
-openspec config profile          # interactive picker
-openspec config profile core     # preset shortcut (core workflows, preserves delivery)
+# 配置文件配置（交付 + 工作流的交互式选择器）
+openspec config profile          # 交互式选择器
+openspec config profile core     # 预设快捷方式（core 工作流，保留交付）
 ```
 
-The interactive picker allows users to configure both delivery method and workflow selection in one place:
+交互式选择器允许用户在一个地方配置交付方法和工作流选择：
 
 ```
 $ openspec config profile
 
-Delivery: [skills] [commands] [both]
-                              ^^^^^^
+交付：[skills] [commands] [both]
+                          ^^^^^^
 
-Workflows: (space to toggle, enter to save)
+工作流：（空格切换，回车保存）
 [x] propose
 [x] explore
 [x] apply
@@ -127,76 +127,76 @@ Workflows: (space to toggle, enter to save)
 [ ] onboard
 ```
 
-### 8. Backwards Compatibility & Migration
+### 8. 向后兼容性和迁移
 
-**Existing users keep their current setup.** When `openspec update` runs on a project with existing workflows and no `profile` in global config, it performs a one-time migration:
+**现有用户保持当前设置。** 当 `openspec update` 在具有现有工作流且全局配置中没有 `profile` 的项目上运行时，它执行一次性迁移：
 
-1. Scans installed workflow files across all tool directories in the project
-2. Writes `profile: "custom"`, `delivery: "both"`, `workflows: [<detected>]` to global config
-3. Refreshes templates but does NOT add or remove any workflows
-4. Displays: "Migrated: custom profile with N existing workflows"
+1. 扫描项目中所有工具目录中已安装的工作流文件
+2. 将 `profile: "custom"`、`delivery: "both"`、`workflows: [<detected>]` 写入全局配置
+3. 刷新模板但不添加或移除任何工作流
+4. 显示："已迁移：自定义配置文件包含 N 个现有工作流"
 
-After migration, subsequent `init` and `update` commands respect the migrated config.
+迁移后，后续的 `init` 和 `update` 命令尊重迁移的配置。
 
-**Key behaviors:**
-- Existing users' workflows are preserved exactly as-is (no `propose` added automatically)
-- Both `init` (re-init) and `update` trigger migration on existing projects if no profile is set
-- `openspec init` on a **new** project (no existing workflows) uses global config, defaulting to `core`
-- `init` with a custom profile applies the configured workflows directly (no profile confirmation prompt)
-- `init` validates `--profile` values (`core` or `custom`) and errors on invalid input
-- Migration message mentions `propose` and suggests `openspec config profile core` to opt in
-- After migration, users can opt into `core` profile via `openspec config profile core`
-- Workflow templates conditionally reference only installed workflows in "next steps" guidance
-- Delivery changes are applied: switching to `skills` removes command files, switching to `commands` removes skill files
-- Re-running `init` applies delivery cleanup on existing projects (removes files that no longer match delivery)
-- `update` treats profile/delivery drift as update-required even when template versions are already current
-- `update` treats command-only installs as configured tools
-- All workflows remain available via custom profile
+**关键行为：**
+- 现有用户的工作流完全按原样保留（不会自动添加 `propose`）
+- 如果未设置配置文件，`init`（重新初始化）和 `update` 都会在现有项目上触发迁移
+- 在**新**项目上（没有现有工作流）的 `openspec init` 使用全局配置，默认为 `core`
+- 使用自定义配置文件的 `init` 直接应用配置的工作流（无配置文件确认提示）
+- `init` 验证 `--profile` 值（`core` 或 `custom`）并在无效输入时报错
+- 迁移消息提到 `propose` 并建议 `openspec config profile core` 以选择加入
+- 迁移后，用户可以通过 `openspec config profile core` 选择加入 `core` 配置文件
+- 工作流模板在"下一步"指导中有条件地仅引用已安装的工作流
+- 交付更改会应用：切换到 `skills` 会移除命令文件，切换到 `commands` 会移除技能文件
+- 重新运行 `init` 在现有项目上应用交付清理（移除不再匹配交付的文件）
+- `update` 即使模板版本已经是当前的，也将配置文件/交付漂移视为需要更新
+- `update` 将仅命令安装视为已配置的工具
+- 所有工作流通过自定义配置文件保持可用
 
-## Capabilities
+## 能力
 
-### New Capabilities
+### 新能力
 
-- `profiles`: Workflow profiles (core, custom), delivery preferences, global config storage, interactive picker
-- `propose-workflow`: Combined workflow that creates change + generates all artifacts
+- `profiles`：工作流配置文件（core、custom）、交付偏好、全局配置存储、交互式选择器
+- `propose-workflow`：创建变更 + 生成所有产物的组合工作流
 
-### Modified Capabilities
+### 修改的能力
 
-- `cli-init`: Smart defaults with tool auto-detection, profile-based skill/command generation
-- `cli-update`: Profile support, delivery changes, one-time migration for existing users
+- `cli-init`：带工具自动检测的智能默认、基于配置文件的技能/命令生成
+- `cli-update`：配置文件支持、交付更改、现有用户的一次性迁移
 
-## Impact
+## 影响
 
-### New Files
-- `src/core/templates/workflows/propose.ts` - New propose workflow template
-- `src/core/profiles.ts` - Profile definitions and logic
-- `src/core/available-tools.ts` - Detect what AI tools user has from directories
+### 新文件
+- `src/core/templates/workflows/propose.ts` - 新的 propose 工作流模板
+- `src/core/profiles.ts` - 配置文件定义和逻辑
+- `src/core/available-tools.ts` - 从目录检测用户有哪些 AI 工具
 
-### Modified Files
-- `src/core/init.ts` - Smart defaults, auto-detection, tool confirmation
-- `src/core/config.ts` - Add profile and delivery types
-- `src/core/global-config.ts` - Add profile, delivery, workflows fields to schema
-- `src/core/shared/skill-generation.ts` - Filter by profile, respect delivery
-- `src/core/shared/tool-detection.ts` - Update SKILL_NAMES and COMMAND_IDS to include propose
-- `src/commands/config.ts` - Add `profile` subcommand with interactive picker
-- `src/core/update.ts` - Add profile/delivery support, file deletion for delivery changes
-- `src/prompts/searchable-multi-select.ts` - Fix keybindings (space/enter)
+### 修改的文件
+- `src/core/init.ts` - 智能默认、自动检测、工具确认
+- `src/core/config.ts` - 添加配置文件和交付类型
+- `src/core/global-config.ts` - 向模式添加 profile、delivery、workflows 字段
+- `src/core/shared/skill-generation.ts` - 按配置文件过滤，尊重交付
+- `src/core/shared/tool-detection.ts` - 更新 SKILL_NAMES 和 COMMAND_IDS 以包含 propose
+- `src/commands/config.ts` - 添加带交互式选择器的 `profile` 子命令
+- `src/core/update.ts` - 添加配置文件/交付支持、交付更改的文件删除
+- `src/prompts/searchable-multi-select.ts` - 修复键绑定（空格/回车）
 
-### Global Config Schema Extension
+### 全局配置模式扩展
 ```json
-// ~/.config/openspec/config.json (extends existing)
+// ~/.config/openspec/config.json（扩展现有）
 {
-  "telemetry": { ... },          // existing
-  "featureFlags": { ... },       // existing
-  "profile": "core",             // NEW: core | custom
-  "delivery": "both",            // NEW: both | skills | commands
-  "workflows": ["propose", ...]  // NEW: only if profile: custom
+  "telemetry": { ... },          // 现有
+  "featureFlags": { ... },       // 现有
+  "profile": "core",             // 新：core | custom
+  "delivery": "both",            // 新：both | skills | commands
+  "workflows": ["propose", ...]  // 新：仅当 profile: custom 时
 }
 ```
 
-## Profiles Reference
+## 配置文件参考
 
-| Profile | Workflows | Description |
-|---------|-----------|-------------|
-| core | propose, explore, apply, archive | Streamlined flow for most users (default) |
-| custom | user-defined | Pick exactly what you need via `openspec config profile` |
+| 配置文件 | 工作流 | 描述 |
+|---------|--------|------|
+| core | propose、explore、apply、archive | 大多数用户的精简流程（默认） |
+| custom | 用户定义 | 通过 `openspec config profile` 精确选择你需要的 |

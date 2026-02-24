@@ -1,61 +1,61 @@
-## 1. Global Config + Validation
+## 1. 全局配置 + 验证
 
-- [ ] 1.1 Add `installScope` (`global` | `project`) to `GlobalConfig` with explicit `global` default for newly created configs
-- [ ] 1.2 Update config schema validation and known-key checks to include install scope
-- [ ] 1.3 Add schema-evolution tests ensuring missing `installScope` in legacy configs resolves to effective `project` until explicit migration
-- [ ] 1.4 Extend `openspec config list` output to show install scope and source (`explicit`, `new-default`, `legacy-default`)
+- [ ] 1.1 向 `GlobalConfig` 添加 `installScope`（`global` | `project`），新创建配置的显式 `global` 默认值
+- [ ] 1.2 更新配置模式验证和已知键检查以包含安装范围
+- [ ] 1.3 添加模式演进测试，确保遗留配置中缺失的 `installScope` 在显式迁移前解析为有效的 `project`
+- [ ] 1.4 扩展 `openspec config list` 输出以显示安装范围和来源（`explicit`、`new-default`、`legacy-default`）
 
-## 2. Tool Capability Metadata + Resolvers
+## 2. 工具能力元数据 + 解析器
 
-- [ ] 2.1 Extend `AI_TOOLS` metadata to declare scope support per surface (skills/commands)
-- [ ] 2.2 Add shared install-target resolver for skills and commands using requested scope + tool support
-- [ ] 2.3 Implement deterministic fallback/error behavior when preferred scope is unsupported, including default behavior when scope support metadata is absent
-- [ ] 2.4 Add unit tests for scope resolution (preferred, fallback, and hard-fail paths)
+- [ ] 2.1 扩展 `AI_TOOLS` 元数据以按表面（技能/命令）声明范围支持
+- [ ] 2.2 使用请求的范围 + 工具支持为技能和命令添加共享安装目标解析器
+- [ ] 2.3 实现首选范围不支持时的确定性回退/错误行为，包括范围支持元数据缺失时的默认行为
+- [ ] 2.4 添加范围解析的单元测试（首选、回退和硬失败路径）
 
-## 3. Command Generation Contract
+## 3. 命令生成契约
 
-- [ ] 3.1 Update `ToolCommandAdapter` path contract to accept install context
-- [ ] 3.2 Update `generateCommand`/`generateCommands` to pass context through adapters
-- [ ] 3.3 Migrate all command adapters to the new path contract
-- [ ] 3.4 Update adapter tests for scoped path behavior (including Codex global path semantics)
+- [ ] 3.1 更新 `ToolCommandAdapter` 路径契约以接受安装上下文
+- [ ] 3.2 更新 `generateCommand`/`generateCommands` 以通过适配器传递上下文
+- [ ] 3.3 将所有命令适配器迁移到新的路径契约
+- [ ] 3.4 更新范围路径行为的适配器测试（包括 Codex 全局路径语义）
 
-## 4. Init Command Scope Support
+## 4. Init 命令范围支持
 
-- [ ] 4.1 Add scope override flag to `openspec init` (`--scope global|project`)
-- [ ] 4.2 Resolve effective scope per tool/surface before writing artifacts
-- [ ] 4.3 Apply scope-aware generation/removal planning for skills and commands
-- [ ] 4.4 Surface effective scope decisions and fallback notes in init summary output
-- [ ] 4.5 Add init tests for global default, project override, and fallback/error scenarios
+- [ ] 4.1 向 `openspec init` 添加范围覆盖标志（`--scope global|project`）
+- [ ] 4.2 在写入产物之前按每个工具/表面解析有效范围
+- [ ] 4.3 为技能和命令应用范围感知生成/移除规划
+- [ ] 4.4 在 init 摘要输出中显示有效范围决策和回退说明
+- [ ] 4.5 添加全局默认、项目覆盖和回退/错误场景的 init 测试
 
-## 5. Update Command Scope Support
+## 5. Update 命令范围支持
 
-- [ ] 5.1 Add scope override flag to `openspec update` (`--scope global|project`)
-- [ ] 5.2 Make configured-tool detection and drift checks scope-aware
-- [ ] 5.3 Persist and read last successful effective scope per tool/surface for deterministic scope-drift detection
-- [ ] 5.4 Apply scope-aware sync/removal with consistent fallback/error behavior
-- [ ] 5.5 Ensure scope changes update managed files in new targets and clean old managed targets safely
-- [ ] 5.6 Add update tests for global/project/fallback/error and repeat-run idempotency
+- [ ] 5.1 向 `openspec update` 添加范围覆盖标志（`--scope global|project`）
+- [ ] 5.2 使配置工具检测和漂移检查范围感知
+- [ ] 5.3 为每个工具/表面持久化和读取最后成功的有效范围以进行确定性范围漂移检测
+- [ ] 5.4 应用具有一致回退/错误行为的范围感知同步/移除
+- [ ] 5.5 确保范围更改更新新目标中的托管文件并安全清理旧托管目标
+- [ ] 5.6 添加全局/项目/回退/错误和重复运行幂等性的更新测试
 
-## 6. Config UX
+## 6. 配置用户体验
 
-- [ ] 6.1 Extend `openspec config profile` interactive flow to select install scope
-- [ ] 6.2 Preserve install scope when using preset shortcuts unless explicitly changed
-- [ ] 6.3 Ensure non-interactive config behavior remains deterministic with clear errors
-- [ ] 6.4 Add/adjust config command tests for install scope flows
-- [ ] 6.5 Add migration UX for legacy users to opt into `global` scope explicitly
+- [ ] 6.1 扩展 `openspec config profile` 交互流程以选择安装范围
+- [ ] 6.2 使用预设快捷方式时保留安装范围，除非显式更改
+- [ ] 6.3 确保非交互式配置行为保持确定性，有清晰的错误
+- [ ] 6.4 为安装范围流程添加/调整配置命令测试
+- [ ] 6.5 为遗留用户添加迁移用户体验以显式选择进入 `global` 范围
 
-## 7. Documentation
+## 7. 文档
 
-- [ ] 7.1 Update `docs/supported-tools.md` with scope behavior and effective-scope fallback notes
-- [ ] 7.2 Update `docs/cli.md` examples for init/update scope options
-- [ ] 7.3 Document cross-project implications of global installs
-- [ ] 7.4 Add existing-user migration guide covering legacy-default behavior and explicit opt-in to `installScope: global`
+- [ ] 7.1 用范围行为和有效范围回退说明更新 `docs/supported-tools.md`
+- [ ] 7.2 用 init/update 范围选项更新 `docs/cli.md` 示例
+- [ ] 7.3 文档化全局安装的跨项目影响
+- [ ] 7.4 添加现有用户迁移指南，涵盖遗留默认行为和显式选择进入 `installScope: global`
 
-## 8. Verification
+## 8. 验证
 
-- [ ] 8.1 Run targeted tests for config, adapters, init, and update
-- [ ] 8.2 Run full test suite (`pnpm test`) and resolve regressions
-- [ ] 8.3 Manual smoke test: init/update with `installScope=global`
-- [ ] 8.4 Manual smoke test: init/update with `--scope project`
-- [ ] 8.5 Verify path resolution behavior on Windows CI (or cross-platform unit tests with mocked Windows paths)
-- [ ] 8.6 Verify combined behavior matrix for mixed tools across scope × delivery × command-surface capability
+- [ ] 8.1 运行配置、适配器、init 和 update 的定向测试
+- [ ] 8.2 运行完整测试套件（`pnpm test`）并解决回归问题
+- [ ] 8.3 手动冒烟测试：使用 `installScope=global` 的 init/update
+- [ ] 8.4 手动冒烟测试：使用 `--scope project` 的 init/update
+- [ ] 8.5 验证 Windows CI 上的路径解析行为（或使用模拟 Windows 路径的跨平台单元测试）
+- [ ] 8.6 验证跨范围 × 交付 × 命令表面能力的混合工具组合行为矩阵

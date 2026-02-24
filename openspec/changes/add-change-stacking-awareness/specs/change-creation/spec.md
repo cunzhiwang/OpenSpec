@@ -1,15 +1,14 @@
-## ADDED Requirements
+## 新增需求
 
-### Requirement: Stack Metadata Scaffolding
-Change creation workflows SHALL support optional dependency metadata for new or split changes.
+### 需求：堆叠元数据脚手架
+变更创建工作流应支持新变更或拆分变更的可选依赖元数据。
 
-#### Scenario: Create change with stack metadata
-- **WHEN** a change is created with stack metadata inputs
-- **THEN** creation SHALL persist metadata fields in change configuration
-- **AND** persisted metadata SHALL be validated against change metadata schema rules
+#### 场景：使用堆叠元数据创建变更
+- **当** 使用堆叠元数据输入创建变更时
+- **则** 创建应将元数据字段持久化到变更配置中
+- **且** 持久化的元数据应根据变更元数据模式规则进行验证
 
-#### Scenario: Split-generated child metadata
-- **WHEN** child changes are generated from a split workflow
-- **THEN** each child SHALL include a `parent` link to the source change
-- **AND** SHALL include dependency metadata needed for deterministic sequencing
-
+#### 场景：拆分生成的子元数据
+- **当** 从拆分工作流生成子变更时
+- **则** 每个子变更应包含指向源变更的 `parent` 链接
+- **且** 应包含确定性排序所需的依赖元数据

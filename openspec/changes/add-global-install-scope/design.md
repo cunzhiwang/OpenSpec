@@ -1,48 +1,48 @@
-## Context
+## 上下文
 
-OpenSpec today assumes project-local installation for most generated artifacts, with Codex command prompts as the main global exception. This mixed model works, but it is implicit and not user-configurable.
+OpenSpec 今天假设大多数生成的产物是项目本地安装，Codex 命令提示是主要的全局例外。这种混合模型有效，但它是隐式的且用户不可配置。
 
-The requested change is to support user-selectable install scope (`global` or `project`) for tool skills/commands, defaulting to `global` for new configurations while preserving legacy project-local behavior until explicit migration.
+请求的变更是支持用户可选择的工具技能/命令安装范围（`global` 或 `project`），为新配置默认使用 `global`，同时保留遗留的项目本地行为直到显式迁移。
 
-## Goals / Non-Goals
+## 目标/非目标
 
-**Goals:**
+**目标：**
 
-- Provide a single scope preference that users can set globally and override per run
-- Default new users to `global` scope
-- Make install path resolution deterministic and explicit across tools/surfaces
-- Preserve current behavior for users with older config files that do not yet define `installScope`
-- Avoid silent partial installs; surface effective scope decisions in output
+- 提供用户可以全局设置并按运行覆盖的单一范围偏好
+- 新用户默认使用 `global` 范围
+- 使安装路径解析在工具/表面之间确定性和明确
+- 为尚未定义 `installScope` 的旧配置文件用户保留当前行为
+- 避免静默部分安装；在输出中显示有效范围决策
 
-**Non-Goals:**
+**非目标：**
 
-- Implementing project-local config file support for global settings
-- Defining global install paths for tools where upstream location conventions are unknown
-- Changing workflow/profile semantics (`core`, `custom`, `delivery`) in this change
+- 实现全局设置的项目本地配置文件支持
+- 为上游位置约定未知的工具定义全局安装路径
+- 在此变更中更改工作流/配置文件语义（`core`、`custom`、`delivery`）
 
-## Decisions
+## 决策
 
-### 1. Scope model in global config
+### 1. 全局配置中的范围模型
 
-Add install scope preference to global config:
+向全局配置添加安装范围偏好：
 
 ```ts
 type InstallScope = 'global' | 'project';
 
 interface GlobalConfig {
-  // existing fields...
+  // 现有字段...
   installScope?: InstallScope;
 }
 ```
 
-Defaults:
+默认值：
 
-- New configs SHOULD write `installScope: global` explicitly.
-- Existing configs without this field continue to load safely through schema evolution and SHALL resolve effective default as `project` until users explicitly set `installScope`.
+- 新配置应显式写入 `installScope: global`。
+- 没有此字段的现有配置通过模式演进继续安全加载，并且在用户显式设置 `installScope` 之前，有效默认值应解析为 `project`。
 
-### 2. Explicit tool scope support metadata
+### 2. 显式工具范围支持元数据
 
-Extend `AI_TOOLS` metadata with optional scope support declarations per surface:
+用每个表面的可选范围支持声明扩展 `AI_TOOLS` 元数据：
 
 ```ts
 interface ToolInstallScopeSupport {
@@ -51,111 +51,111 @@ interface ToolInstallScopeSupport {
 }
 ```
 
-Resolution rules:
+解析规则：
 
-1. If scope support metadata is absent for a tool surface, treat it as project-only support for conservative backward compatibility.
-2. Try preferred scope.
-3. If unsupported, use alternate scope when supported.
-4. If neither is supported, fail with actionable error.
+1. 如果工具表面的范围支持元数据缺失，为保守的向后兼容性将其视为仅支持项目。
+2. 尝试首选范围。
+3. 如果不支持，在支持时使用备用范围。
+4. 如果两者都不支持，以可操作的错误失败。
 
-This enables default-global behavior while remaining safe for tools that only support project-local paths.
+这启用了默认全局行为，同时对仅支持项目本地路径的工具保持安全。
 
-### 3. Scope-aware install target resolver
+### 3. 范围感知安装目标解析器
 
-Introduce shared resolver utilities to compute effective target paths for:
+引入共享解析器工具以计算以下的有效目标路径：
 
-- skills root directory
-- command output files
+- 技能根目录
+- 命令输出文件
 
-Resolver input:
+解析器输入：
 
-- tool id
-- requested scope
-- project root
-- environment context (`CODEX_HOME`, etc.)
+- 工具 ID
+- 请求的范围
+- 项目根目录
+- 环境上下文（`CODEX_HOME` 等）
 
-Resolver output:
+解析器输出：
 
-- effective scope per surface
-- concrete target paths
-- optional fallback reasons for user-facing output
+- 每个表面的有效范围
+- 具体目标路径
+- 用于用户可见输出的可选回退原因
 
-Platform behavior:
+平台行为：
 
-- Resolver outputs are OS-aware and normalized for the current platform.
-- Windows global targets MUST use Windows path conventions (for example `%USERPROFILE%\.codex\prompts` fallback for Codex when `CODEX_HOME` is unset), not POSIX defaults.
+- 解析器输出是操作系统感知的，并为当前平台标准化。
+- Windows 全局目标必须使用 Windows 路径约定（例如，当 `CODEX_HOME` 未设置时，Codex 的 `%USERPROFILE%\.codex\prompts` 回退），而不是 POSIX 默认值。
 
-### 4. Context-aware command adapter paths
+### 4. 上下文感知命令适配器路径
 
-Update command generation contract so adapters receive install context for path resolution. This avoids hardcoded absolute/relative assumptions and centralizes scope decisions.
+更新命令生成契约，使适配器接收安装上下文用于路径解析。这避免了硬编码的绝对/相对假设并集中范围决策。
 
-Example direction:
+示例方向：
 
 ```ts
 getFilePath(commandId: string, context: InstallContext): string
 ```
 
-### 5. CLI behavior and UX
+### 5. CLI 行为和用户体验
 
-`init`:
+`init`：
 
-- Uses configured install scope by default; if absent in a legacy config, uses migration-safe effective default (`project`).
-- Supports explicit override flag (`--scope global|project`).
-- In interactive mode, displays chosen scope and any per-tool fallback decisions before writing files.
+- 默认使用配置的安装范围；如果在遗留配置中缺失，使用迁移安全的有效默认值（`project`）。
+- 支持显式覆盖标志（`--scope global|project`）。
+- 在交互模式下，在写入文件之前显示选定的范围和任何每工具回退决策。
 
-`update`:
+`update`：
 
-- Applies current scope preference (or override); if absent in a legacy config, uses migration-safe effective default (`project`).
-- Performs drift detection using effective scoped paths and last-applied scope state.
-- Reports effective scope decisions in summary output.
+- 应用当前范围偏好（或覆盖）；如果在遗留配置中缺失，使用迁移安全的有效默认值（`project`）。
+- 使用有效范围路径和最后应用的范围状态执行漂移检测。
+- 在摘要输出中报告有效范围决策。
 
-`config`:
+`config`：
 
-- `openspec config profile` interactive flow includes install scope selection.
-- `openspec config list` shows `installScope` with source annotation (`explicit`, `new-default`, or `legacy-default`).
+- `openspec config profile` 交互流程包括安装范围选择。
+- `openspec config list` 显示带来源注释的 `installScope`（`explicit`、`new-default` 或 `legacy-default`）。
 
-### 6. Cleanup safety during scope changes
+### 6. 范围更改期间的清理安全性
 
-When scope changes:
+当范围更改时：
 
-- Writes occur in the new effective targets.
-- Cleanup/removal is limited to OpenSpec-managed files for the relevant tool/workflow IDs.
-- Output explicitly states which scope locations were updated and which were cleaned.
+- 写入发生在新的有效目标。
+- 清理/移除限于相关工具/工作流 ID 的 OpenSpec 托管文件。
+- 输出明确说明哪些范围位置被更新，哪些被清理。
 
-### 7. Scope drift state tracking
+### 7. 范围漂移状态跟踪
 
-Track last successful effective scope per tool/surface in project-managed state.
+在项目托管状态中为每个工具/表面跟踪最后成功的有效范围。
 
-Rules:
+规则：
 
-1. Drift is detected when current resolved scope differs from last successful scope for a configured tool/surface.
-2. Scope support MUST be validated for all configured tools/surfaces before any write starts.
-3. Update writes to newly resolved targets first, verifies completeness, then removes managed files at previous targets.
-4. If new-target writes are partial or verification fails, command SHALL abort old-target cleanup and report actionable failure with incomplete/new and preserved/old paths.
-5. Cleanup failures do not rollback new writes; command returns actionable failure with leftover paths to resolve.
+1. 当当前解析的范围与配置的工具/表面的最后成功范围不同时检测到漂移。
+2. 在任何写入开始之前，必须为所有配置的工具/表面验证范围支持。
+3. 更新首先写入新解析的目标，验证完整性，然后移除先前目标的托管文件。
+4. 如果新目标写入是部分的或验证失败，命令应中止旧目标清理并报告可操作的失败，包含不完整/新的和保留/旧的路径。
+5. 清理失败不会回滚新写入；命令返回可操作的失败，包含要解决的剩余路径。
 
-### 8. Coordination with command-surface capability changes
+### 8. 与命令表面能力变更的协调
 
-If `add-tool-command-surface-capabilities` lands, planning logic must evaluate scope resolution and delivery/capability behavior together (scope × delivery × command surface).
+如果 `add-tool-command-surface-capabilities` 落地，规划逻辑必须一起评估范围解析和交付/能力行为（范围 × 交付 × 命令表面）。
 
-## Risks / Trade-offs
+## 风险/权衡
 
-**Risk: Cross-project shared global state**
-Global installs are shared across projects. Updating global artifacts from one project affects all projects using that tool scope.
-→ Mitigation: make scope explicit in output; keep profile/delivery global and deterministic.
+**风险：跨项目共享全局状态**
+全局安装在项目之间共享。从一个项目更新全局产物会影响使用该工具范围的所有项目。
+→ 缓解：在输出中使范围明确；保持配置文件/交付全局和确定性。
 
-**Risk: Tool-specific unknown global conventions**
-Not all tools document a stable global install location.
-→ Mitigation: use explicit scope support metadata; fallback or fail instead of guessing.
+**风险：工具特定的未知全局约定**
+并非所有工具都记录了稳定的全局安装位置。
+→ 缓解：使用显式范围支持元数据；回退或失败而不是猜测。
 
-**Risk: Adapter API churn**
-Changing adapter path contracts touches many files/tests.
-→ Mitigation: migrate in one pass with adapter contract tests and existing end-to-end generation tests.
+**风险：适配器 API 变动**
+更改适配器路径契约会触及许多文件/测试。
+→ 缓解：通过适配器契约测试和现有端到端生成测试一次性迁移。
 
-## Rollout Plan
+## 推出计划
 
-1. Add config schema + defaults for install scope.
-2. Add tool scope capability metadata and resolver utilities.
-3. Upgrade command adapter contract and generator path plumbing.
-4. Integrate scope-aware behavior into init/update.
-5. Add documentation and test coverage.
+1. 为安装范围添加配置模式 + 默认值。
+2. 添加工具范围能力元数据和解析器工具。
+3. 升级命令适配器契约和生成器路径管道。
+4. 将范围感知行为集成到 init/update。
+5. 添加文档和测试覆盖。

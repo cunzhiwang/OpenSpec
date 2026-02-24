@@ -1,65 +1,65 @@
-## ADDED Requirements
+## 新增需求
 
-### Requirement: Stack Metadata Model
-The system SHALL support optional metadata on active changes to express sequencing and decomposition relationships.
+### 需求：堆叠元数据模型
+系统应支持活跃变更上的可选元数据，以表达排序和分解关系。
 
-#### Scenario: Optional stack metadata is present
-- **WHEN** a change includes stack metadata fields
-- **THEN** the system SHALL parse and expose `dependsOn`, `provides`, `requires`, `touches`, and `parent`
-- **AND** validation SHALL enforce normalized field shapes and value types (`dependsOn`/`provides`/`requires`/`touches` as string arrays, `parent` as string when present)
+#### 场景：存在可选堆叠元数据
+- **当** 变更包含堆叠元数据字段时
+- **则** 系统应解析并暴露 `dependsOn`、`provides`、`requires`、`touches` 和 `parent`
+- **且** 验证应强制执行规范化的字段形状和值类型（`dependsOn`/`provides`/`requires`/`touches` 为字符串数组，`parent` 在存在时为字符串）
 
-#### Scenario: Backward compatibility without stack metadata
-- **WHEN** a change does not include stack metadata
-- **THEN** existing behavior SHALL continue without migration steps
-- **AND** validation SHALL not fail solely because stack metadata is absent
+#### 场景：无堆叠元数据时的向后兼容性
+- **当** 变更不包含堆叠元数据时
+- **则** 现有行为应继续，无需迁移步骤
+- **且** 验证不应仅因堆叠元数据缺失而失败
 
-### Requirement: Change Dependency Graph
-The system SHALL provide dependency-aware ordering for active changes.
+### 需求：变更依赖图
+系统应为活跃变更提供依赖感知排序。
 
-#### Scenario: Build dependency order
-- **WHEN** users request stack planning output
-- **THEN** the system SHALL compute a dependency graph across active changes
-- **AND** SHALL return a deterministic topological order for unblocked changes
+#### 场景：构建依赖顺序
+- **当** 用户请求堆叠规划输出时
+- **则** 系统应计算跨活跃变更的依赖图
+- **且** 应返回未阻塞变更的确定性拓扑顺序
 
-#### Scenario: Tie-breaking within the same dependency depth
-- **WHEN** multiple unblocked changes share the same topological dependency depth
-- **THEN** ordering SHALL break ties lexicographically by change ID
-- **AND** repeated runs over the same input SHALL return the same order
+#### 场景：相同依赖深度内的打破平局
+- **当** 多个未阻塞变更共享相同的拓扑依赖深度时
+- **则** 排序应按变更 ID 字典序打破平局
+- **且** 对相同输入的重复运行应返回相同顺序
 
-#### Scenario: Dependency cycle detection
-- **WHEN** active changes contain a dependency cycle
-- **THEN** validation SHALL fail with cycle details before archive or sequencing actions proceed
-- **AND** output SHALL include actionable guidance to break the cycle
+#### 场景：依赖循环检测
+- **当** 活跃变更包含依赖循环时
+- **则** 验证应在归档或排序操作进行前以循环详情失败
+- **且** 输出应包含打破循环的可操作指导
 
-### Requirement: Capability marker and overlap semantics
-The system SHALL treat capability markers as validation contracts and `touches` as advisory overlap signals.
+### 需求：能力标记和重叠语义
+系统应将能力标记视为验证契约，将 `touches` 视为建议性重叠信号。
 
-#### Scenario: Required capability provided by an active change
-- **WHEN** change B declares `requires` marker `X`
-- **AND** active change A declares `provides` marker `X`
-- **THEN** validation SHALL require B to declare an explicit ordering edge in `dependsOn` to at least one active provider of `X`
-- **AND** validation SHALL fail if no explicit dependency is declared
+#### 场景：活跃变更提供所需能力
+- **当** 变更 B 声明 `requires` 标记 `X`
+- **且** 活跃变更 A 声明 `provides` 标记 `X`
+- **则** 验证应要求 B 在 `dependsOn` 中至少声明对 `X` 的一个活跃提供者的显式排序边
+- **且** 如果未声明显式依赖则验证应失败
 
-#### Scenario: Requires marker without active provider
-- **WHEN** a change declares a `requires` marker
-- **AND** no active change declares the corresponding `provides` marker
-- **THEN** validation SHALL NOT infer an implicit dependency edge
-- **AND** ordering SHALL continue to be determined solely by explicit `dependsOn` relationships
+#### 场景：无活跃提供者的 requires 标记
+- **当** 变更声明 `requires` 标记
+- **且** 没有活跃变更声明对应的 `provides` 标记
+- **则** 验证不应推断隐式依赖边
+- **且** 排序应继续仅由显式 `dependsOn` 关系确定
 
-#### Scenario: Requires marker satisfied by archived history
-- **WHEN** a change declares a `requires` marker
-- **AND** no active change provides that marker
-- **AND** at least one archived change in history provides that marker
-- **THEN** validation SHALL NOT warn solely about missing provider
-- **AND** SHALL continue to use explicit `dependsOn` for active ordering
+#### 场景：已归档历史满足的 requires 标记
+- **当** 变更声明 `requires` 标记
+- **且** 没有活跃变更提供该标记
+- **且** 历史中至少有一个已归档变更提供该标记
+- **则** 验证不应仅因缺少提供者而警告
+- **且** 应继续使用显式 `dependsOn` 进行活跃排序
 
-#### Scenario: Requires marker missing in full history
-- **WHEN** a change declares a `requires` marker
-- **AND** no active or archived change in history provides that marker
-- **THEN** validation SHALL emit a non-blocking warning naming the change and missing marker
-- **AND** SHALL NOT infer an implicit dependency edge
+#### 场景：完整历史中缺失的 requires 标记
+- **当** 变更声明 `requires` 标记
+- **且** 历史中没有活跃或已归档变更提供该标记
+- **则** 验证应发出非阻塞警告，命名变更和缺失的标记
+- **且** 不应推断隐式依赖边
 
-#### Scenario: Overlap warning for shared touches
-- **WHEN** multiple active changes declare overlapping `touches` values
-- **THEN** validation SHALL emit a warning listing the overlapping changes and touched areas
-- **AND** validation SHALL NOT fail solely on overlap
+#### 场景：共享 touches 的重叠警告
+- **当** 多个活跃变更声明重叠的 `touches` 值时
+- **则** 验证应发出警告，列出重叠的变更和触及的区域
+- **且** 验证不应仅因重叠而失败

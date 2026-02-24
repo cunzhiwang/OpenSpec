@@ -1,34 +1,34 @@
-## ADDED Requirements
+## 新增需求
 
-### Requirement: Update install scope selection
-The update command SHALL support install scope selection for sync operations.
+### 需求：Update 安装范围选择
+update 命令应支持为同步操作选择安装范围。
 
-#### Scenario: Scope defaults to global config value
-- **WHEN** user runs `openspec update` without explicit scope override
-- **THEN** update SHALL use configured install scope
-- **AND** if unset, SHALL resolve migration-aware default (`global` for newly created configs, `project` for legacy schema-evolved configs)
+#### 场景：范围默认为全局配置值
+- **当** 用户运行 `openspec update` 而没有显式范围覆盖
+- **则** update 应使用配置的安装范围
+- **且** 如果未设置，应解析迁移感知默认值（新创建配置为 `global`，遗留模式演进配置为 `project`）
 
-#### Scenario: Scope override via flag
-- **WHEN** user runs `openspec update --scope project`
-- **THEN** update SHALL use `project` as preferred scope for that run
+#### 场景：通过标志覆盖范围
+- **当** 用户运行 `openspec update --scope project`
+- **则** update 应使用 `project` 作为该运行的首选范围
 
-### Requirement: Scope-aware sync and drift detection
-The update command SHALL evaluate configured state and drift using effective scoped paths.
+### 需求：范围感知同步和漂移检测
+update 命令应使用有效范围路径评估配置状态和漂移。
 
-#### Scenario: Scoped drift detection
-- **WHEN** update evaluates whether tools are up-to-date
-- **THEN** it SHALL inspect files at effective scoped targets for each tool/surface
-- **AND** SHALL compare current resolved scope against last successful effective scope for each tool/surface
-- **AND** SHALL treat a difference as sync-required drift
+#### 场景：范围漂移检测
+- **当** update 评估工具是否最新时
+- **则** 它应检查每个工具/表面的有效范围目标的文件
+- **且** 应将当前解析的范围与每个工具/表面的最后成功有效范围进行比较
+- **且** 应将差异视为需要同步的漂移
 
-#### Scenario: Scope fallback during update
-- **WHEN** preferred scope is unsupported for a configured tool/surface
-- **AND** alternate scope is supported
-- **THEN** update SHALL apply fallback scope resolution
-- **AND** SHALL report fallback in output
+#### 场景：更新期间的范围回退
+- **当** 配置的工具/表面不支持首选范围
+- **且** 支持备用范围
+- **则** update 应应用回退范围解析
+- **且** 应在输出中报告回退
 
-#### Scenario: Unsupported scope during update
-- **WHEN** configured tool/surface supports neither preferred nor alternate scope
-- **THEN** scope support SHALL be validated for all configured tools/surfaces before any write
-- **AND** update SHALL fail without performing file writes when incompatibilities are detected
-- **AND** SHALL report incompatible tools with remediation steps
+#### 场景：更新期间不支持的范围
+- **当** 配置的工具/表面既不支持首选也不支持备用范围
+- **则** 应在任何写入前验证所有配置的工具/表面的范围支持
+- **且** 当检测到不兼容时 update 应失败而不执行文件写入
+- **且** 应报告不兼容的工具和补救步骤

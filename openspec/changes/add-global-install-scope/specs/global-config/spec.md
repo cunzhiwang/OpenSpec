@@ -1,24 +1,24 @@
-## ADDED Requirements
+## 新增需求
 
-### Requirement: Install scope field in global config
-The global config schema SHALL include install scope preference.
+### 需求：全局配置中的安装范围字段
+全局配置模式应包含安装范围偏好。
 
-#### Scenario: Config shape supports install scope
-- **WHEN** reading or writing global config
-- **THEN** config SHALL support `installScope` with allowed values `global` and `project`
+#### 场景：配置形状支持安装范围
+- **当** 读取或写入全局配置时
+- **则** 配置应支持 `installScope`，允许值为 `global` 和 `project`
 
-#### Scenario: Schema evolution default
-- **WHEN** loading legacy config without `installScope`
-- **THEN** the system SHALL preserve schema compatibility without mutating the file
-- **AND** effective install scope SHALL resolve to `project` until user explicitly sets `installScope`
-- **AND** preserve all other existing fields
+#### 场景：模式演进默认值
+- **当** 加载没有 `installScope` 的遗留配置时
+- **则** 系统应在不修改文件的情况下保持模式兼容性
+- **且** 有效安装范围应解析为 `project`，直到用户显式设置 `installScope`
+- **且** 保留所有其他现有字段
 
-#### Scenario: New config default
-- **WHEN** creating a new global config
-- **THEN** the system SHALL persist `installScope: global` by default
-- **AND** users MAY switch to `project` explicitly
+#### 场景：新配置默认值
+- **当** 创建新的全局配置时
+- **则** 系统应默认持久化 `installScope: global`
+- **且** 用户可以显式切换到 `project`
 
-#### Scenario: Invalid install scope value
-- **WHEN** config validation receives an invalid install scope value
-- **THEN** the value SHALL be rejected
-- **AND** the system SHALL preserve the existing valid configuration
+#### 场景：无效的安装范围值
+- **当** 配置验证收到无效的安装范围值时
+- **则** 该值应被拒绝
+- **且** 系统应保留现有的有效配置

@@ -1,95 +1,97 @@
-# Add Artifact Regeneration Support
+# 添加产物重新生成支持
 
-## Problem
+## 问题
 
-Currently, there is **no way to regenerate artifacts** in the OPSX workflow:
+目前，在 OPSX 工作流中**没有办法重新生成产物**：
 
-- `/opsx:apply` just reads whatever's on disk
-- `/opsx:continue` only creates the NEXT artifact - won't touch existing ones
+- `/opsx:apply` 只是读取磁盘上的内容
+- `/opsx:continue` 只创建下一个产物 - 不会触及现有产物
 
-If you edit `design.md` after `tasks.md` exists, your only options are:
-1. Delete tasks.md manually, then run `/opsx:continue`
-2. Edit tasks.md manually
+如果你在 `tasks.md` 存在后编辑了 `design.md`，你唯一的选择是：
+1. 手动删除 tasks.md，然后运行 `/opsx:continue`
+2. 手动编辑 tasks.md
 
-The documentation claims you can "update artifacts mid-flight and continue" but there's no mechanism that actually supports this.
+文档声称你可以"在中途更新产物并继续"，但实际上没有机制支持这一点。
 
-## Proposed Solution
+## 提议的解决方案
 
-Two parts:
+两部分：
 
-### Part 1: Staleness Detection
-Add artifact staleness detection to `/opsx:apply`:
+### 第一部分：过期检测
 
-1. **Track modification times**: When generating an artifact, record the mtime of its dependencies
-2. **Detect staleness**: When `/opsx:apply` runs, check if upstream artifacts (design.md, specs) have been modified since tasks.md was generated
-3. **Prompt user**: If stale, ask: "Design was modified after tasks were generated. Would you like to regenerate tasks with `/opsx:continue`?"
+向 `/opsx:apply` 添加产物过期检测：
 
-## User Experience
+1. **跟踪修改时间**：生成产物时，记录其依赖项的 mtime
+2. **检测过期**：当 `/opsx:apply` 运行时，检查上游产物（design.md、specs）是否在 tasks.md 生成后被修改
+3. **提示用户**：如果过期，询问："设计在任务生成后被修改。您是否要使用 `/opsx:continue` 重新生成任务？"
 
-### Vision: Seamless Mid-Flight Correction
+## 用户体验
 
-This is the workflow we want to enable (currently documented but not supported):
+### 愿景：无缝中途修正
+
+这是我们想要启用的工作流（目前有文档但不支持）：
 
 ```
-You: /opsx:apply
+你: /opsx:apply
 
-AI:  Working through tasks...
-     ✓ Task 1.1: Created caching layer
-     ✓ Task 1.2: Added cache invalidation
+AI:  处理任务中...
+     ✓ 任务 1.1：创建了缓存层
+     ✓ 任务 1.2：添加了缓存失效
 
-     Working on 1.3: Implement TTL...
-     I noticed the design assumes Redis, but your project uses
-     in-memory caching. Should I update the design?
+     正在处理 1.3：实现 TTL...
+     我注意到设计假设使用 Redis，但你的项目使用
+     内存缓存。我应该更新设计吗？
 
-You: Yes, update it to use the existing cache module.
+你: 是的，更新它以使用现有的缓存模块。
 
-AI:  Updated design.md to use CacheManager from src/cache/
-     Updated tasks.md with revised implementation steps
-     Continuing implementation...
-     ✓ Task 1.3: Implemented TTL using CacheManager
+AI:  更新了 design.md 以使用 src/cache/ 中的 CacheManager
+     使用修订后的实现步骤更新了 tasks.md
+     继续实现...
+     ✓ 任务 1.3：使用 CacheManager 实现了 TTL
      ...
 ```
 
-**No restart needed.** Just update the artifact and continue.
+**无需重启。** 只需更新产物并继续。
 
-### Staleness Warning UX
+### 过期警告用户体验
 
-When user manually edits an upstream artifact:
+当用户手动编辑上游产物时：
 
 ```
 $ /opsx:apply
 
-⚠️  Detected changes to upstream artifacts:
-    - design.md modified 5 minutes ago (after tasks.md was generated)
+⚠️  检测到上游产物的更改：
+    - design.md 在 5 分钟前被修改（在 tasks.md 生成之后）
 
-Options:
-1. Regenerate tasks (recommended)
-2. Continue anyway with current tasks
-3. Cancel
+选项：
+1. 重新生成任务（推荐）
+2. 无论如何继续使用当前任务
+3. 取消
 
 >
 ```
 
-### Part 2: Regeneration Capability
+### 第二部分：重新生成能力
 
-Add a way to regenerate specific artifacts:
+添加重新生成特定产物的方法：
 
 ```bash
-# Option A: Flag on continue
+# 选项 A：continue 上的标志
 /opsx:continue --regenerate tasks
 
-# Option B: Separate command
+# 选项 B：单独的命令
 /opsx:regenerate tasks
 
-# Option C: Interactive prompt when staleness detected
+# 选项 C：检测到过期时的交互式提示
 /opsx:apply
-# "Design changed. Regenerate tasks? [y/N]"
+# "设计已更改。重新生成任务？[y/N]"
 ```
 
-## Technical Approach
+## 技术方案
 
-### Option A: Metadata File
-Store `.openspec-meta.json` in change directory:
+### 选项 A：元数据文件
+
+在变更目录中存储 `.openspec-meta.json`：
 ```json
 {
   "tasks.md": {
@@ -102,35 +104,37 @@ Store `.openspec-meta.json` in change directory:
 }
 ```
 
-### Option B: Frontmatter
-Add YAML frontmatter to generated artifacts:
+### 选项 B：前置元数据
+
+向生成的产物添加 YAML 前置元数据：
 ```markdown
 ---
 generated_at: 2025-01-24T10:00:00Z
 depends_on:
   - design.md@2025-01-24T09:55:00Z
 ---
-# Tasks
+# 任务
 ...
 ```
 
-### Option C: Git-based
-Use git to detect if upstream files changed since downstream was last modified. No extra metadata needed but requires git.
+### 选项 C：基于 Git
 
-## Non-Goals
+使用 git 检测上游文件是否在下游最后修改后发生了变化。不需要额外的元数据，但需要 git。
 
-- Automatic regeneration (user should always choose)
-- Blocking apply entirely (just warn)
-- Tracking code file changes (only artifact dependencies)
+## 非目标
 
-## Dependencies
+- 自动重新生成（用户应始终选择）
+- 完全阻止应用（只是警告）
+- 跟踪代码文件更改（只跟踪产物依赖）
 
-- Should be implemented after `fix-midflight-update-docs` so docs are accurate first
-- Could be combined with that change if desired
+## 依赖项
 
-## Success Criteria
+- 应在 `fix-midflight-update-docs` 之后实施，以便文档首先是准确的
+- 如果需要，可以与该变更合并
 
-- User is warned when applying with stale artifacts
-- Clear path to regenerate if needed
-- No false positives (only warn when genuinely stale)
-- Documentation claims become actually true
+## 成功标准
+
+- 当使用过期产物应用时用户会收到警告
+- 如果需要，有明确的重新生成路径
+- 没有误报（只在真正过期时警告）
+- 文档声称变为实际可用

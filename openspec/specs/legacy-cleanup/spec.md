@@ -1,17 +1,17 @@
-# legacy-cleanup Specification
+# legacy-cleanup 规范
 
-## Purpose
-Define detection and cleanup behavior for legacy OpenSpec artifacts during initialization and update workflows.
+## 目的
+定义在初始化和更新工作流期间对遗留 OpenSpec 产物的检测和清理行为。
 
-## Requirements
-### Requirement: Legacy artifact detection
+## 需求
+### 需求：遗留产物检测
 
-The system SHALL detect legacy OpenSpec artifacts from previous init versions.
+系统应当检测来自先前初始化版本的遗留 OpenSpec 产物。
 
-#### Scenario: Detecting legacy config files
+#### 场景：检测遗留配置文件
 
-- **WHEN** running `openspec init` on an existing project
-- **THEN** the system SHALL check for config files with OpenSpec markers:
+- **当** 在现有项目上运行 `openspec init` 时
+- **则** 系统应当检查带有 OpenSpec 标记的配置文件：
   - `CLAUDE.md`
   - `.cursorrules`
   - `.windsurfrules`
@@ -21,143 +21,142 @@ The system SHALL detect legacy OpenSpec artifacts from previous init versions.
   - `.amazonq/instructions.md`
   - `CODEBUDDY.md`
   - `IFLOW.md`
-  - And all other tool config files from the legacy ToolRegistry
+  - 以及来自遗留 ToolRegistry 的所有其他工具配置文件
 
-#### Scenario: Detecting legacy slash command directories
+#### 场景：检测遗留斜杠命令目录
 
-- **WHEN** running `openspec init` on an existing project
-- **THEN** the system SHALL check for old slash command directories:
+- **当** 在现有项目上运行 `openspec init` 时
+- **则** 系统应当检查旧的斜杠命令目录：
   - `.claude/commands/openspec/`
-  - `.cursor/commands/openspec/` (note: old format used `openspec-*.md` in commands root)
+  - `.cursor/commands/openspec/`（注意：旧格式在 commands 根目录使用 `openspec-*.md`）
   - `.windsurf/workflows/openspec-*.md`
-  - And equivalent directories for all tools in the legacy SlashCommandRegistry
+  - 以及遗留 SlashCommandRegistry 中所有工具的等效目录
 
-#### Scenario: Detecting legacy OpenSpec structure files
+#### 场景：检测遗留 OpenSpec 结构文件
 
-- **WHEN** running `openspec init` on an existing project
-- **THEN** the system SHALL check for:
+- **当** 在现有项目上运行 `openspec init` 时
+- **则** 系统应当检查：
   - `openspec/AGENTS.md`
-  - `openspec/project.md` (for migration messaging only, not deleted)
-  - Root `AGENTS.md` with OpenSpec markers
+  - `openspec/project.md`（仅用于迁移消息，不删除）
+  - 带有 OpenSpec 标记的根 `AGENTS.md`
 
-### Requirement: Legacy cleanup confirmation
+### 需求：遗留清理确认
 
-The system SHALL prompt for confirmation before removing legacy artifacts.
+系统应当在移除遗留产物之前提示确认。
 
-#### Scenario: Prompting for cleanup when legacy detected
+#### 场景：检测到遗留时提示清理
 
-- **WHEN** legacy artifacts are detected
-- **THEN** the system SHALL display what was found
-- **AND** prompt: "Legacy files detected. Upgrade and clean up? [Y/n]"
-- **AND** default to Yes if user presses Enter
+- **当** 检测到遗留产物时
+- **则** 系统应当显示发现的内容
+- **且** 提示："Legacy files detected. Upgrade and clean up? [Y/n]"
+- **且** 如果用户按 Enter 则默认为 Yes
 
-#### Scenario: User confirms cleanup
+#### 场景：用户确认清理
 
-- **WHEN** user responds Y or presses Enter
-- **THEN** the system SHALL remove legacy artifacts
-- **AND** proceed with skill-based setup
+- **当** 用户回复 Y 或按 Enter 时
+- **则** 系统应当移除遗留产物
+- **且** 继续进行基于技能的设置
 
-#### Scenario: User declines cleanup
+#### 场景：用户拒绝清理
 
-- **WHEN** user responds N
-- **THEN** the system SHALL abort initialization
-- **AND** display message suggesting manual cleanup or using `--force` flag
+- **当** 用户回复 N 时
+- **则** 系统应当中止初始化
+- **且** 显示建议手动清理或使用 `--force` 标志的消息
 
-#### Scenario: Non-interactive mode
+#### 场景：非交互模式
 
-- **WHEN** running with `--no-interactive` or in CI environment
-- **AND** legacy artifacts are detected
-- **THEN** the system SHALL abort with exit code 1
-- **AND** display detected legacy artifacts
-- **AND** suggest running interactively or using `--force` flag
+- **当** 使用 `--no-interactive` 运行或在 CI 环境中时
+- **且** 检测到遗留产物
+- **则** 系统应当以退出代码 1 中止
+- **且** 显示检测到的遗留产物
+- **且** 建议交互式运行或使用 `--force` 标志
 
-### Requirement: Surgical removal of config file content
+### 需求：配置文件内容的精确移除
 
-The system SHALL preserve user content when removing OpenSpec markers from config files.
+系统应当在从配置文件移除 OpenSpec 标记时保留用户内容。
 
-#### Scenario: Config file with only OpenSpec content
+#### 场景：配置文件只有 OpenSpec 内容
 
-- **WHEN** a config file contains only OpenSpec marker block (whitespace outside is acceptable)
-- **THEN** the system SHALL remove the OpenSpec marker block
-- **AND** preserve the file (even if empty or whitespace-only)
-- **AND** NOT delete the file (config files belong to the user's project root)
+- **当** 配置文件只包含 OpenSpec 标记块（外部空白可接受）时
+- **则** 系统应当移除 OpenSpec 标记块
+- **且** 保留文件（即使为空或只有空白）
+- **且** 不删除文件（配置文件属于用户的项目根目录）
 
-#### Scenario: Config file with mixed content
+#### 场景：配置文件有混合内容
 
-- **WHEN** a config file contains content outside OpenSpec markers
-- **THEN** the system SHALL remove only the `<!-- OPENSPEC:START -->` to `<!-- OPENSPEC:END -->` block
-- **AND** preserve all content before and after the markers
-- **AND** clean up any resulting double blank lines
+- **当** 配置文件在 OpenSpec 标记外包含内容时
+- **则** 系统应当仅移除 `<!-- OPENSPEC:START -->` 到 `<!-- OPENSPEC:END -->` 块
+- **且** 保留标记前后的所有内容
+- **且** 清理任何产生的双空行
 
-#### Scenario: Root AGENTS.md with mixed content
+#### 场景：根 AGENTS.md 有混合内容
 
-- **WHEN** root `AGENTS.md` contains OpenSpec markers AND other content
-- **THEN** the system SHALL remove only the OpenSpec marker block
-- **AND** preserve the rest of the file
+- **当** 根 `AGENTS.md` 包含 OpenSpec 标记和其他内容时
+- **则** 系统应当仅移除 OpenSpec 标记块
+- **且** 保留文件的其余部分
 
-### Requirement: Legacy directory removal
+### 需求：遗留目录移除
 
-The system SHALL remove legacy slash command directories entirely.
+系统应当完全移除遗留斜杠命令目录。
 
-#### Scenario: Removing old slash command directory
+#### 场景：移除旧斜杠命令目录
 
-- **WHEN** a legacy slash command directory exists (e.g., `.claude/commands/openspec/`)
-- **THEN** the system SHALL delete the entire directory and its contents
-- **AND** NOT delete the parent directory (e.g., `.claude/commands/` remains)
+- **当** 遗留斜杠命令目录存在时（例如 `.claude/commands/openspec/`）
+- **则** 系统应当删除整个目录及其内容
+- **且** 不删除父目录（例如 `.claude/commands/` 保留）
 
-#### Scenario: Removing legacy AGENTS.md
+#### 场景：移除遗留 AGENTS.md
 
-- **WHEN** `openspec/AGENTS.md` exists
-- **THEN** the system SHALL delete the file
-- **AND** NOT delete the `openspec/` directory itself
+- **当** `openspec/AGENTS.md` 存在时
+- **则** 系统应当删除该文件
+- **且** 不删除 `openspec/` 目录本身
 
-### Requirement: project.md migration hint
+### 需求：project.md 迁移提示
 
-The system SHALL preserve project.md and display a migration hint instead of deleting it.
+系统应当保留 project.md 并显示迁移提示而不是删除它。
 
-#### Scenario: project.md exists during upgrade
+#### 场景：升级期间 project.md 存在
 
-- **WHEN** `openspec/project.md` exists during legacy cleanup
-- **THEN** the system SHALL NOT delete the file
-- **AND** the system SHALL display a migration hint in the output:
+- **当** 遗留清理期间 `openspec/project.md` 存在时
+- **则** 系统不应当删除该文件
+- **且** 系统应当在输出中显示迁移提示：
   ```
   Manual migration needed:
     → openspec/project.md still exists
       Move useful content to config.yaml's "context:" field, then delete
   ```
 
-#### Scenario: project.md migration rationale
+#### 场景：project.md 迁移理由
 
-- **GIVEN** project.md may contain user-written project documentation
-- **AND** config.yaml's context field serves the same purpose (auto-injected into artifacts)
-- **WHEN** displaying the migration hint
-- **THEN** users can migrate manually or use `/opsx:explore` to get AI assistance
+- **给定** project.md 可能包含用户编写的项目文档
+- **且** config.yaml 的 context 字段服务于相同目的（自动注入到产物中）
+- **当** 显示迁移提示时
+- **则** 用户可以手动迁移或使用 `/opsx:explore` 获取 AI 辅助
 
-### Requirement: Cleanup reporting
+### 需求：清理报告
 
-The system SHALL report what was cleaned up.
+系统应当报告清理了什么。
 
-#### Scenario: Displaying cleanup summary
+#### 场景：显示清理摘要
 
-- **WHEN** legacy cleanup completes
-- **THEN** the system SHALL display a summary section:
+- **当** 遗留清理完成时
+- **则** 系统应当显示摘要部分：
   ```
   Cleaned up legacy files:
     ✓ Removed OpenSpec markers from CLAUDE.md
     ✓ Removed .claude/commands/openspec/ (replaced by /opsx:*)
     ✓ Removed openspec/AGENTS.md (no longer needed)
   ```
-- **AND IF** `openspec/project.md` exists
-- **THEN** the system SHALL display a separate migration section:
+- **且如果** `openspec/project.md` 存在
+- **则** 系统应当显示单独的迁移部分：
   ```
   Manual migration needed:
     → openspec/project.md still exists
       Move useful content to config.yaml's "context:" field, then delete
   ```
 
-#### Scenario: No legacy detected
+#### 场景：未检测到遗留
 
-- **WHEN** no legacy artifacts are found
-- **THEN** the system SHALL NOT display the cleanup section
-- **AND** proceed directly with skill setup
-
+- **当** 未找到遗留产物时
+- **则** 系统不应当显示清理部分
+- **且** 直接进行技能设置

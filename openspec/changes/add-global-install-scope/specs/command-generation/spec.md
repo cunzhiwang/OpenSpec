@@ -1,22 +1,22 @@
-## MODIFIED Requirements
+## 修改的需求
 
-### Requirement: ToolCommandAdapter interface
-The system SHALL provide install-context-aware command path resolution.
+### 需求：ToolCommandAdapter 接口
+系统应提供安装上下文感知的命令路径解析。
 
-#### Scenario: Adapter interface structure
-- **WHEN** implementing a tool adapter
-- **THEN** command file path resolution SHALL receive install context (including effective scope and environment context)
-- **AND** SHALL return the effective command output path for that context
+#### 场景：适配器接口结构
+- **当** 实现工具适配器时
+- **则** 命令文件路径解析应接收安装上下文（包括有效范围和环境上下文）
+- **且** 应返回该上下文的有效命令输出路径
 
-#### Scenario: Codex global path remains supported
-- **WHEN** resolving Codex command paths in global scope
-- **THEN** the adapter SHALL target `$CODEX_HOME/prompts` when `CODEX_HOME` is set
-- **AND** SHALL otherwise target `~/.codex/prompts`
+#### 场景：Codex 全局路径仍受支持
+- **当** 在全局范围解析 Codex 命令路径时
+- **则** 适配器在设置 `CODEX_HOME` 时应目标 `$CODEX_HOME/prompts`
+- **且** 否则应目标 `~/.codex/prompts`
 
-### Requirement: Command generator function
-The command generator SHALL pass install context into adapter path resolution for all generated commands.
+### 需求：命令生成器函数
+命令生成器应将安装上下文传递到所有生成命令的适配器路径解析。
 
-#### Scenario: Scoped command generation
-- **WHEN** generating commands for a tool with a resolved effective scope
-- **THEN** generated command paths SHALL match that effective scope
-- **AND** the formatted command body/frontmatter behavior SHALL remain tool-specific and unchanged
+#### 场景：范围命令生成
+- **当** 为具有解析有效范围的工具生成命令时
+- **则** 生成的命令路径应匹配该有效范围
+- **且** 格式化的命令主体/前置元数据行为应保持工具特定且不变
